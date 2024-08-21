@@ -1,1 +1,1 @@
-# self-hosted
+# DZ Self Hosted
