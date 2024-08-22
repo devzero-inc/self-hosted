@@ -1,0 +1,37 @@
+vmType: "qemu"
+cpus: 6
+memory: "10GiB"
+disk: "100GiB"
+images:
+  - location: "./scripts/cluster_base/dz-cluster-base-arm64.qcow2"
+    arch: "aarch64"
+  - location: "https://dz-self-hosted.s3.us-west-2.amazonaws.com/dz-cluster-base-amd64.qcow2"
+    arch: "x86_64"
+mounts: []
+provision:
+  - mode: user
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      sudo hostnamectl set-hostname dz-cluster
+      minikube start --driver=none --container-runtime=cri-o --kubernetes-version=v1.29.0 --cni=bridge
+probes:
+  - script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      output=$(kubectl get pods -A)
+
+      # Check if the output is empty
+      if [ -z "$output" ]; then
+        echo "No pods found!"
+        exit 1
+      fi
+
+      # Check if any pod is not in Running status
+      if echo "$output" | grep -v -E 'Running|STATUS'; then
+        echo "One or more pods are not in Running status!"
+        exit 1
+      fi
+
+      echo "All pods are in Running status."
+      exit 0
