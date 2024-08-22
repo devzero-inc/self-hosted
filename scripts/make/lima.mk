@@ -1,6 +1,6 @@
 .PHONY: start
 start:
-	limactl start $(VM_NAME).yaml --tty=false
+	limactl start $(VM_NAME).yaml --tty=false || limactl start $(VM_NAME)
 
 .PHONY: shell
 shell:
@@ -11,7 +11,7 @@ stop:
 	limactl stop $(VM_NAME) || true
 
 .PHONY: delete
-delete:
+delete: stop
 	limactl delete $(VM_NAME)
 
 .PHONY: commit
