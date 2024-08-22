@@ -3,7 +3,7 @@ cpus: 6
 memory: "10GiB"
 disk: "100GiB"
 images:
-  - location: "./scripts/cluster_base/dz-cluster-base-arm64.qcow2"
+  - location: "https://dz-self-hosted.s3.us-west-2.amazonaws.com/dz-cluster-base-arm64.qcow2"
     arch: "aarch64"
   - location: "https://dz-self-hosted.s3.us-west-2.amazonaws.com/dz-cluster-base-amd64.qcow2"
     arch: "x86_64"
