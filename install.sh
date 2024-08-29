@@ -19,10 +19,10 @@ if [ "$OS" = "Darwin" ]; then
     echo "Homebrew is not installed. Please install Homebrew first."
     exit 1
   fi
-  brew install qemu jq lima make kubectl >/dev/null 2>&1
+  brew install qemu jq lima make kubectl
 elif [ "$OS" = "Linux" ]; then
   # id -u devzero &>/dev/null || sudo useradd -m -s /bin/bash devzero && sudo usermod -aG sudo devzero && echo "devzero ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/devzero
-  sudo apt-get install qemu-system jq make -y >/dev/null 2>&1
+  sudo apt-get install qemu-system jq make -y
   VERSION=$(curl -fsSL https://api.github.com/repos/lima-vm/lima/releases/latest | jq -r .tag_name)
   curl -fsSL "https://github.com/lima-vm/lima/releases/download/${VERSION}/lima-${VERSION:1}-$(uname -s)-$(uname -m).tar.gz" | sudo tar Cxzvm /usr/local >/dev/null 2>&1
   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$arch/kubectl" >/dev/null 2>&1
@@ -89,4 +89,7 @@ limactl create dz_cluster.yaml --tty=false
 limactl start dz_cluster
 limactl shell dz_cluster -- cat .kube/config | tail -n +2 | sed -e 's|server:.*|server: https://127.0.0.1:8443|' > kubeconfig
 kubectl get secret devzero-sa0-token -n default -o jsonpath='{.data.token}' --kubeconfig kubeconfig| base64 -d > sa-token
-echo "Cluster started."
+echo "Data plane started."
+
+# Install control plane
+/bin/bash ./dz/run.sh
