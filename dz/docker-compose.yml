@@ -198,7 +198,6 @@ services:
 
   polland-flower:
     <<: *polland
-    image: polland_flower
     container_name: polland_flower
     depends_on: []
     ports:
