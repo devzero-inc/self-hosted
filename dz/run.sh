@@ -91,6 +91,7 @@ prompt_for_registry_login() {
         printf "No registry token provided. Exiting.\n" >&2
         exit 1
     fi
+    printf "Connection to %s with token %s...\n" "$REGISTRY_URL" "$registry_token"
     if ! echo "$registry_token" | docker login --username AWS --password-stdin "$REGISTRY_URL"; then
         printf "Docker registry login failed. Exiting.\n" >&2
         exit 1
