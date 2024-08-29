@@ -31,20 +31,6 @@ secrets:
 
 services:
 
-  dozzle:
-    container_name: dozzle
-    image: amir20/dozzle:latest
-    environment:
-      DOZZLE_NO_ANALYTICS: true
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 9999:8080
-    networks:
-      - polland-internal
-      - backend
-      - frontend
-
   buildkitd:
     image: moby/buildkit:v0.13.0-rootless
     command:
@@ -62,14 +48,13 @@ services:
 
   # 056855531191.dkr.ecr.us-west-2.amazonaws.com/polland:self-hosted-arm-base-2024-08-29--12-35--cd0517747f97-dirty 
   polland: &polland
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/polland:self-hosted-arm-base-2024-08-29--12-35--cd0517747f97-dirty 
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/polland:self-hosted-arm-base-2024-08-29--21-08--864a05d7e43d-dirty
     command: "/wait-for-it.sh -- /start"
     container_name: polland_django
     stdin_open: true # for ipdb
     tty: true # for ipdb
     depends_on:
       - polland-mysql
-      - polland-postgres
       - polland-redis
       - buildkitd
 #      - celeryworker
@@ -81,7 +66,7 @@ services:
       - ./compose/local/django/start-celeryworker:/start-celeryworker
       - ./compose/local/django/start-flower:/start-flower
       - ./compose/local/django/start-celery-exporter:/start-celery-exporter
-      - $HOME/.aws/:/root/.aws/:ro
+        #- $HOME/.aws/:/root/.aws/:ro
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.mysql
@@ -120,25 +105,6 @@ services:
     networks:
       - polland-internal
 
-  polland-postgres:
-    image: postgres:16.3
-    healthcheck:
-      test: ["CMD", "pg_isready", "-d", "polland", "-U", "MkHqCahbCImFqRlnGoqIZPsvddlWHSbh"]
-      start_period: 10s
-      interval: 2s
-      timeout: 5s
-      retries: 100
-    container_name: polland_postgres
-    volumes:
-      - polland_postgres_data:/var/lib/postgresql/data/
-      - polland_postgres_data_backups:/backups
-    env_file:
-      - ./.envs/.local/.postgres
-    ports:
-      - 5432:5432
-    networks:
-      - polland-internal
-
   polland-redis:
     image: redis:6
     container_name: polland_redis
@@ -155,7 +121,6 @@ services:
     depends_on:
       - polland-redis
       - polland-mysql
-      - polland-postgres
     environment:
       LOGSRV_DEFAULT_QUEUE: http://elasticmq:9324/queue/logsrv.fifo
       LOGSRV_DEFAULT_REGION: elasticmq
@@ -169,27 +134,12 @@ services:
     networks:
       - polland-internal
 
-  polland-celery-exporter:
-    <<: *polland
-    container_name: polland_celeryexporter
-    stdin_open: true # for ipdb
-    tty: true # for ipdb
-    depends_on:
-      - polland-redis
-      - polland-celeryworker
-    ports:
-      - '9095:9095'
-    command: /start-celery-exporter
-    networks:
-      - polland-internal
-
   polland-celerybeat:
     <<: *polland
     container_name: polland_celerybeat
     depends_on:
       - polland-redis
       - polland-mysql
-      - polland-postgres
     ports: []
     command: /start-celerybeat
     networks:
@@ -219,19 +169,6 @@ services:
       - 27017:27017
     volumes:
       - mongodb_data:/data/db
-    networks:
-      - backend
-
-  mongo-express:
-    image: mongo-express
-    restart: always
-    environment:
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_PORT: 27017
-    ports:
-      - 8081:8081
-    depends_on:
-      - mongodb
     networks:
       - backend
 
