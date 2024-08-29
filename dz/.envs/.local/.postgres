@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=polland-postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=polland
+POSTGRES_USER=MkHqCahbCImFqRlnGoqIZPsvddlWHSbh
+POSTGRES_PASSWORD=pe6hYO141rRuxE3ePpjTRsDE3AohQeTyoamhNo4iCN5TeGlwdu0snTnsIF7OUVsQ

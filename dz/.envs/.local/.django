@@ -1,0 +1,22 @@
+# General
+# ------------------------------------------------------------------------------
+USE_DOCKER=yes
+IPYTHONDIR=/app/.ipython
+PYTHONPATH=/app
+# Redis
+# ------------------------------------------------------------------------------
+REDIS_URL=redis://polland-redis:6379/0
+
+# Celery
+# ------------------------------------------------------------------------------
+
+# Flower
+CELERY_FLOWER_USER=
+CELERY_FLOWER_PASSWORD=
+FLOWER_UNAUTHENTICATED_API=true
+
+PULUMI_BUCKET_URL=s3://devzero-preproduction-polland
+PULUMI_BUCKET_EXTRA=region=us-west-2&awssdk=v2
+
+# Can be found bon Bitwarden under `VAULT_AUTH_APPROLE_SECRET_ID (Polland)`
+VAULT_AUTH_APPROLE_SECRET_ID=

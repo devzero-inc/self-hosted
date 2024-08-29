@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+
+
+exec watchfiles --filter python celery.__main__.main --args '-A config.celery_app worker -Q fast,workload,cluster,build -l INFO -O fair --concurrency 1' --sigint-timeout 3600

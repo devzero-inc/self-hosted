@@ -1,0 +1,540 @@
+# secrets:
+#   github_token:
+#     environment: "DEBO_GITHUB_PAT"
+
+volumes:
+  polland_pycache:
+  polland_mysql_data:
+  polland_mysql_data_backups:
+  polland_postgres_data:
+  polland_postgres_data_backups:
+  polland_cache:
+  logsrv_postgres_data:
+  logsrv_postgres_data_backups:
+  mongodb_data:
+  influxdb_data:
+  redis_data:
+  hydra_postgres_data:
+  hydra_postgres_data_backups:
+
+networks:
+  polland-internal:
+  logsrv-internal:
+  backend:
+  hydra:
+  frontend:
+
+secrets:
+  github_token:
+    environment: "DEBO_GITHUB_PAT"
+  npm_token:
+    environment: "API_CLIENT_PKG_TOKEN"
+
+services:
+
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    environment:
+      DOZZLE_NO_ANALYTICS: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 9999:8080
+    networks:
+      - polland-internal
+      - backend
+      - frontend
+
+  buildkitd:
+    image: moby/buildkit:v0.13.0-rootless
+    command:
+      - --addr
+      - tcp://0.0.0.0:1234
+      - --oci-worker-no-process-sandbox
+      - --debug
+#      - --config=/etc/buildkit/buildkitd.toml
+    user: "1000"
+    privileged: true
+    ports:
+      - 1234:1234/tcp
+    networks:
+      - polland-internal
+
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/polland:self-hosted-arm-base-2024-08-29--12-35--cd0517747f97-dirty 
+  polland: &polland
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/polland:self-hosted-arm-base-2024-08-29--12-35--cd0517747f97-dirty 
+    command: "/wait-for-it.sh -- /start"
+    container_name: polland_django
+    stdin_open: true # for ipdb
+    tty: true # for ipdb
+    depends_on:
+      - polland-mysql
+      - polland-postgres
+      - polland-redis
+      - buildkitd
+#      - celeryworker
+#      - flower
+    volumes:
+      - polland_pycache:/pycache
+      - ./scripts/wait-for-it.sh:/wait-for-it.sh
+      - ./compose/local/django/start:/start
+      - ./compose/local/django/start-celeryworker:/start-celeryworker
+      - ./compose/local/django/start-flower:/start-flower
+      - ./compose/local/django/start-celery-exporter:/start-celery-exporter
+      - $HOME/.aws/:/root/.aws/:ro
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.mysql
+      - ./.envs/.local/.postgres
+    environment:
+      LOGSRV_DEFAULT_QUEUE: http://elasticmq:9324/queue/logsrv.fifo
+      LOGSRV_DEFAULT_REGION: elasticmq
+      VAULT_ENDPOINT: "http://vault:8200/"
+      VAULT_AUTH_METHOD: "token"
+      VAULT_TOKEN: "root"
+      DOCKER_REGISTRY: "registry-server:5000"
+      SELF_HOSTED: True
+    ports:
+      - 8000:8000
+      - 8999:8000
+    networks:
+      - polland-internal
+      - backend
+
+  polland-mysql:
+    image: mysql:8.2.0
+    healthcheck:
+      test: mysql -h backend-service-db -P 3306 --user=$$MYSQL_USER --password=$$MYSQL_PASSWORD -e 'SHOW DATABASES;'
+      start_period: 10s
+      interval: 2s
+      timeout: 5s
+      retries: 100
+    container_name: polland_mysql
+    volumes:
+      - polland_mysql_data:/var/lib/mysql
+      - polland_mysql_data_backups:/backups
+    env_file:
+      - ./.envs/.local/.mysql
+    ports:
+      - '3306:3306'
+    networks:
+      - polland-internal
+
+  polland-postgres:
+    image: postgres:16.3
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "polland", "-U", "MkHqCahbCImFqRlnGoqIZPsvddlWHSbh"]
+      start_period: 10s
+      interval: 2s
+      timeout: 5s
+      retries: 100
+    container_name: polland_postgres
+    volumes:
+      - polland_postgres_data:/var/lib/postgresql/data/
+      - polland_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.local/.postgres
+    ports:
+      - 5432:5432
+    networks:
+      - polland-internal
+
+  polland-redis:
+    image: redis:6
+    container_name: polland_redis
+    ports:
+      - "6374:6379"
+    networks:
+      - polland-internal
+
+  polland-celeryworker:
+    <<: *polland
+    container_name: polland_celeryworker
+    stdin_open: true # for ipdb
+    tty: true # for ipdb
+    depends_on:
+      - polland-redis
+      - polland-mysql
+      - polland-postgres
+    environment:
+      LOGSRV_DEFAULT_QUEUE: http://elasticmq:9324/queue/logsrv.fifo
+      LOGSRV_DEFAULT_REGION: elasticmq
+      VAULT_ENDPOINT: "http://vault:8200/"
+      VAULT_AUTH_METHOD: "token"
+      VAULT_TOKEN: "root"
+      DOCKER_REGISTRY: "registry-server:5000"
+      SELF_HOSTED: True
+    ports: []
+    command: /start-celeryworker
+    networks:
+      - polland-internal
+
+  polland-celery-exporter:
+    <<: *polland
+    container_name: polland_celeryexporter
+    stdin_open: true # for ipdb
+    tty: true # for ipdb
+    depends_on:
+      - polland-redis
+      - polland-celeryworker
+    ports:
+      - '9095:9095'
+    command: /start-celery-exporter
+    networks:
+      - polland-internal
+
+  polland-celerybeat:
+    <<: *polland
+    container_name: polland_celerybeat
+    depends_on:
+      - polland-redis
+      - polland-mysql
+      - polland-postgres
+    ports: []
+    command: /start-celerybeat
+    networks:
+      - polland-internal
+
+  polland-flower:
+    <<: *polland
+    image: polland_flower
+    container_name: polland_flower
+    depends_on: []
+    ports:
+      - 5555:5555
+      - 8998:5555
+    command: /start-flower
+    networks:
+      - polland-internal
+
+  mongodb:
+    image: mongo:6.0
+    healthcheck:
+      test: "echo 'db.runCommand(\"ping\").ok' | mongosh mongodb:27017/test --quiet"
+      interval: 30s
+      timeout: 10s
+      retries: 100
+      start_period: 10s
+      start_interval: 5s
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - backend
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongodb
+    networks:
+      - backend
+
+  backend-redis:
+    image: redis:7.2
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+
+  backend-asynqmon: # for monitoring backend jobs
+    image: hibiken/asynqmon
+    platform: linux/amd64
+    restart: always
+    ports:
+      - 9990:9990
+    networks:
+      - backend
+    command: "--port 9990 --redis-addr=backend-redis:6379"
+
+  influxdb:
+    image: influxdb:2.0.7
+    healthcheck:
+      test: "curl -f http://localhost:8086/ping"
+      interval: 30s
+      timeout: 10s
+      retries: 100
+      start_period: 10s
+      start_interval: 5s
+    env_file:
+      - ./influxdb.env
+    ports:
+      - 8086:8086
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    networks:
+      - backend
+
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-arm-base-2024-08-29--12-00--cd0517747f97-dirty
+  backend:
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-arm-base-2024-08-29--14-44--864a05d7e43d-dirty 
+    container_name: backend
+    depends_on:
+      backend-redis:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    environment:
+      CONFIG_FILENAME: development
+      ENVIRONMENT: development
+      INFLUXDB_URL: http://influxdb:8086
+      LOGSRV_DEFAULT_QUEUE: http://elasticmq:9324/queue/logsrv.fifo
+      LOGSRV_DEFAULT_REGION: elasticmq
+      POLLAND_URL: http://polland:8000/
+      MONGODB_URL: mongodb://mongodb:27017
+      REDIS_URL: redis://backend-redis:6379
+      DEFAULT_DZ_BASE_IMAGE_TAG: "base-2024-08-28--12-12--9f59e629cf18-dirty"
+      CONTROL_PLANE_URL: http://host.lima.internal:8831
+      HYDRA_URL: http://hydra:8181
+      HYDRA_API_KEY: ${HYDRA_API_KEY}
+      LICENSE_KEY: ${LICENSE_KEY}
+      SELF_HOSTED: true
+      JWT_PRIVATE_KEY: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBck5paU5xcUtHaU1RNFdCNjhxemNpRVBnK1dOaFpoMjdabjVRNU8rbVhCMlNnNjBCCnNRd2JmWGd5UGJ4ckU1VlZGMHZ6SzZ4ZFlGblRxZXA2a0tXVURuYUJuczljN2R1T0huVTByaGxOTGt0d0ZDb2sKcHJKNFVwUUNWZDYzajBvZ0lBUzhHKzJrVFdMS09rLzBKUVdUTlY0Umx1cHdMMFFWd0ZteWxuSFBaU1IraVBZdwpsOEZKcllKWVYrZzZ3RXYxQit4RVdHek1tU1F6QlJKRFZJNjhhS1dGdVJCZ1UvWTVHTDFHQ21sRXZna3RFc29WCjFhZVpqcExIdmJUSVo4Tk1rVUNBMDdheG1RQUJoeURmTFNBaVg4S3k0VjZ3UmRMN2NNQitIQm8yTktMQjRzMG8KZEFobUt0L0xBTjBVODRWdXgvZXZXSDBFa2dWTjlabVdLb2J4RHdJREFRQUJBb0lCQVFDU3hwTlpJSkNOaVdGNApRVm1tWWF3VCtyQThsbXZMTDB4SHlOUWcxSERNb0VBZW1QZHF4UUZERnFKelVtRUxEREJwekJEKzhTdUorajJICmVKb0Q0dGRMUU03cGNPVlZCckEwcFFyTEhLa3h1dFcrQ2R0OXd1ZnlGOFd6N2FDcWlTT21qTjdBU0pqUkxpYlUKUmJqcEIwYnVkcWN4Skh1SFo2V2c1WXFGdnJlREJvaG4weG5FVkd5c2lwVGREc3hoUWZ3Yk5sdkMxc1JrbHlBMQpjVGdoMS84UE5TQytIU0FpVjE4aWhQVDh2UjQ0V2NXQ3k0QmFCZkJqbkloRGZFL2J3Z2NSUGg4Y0lGR1B0VFNMCkJsMWtPeUc4R2pPTG5jMHpFRmVGSVF5VmZtdDYvTXB6enRtMVFqOXpkMnh3Y1ExSkNDZExESDdmWEFmRzFGTzkKdGZsZVprY2hBb0dCQU9FbU9DKytjbE9nQUQ5bW5KRGlRejRDeExMTG9HMVZncHRNQWw2SDhaeG93b0NheFFRMQpBQStkM2ZPVXJ3TzFsU2IwUDFQNDBBL252QVIxZ2IwRVJSNlE0d0tBVnovQWp2REh1QUM0SjU0enZncHlhTzBDCmhQUllhdzVnYmFSYk4rQWx4SDNmWXhiaUx0dUNFTitoOFluOE5lbmJwU0J2WVFxVzBSSDR6RGlGQW9HQkFNU0gKdW9TMHo2RE5CUGgzMXAwNTZiM0pMV3lydDVvY1MwcnYxUjNoYkhQam11Ulo4Rk1OV3VDTlJhRHlYQi9IQVJhdApQNHF4T1NoRmY1Vjc5TU5vUktxZzNRcUJZQ2VRZDJBZjNpWW1abTNmNWI5Wi93T2tCdHpnNlA4OTZnN29jdmlnCkZhWlpIeXVHVmlacmkxdkltZDlNU0VSYlVzNjVEOGdCdzFtbXo0R0RBb0dCQUozNDhnMVZ3K08yN05XUFNxVkIKakVxVEtLNEd2NTVYRkJlZ2dqMFBoMC9tRlNxazdUMWhicFNHZ0xlcWlBM0ROMDZvcTFKZ3pxT0tSZHFmRkJPcQpUbEQrK2JqRWtmTXlTVmpaMk5ud1hDUGRUQ2NLVldLT2xQalluT3p1YlorWFBTSXhmYWVQdUhmUzVXdXcyK1A5ClBYdENraFZ1dm5KK2s0a1pmc0hzWG1YOUFvR0FOMVBHckttQ2NsQ0ZmN1d0RTZKRUxZdS9ZQUtQczdFWGVVYy8KaGlQNk5qM3pVeW9Hd0RyWVJMTkEwT2lxQ3NBcGpFckZ3clBWMVlLTFFuZ2RGZzM2bHRhbW85aDhTMmNlVkU5awphUFVTalFnbFU5TndPWVFwOG5EVzUxUjAyakdTZkhBRTZFbmF2cFFaR01QWi9jTGhucjJJOHNXSzhHdWxCN2VICldXdmVxeVVDZ1lFQXAwY0JBcUpEQzVPTFRYZHRUYkJYaW8zaHhnSktuTmIxVnROZzFpcXY2Q1lYVlBtQjFaT3cKUHB6bm5GSE5UVDhtLzhXbVBHMEkyZi84Ni9WWUUzTlYrdDZpZFRDK2g0S1NUQVlrUG55YmdKc1BLcjNyVFZ2UwpWK0dXWHhjb1VLZWZCaGkzTDN4SEcrNmxDbW5ldkNTdW03NjRhSEJkc2JTdTZBUWtldEpuNFN3PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ=="
+    ports:
+      - 8444:8444
+    networks:
+      - backend
+
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/buildqd:self-hosted-arm-base-2024-08-29--12-24--cd0517747f97-dirty
+  buildqd:
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/buildqd:self-hosted-arm-base-2024-08-29--12-24--cd0517747f97-dirty
+    container_name: buildqd
+    environment:
+      REDIS_ADDRESS: polland-redis:6379
+      POLLAND_ADDRESS: http://polland:8000
+      BUILDKIT_ADDRESS: buildkitd:1234 
+      LOGSRV_DEFAULT_QUEUE: http://elasticmq:9324/queue/logsrv.fifo
+      LOGSRV_DEFAULT_REGION: elasticmq
+      SELF_HOSTED: true
+    depends_on:
+      - polland 
+    networks:
+      - polland-internal
+
+  logsrv-postgres:
+    image: postgres:16.3
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "logsrv", "-U", "MkHqCahbCImFqRlnGoqIZPsvddlWHSbh"]
+      start_period: 10s
+      interval: 2s
+      timeout: 5s
+      retries: 100
+    container_name: logsrv_postgres
+    volumes:
+      - logsrv_postgres_data:/var/lib/postgresql/data/
+      - logsrv_postgres_data_backups:/backups
+    environment:
+      POSTGRES_HOST: logsrv-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: logsrv 
+      POSTGRES_USER: MkHqCahbCImFqRlnGoqIZPsvddlWHSbh
+      POSTGRES_PASSWORD: pe6hYO141rRuxE3ePpjTRsDE3AohQeTyoamhNo4iCN5TeGlwdu0snTnsIF7OUVsQ
+    networks:
+      - logsrv-internal
+
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/logsrv:self-hosted-arm-base-2024-08-29--12-02--cd0517747f97-dirty
+  logsrv:
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/logsrv:self-hosted-arm-base-2024-08-29--12-02--cd0517747f97-dirty
+    container_name: logsrv
+    depends_on:
+      - logsrv-postgres
+    environment:
+      CONFIG_FILENAME: preproduction 
+      SERVICE_PORT: 8442
+      SELF_HOSTED: true
+      QUEUE_URL: "http://elasticmq:9324/queue/logsrv.fifo"
+      PGPASSWORD: "pe6hYO141rRuxE3ePpjTRsDE3AohQeTyoamhNo4iCN5TeGlwdu0snTnsIF7OUVsQ"
+      POSTGRES_URL: "postgresql://MkHqCahbCImFqRlnGoqIZPsvddlWHSbh@logsrv-postgres:5432/logsrv"
+      USE_FAKE_DB: false 
+      USE_FAKE_QUEUE: false 
+      USE_FAKE_AUTH_MIDDLEWARE: false 
+      VAULTED_AUTH_PUBLIC_KEY: "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFyTmlpTnFxS0dpTVE0V0I2OHF6YwppRVBnK1dOaFpoMjdabjVRNU8rbVhCMlNnNjBCc1F3YmZYZ3lQYnhyRTVWVkYwdnpLNnhkWUZuVHFlcDZrS1dVCkRuYUJuczljN2R1T0huVTByaGxOTGt0d0ZDb2twcko0VXBRQ1ZkNjNqMG9nSUFTOEcrMmtUV0xLT2svMEpRV1QKTlY0Umx1cHdMMFFWd0ZteWxuSFBaU1IraVBZd2w4RkpyWUpZVitnNndFdjFCK3hFV0d6TW1TUXpCUkpEVkk2OAphS1dGdVJCZ1UvWTVHTDFHQ21sRXZna3RFc29WMWFlWmpwTEh2YlRJWjhOTWtVQ0EwN2F4bVFBQmh5RGZMU0FpClg4S3k0VjZ3UmRMN2NNQitIQm8yTktMQjRzMG9kQWhtS3QvTEFOMFU4NFZ1eC9ldldIMEVrZ1ZOOVptV0tvYngKRHdJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t"
+    ports:
+      - 8442:8442
+    networks:
+      - frontend
+      - logsrv-internal
+
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/api-gateway:self-hosted-arm-base-2024-08-29--11-58--cd0517747f97-dirty
+  api-gateway:
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/api-gateway:self-hosted-arm-base-2024-08-29--11-58--cd0517747f97-dirty
+    container_name: api-gateway
+    environment:
+      ENVIRONMENT: development
+      LISTENER_ENDPOINT: 0.0.0.0:8443
+      BACKEND_URL: http://backend:8444
+      VAULTED_AUTH_PUBLIC_KEY: "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFyTmlpTnFxS0dpTVE0V0I2OHF6YwppRVBnK1dOaFpoMjdabjVRNU8rbVhCMlNnNjBCc1F3YmZYZ3lQYnhyRTVWVkYwdnpLNnhkWUZuVHFlcDZrS1dVCkRuYUJuczljN2R1T0huVTByaGxOTGt0d0ZDb2twcko0VXBRQ1ZkNjNqMG9nSUFTOEcrMmtUV0xLT2svMEpRV1QKTlY0Umx1cHdMMFFWd0ZteWxuSFBaU1IraVBZd2w4RkpyWUpZVitnNndFdjFCK3hFV0d6TW1TUXpCUkpEVkk2OAphS1dGdVJCZ1UvWTVHTDFHQ21sRXZna3RFc29WMWFlWmpwTEh2YlRJWjhOTWtVQ0EwN2F4bVFBQmh5RGZMU0FpClg4S3k0VjZ3UmRMN2NNQitIQm8yTktMQjRzMG9kQWhtS3QvTEFOMFU4NFZ1eC9ldldIMEVrZ1ZOOVptV0tvYngKRHdJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t"
+    ports:
+      - 8443:8443
+      - 8831:8443
+    networks:
+      - backend
+      - frontend
+
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/devzero-website:self-hosted-armbase-2024-08-29--13-09--f2d2c8c897eb-dirty 
+  devzero-website:
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/devzero-website:self-hosted-armbase-2024-08-29--13-09--f2d2c8c897eb-dirty 
+    container_name: devzero-website
+    environment:
+      NEXT_AUTH_JWT_SIGNING_PRIV_KEY: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBck5paU5xcUtHaU1RNFdCNjhxemNpRVBnK1dOaFpoMjdabjVRNU8rbVhCMlNnNjBCCnNRd2JmWGd5UGJ4ckU1VlZGMHZ6SzZ4ZFlGblRxZXA2a0tXVURuYUJuczljN2R1T0huVTByaGxOTGt0d0ZDb2sKcHJKNFVwUUNWZDYzajBvZ0lBUzhHKzJrVFdMS09rLzBKUVdUTlY0Umx1cHdMMFFWd0ZteWxuSFBaU1IraVBZdwpsOEZKcllKWVYrZzZ3RXYxQit4RVdHek1tU1F6QlJKRFZJNjhhS1dGdVJCZ1UvWTVHTDFHQ21sRXZna3RFc29WCjFhZVpqcExIdmJUSVo4Tk1rVUNBMDdheG1RQUJoeURmTFNBaVg4S3k0VjZ3UmRMN2NNQitIQm8yTktMQjRzMG8KZEFobUt0L0xBTjBVODRWdXgvZXZXSDBFa2dWTjlabVdLb2J4RHdJREFRQUJBb0lCQVFDU3hwTlpJSkNOaVdGNApRVm1tWWF3VCtyQThsbXZMTDB4SHlOUWcxSERNb0VBZW1QZHF4UUZERnFKelVtRUxEREJwekJEKzhTdUorajJICmVKb0Q0dGRMUU03cGNPVlZCckEwcFFyTEhLa3h1dFcrQ2R0OXd1ZnlGOFd6N2FDcWlTT21qTjdBU0pqUkxpYlUKUmJqcEIwYnVkcWN4Skh1SFo2V2c1WXFGdnJlREJvaG4weG5FVkd5c2lwVGREc3hoUWZ3Yk5sdkMxc1JrbHlBMQpjVGdoMS84UE5TQytIU0FpVjE4aWhQVDh2UjQ0V2NXQ3k0QmFCZkJqbkloRGZFL2J3Z2NSUGg4Y0lGR1B0VFNMCkJsMWtPeUc4R2pPTG5jMHpFRmVGSVF5VmZtdDYvTXB6enRtMVFqOXpkMnh3Y1ExSkNDZExESDdmWEFmRzFGTzkKdGZsZVprY2hBb0dCQU9FbU9DKytjbE9nQUQ5bW5KRGlRejRDeExMTG9HMVZncHRNQWw2SDhaeG93b0NheFFRMQpBQStkM2ZPVXJ3TzFsU2IwUDFQNDBBL252QVIxZ2IwRVJSNlE0d0tBVnovQWp2REh1QUM0SjU0enZncHlhTzBDCmhQUllhdzVnYmFSYk4rQWx4SDNmWXhiaUx0dUNFTitoOFluOE5lbmJwU0J2WVFxVzBSSDR6RGlGQW9HQkFNU0gKdW9TMHo2RE5CUGgzMXAwNTZiM0pMV3lydDVvY1MwcnYxUjNoYkhQam11Ulo4Rk1OV3VDTlJhRHlYQi9IQVJhdApQNHF4T1NoRmY1Vjc5TU5vUktxZzNRcUJZQ2VRZDJBZjNpWW1abTNmNWI5Wi93T2tCdHpnNlA4OTZnN29jdmlnCkZhWlpIeXVHVmlacmkxdkltZDlNU0VSYlVzNjVEOGdCdzFtbXo0R0RBb0dCQUozNDhnMVZ3K08yN05XUFNxVkIKakVxVEtLNEd2NTVYRkJlZ2dqMFBoMC9tRlNxazdUMWhicFNHZ0xlcWlBM0ROMDZvcTFKZ3pxT0tSZHFmRkJPcQpUbEQrK2JqRWtmTXlTVmpaMk5ud1hDUGRUQ2NLVldLT2xQalluT3p1YlorWFBTSXhmYWVQdUhmUzVXdXcyK1A5ClBYdENraFZ1dm5KK2s0a1pmc0hzWG1YOUFvR0FOMVBHckttQ2NsQ0ZmN1d0RTZKRUxZdS9ZQUtQczdFWGVVYy8KaGlQNk5qM3pVeW9Hd0RyWVJMTkEwT2lxQ3NBcGpFckZ3clBWMVlLTFFuZ2RGZzM2bHRhbW85aDhTMmNlVkU5awphUFVTalFnbFU5TndPWVFwOG5EVzUxUjAyakdTZkhBRTZFbmF2cFFaR01QWi9jTGhucjJJOHNXSzhHdWxCN2VICldXdmVxeVVDZ1lFQXAwY0JBcUpEQzVPTFRYZHRUYkJYaW8zaHhnSktuTmIxVnROZzFpcXY2Q1lYVlBtQjFaT3cKUHB6bm5GSE5UVDhtLzhXbVBHMEkyZi84Ni9WWUUzTlYrdDZpZFRDK2g0S1NUQVlrUG55YmdKc1BLcjNyVFZ2UwpWK0dXWHhjb1VLZWZCaGkzTDN4SEcrNmxDbW5ldkNTdW03NjRhSEJkc2JTdTZBUWtldEpuNFN3PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ=="
+      ALGOLIA_ADMIN_API_KEY: "68f9bda98d214b24985e446ceea56f0a"
+      API_BASE_URL: "http://api-gateway:8443/api/v0"
+      API_BASE_URL_V2: "http://api-gateway:8443/backend/v0"
+      AUTH0_BASE_URL: "https://www.devzero.io"
+      NEXT_PUBLIC_BYPASS_AUTH0_FLOW: "true"
+      NEXTAUTH_SECRET: "testingindev"
+      NEXTAUTH_URL: "https://devzero.io/api/auth"
+      NEXT_AUTH_AUTH0_ISSUER: "https://devinfra.us.auth0.com"
+      NEXT_AUTH_AUTH0_PROVIDER_ID: "8kXJssSjdxPZxhAXmWzrGDHbxqlwj2Cc"
+      NEXT_AUTH_AUTH0_PROVIDER_SECRET: "smaHkm3HoQszOdHZItBG8jmUsOw0V1m700W2XLuKS5jeyRfBUwlPTeKxgD_vnomH"
+      NEXT_AUTH_GH_PROVIDER_ID: "504ac45506c623095b9a"
+      NEXT_AUTH_GH_PROVIDER_SECRET: "33d3c82e77c847e83adbf4366fb81e7a40110afb"
+      NEXT_PUBLIC_ALGOLIA_APP_ID: "BU5ONNDCHX"
+      NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY: "03baa75cef8db8b226ed4f5d0811fb8d"
+      NEXT_PUBLIC_AMP_API_KEY: "3b0f94e9b28d15f4863fbd5d9163f508"
+      NEXT_PUBLIC_GITHUB_CALLBACK_URI: "https://devzero.io/user-settings/oauth-callback/github"
+      NEXT_PUBLIC_GITHUB_V2_OAUTH_ID: "e1dce9cae86873e890b3"
+      NEXT_PUBLIC_POSTHOG_KEY: "phc_kLaaAhPtBFA5Rk3wm9x4PmCDpa9eYTwg1EPCJOKhHEa"
+      NEXT_PUBLIC_SANITY_DATASET: "production"
+      NEXT_PUBLIC_SANITY_PROJECT_ID: "vxev1xw8"
+      SANITY_API_DATASET: "production"
+      SANITY_API_PROJECT_ID: "vxev1xw8"
+      SANITY_API_READ_TOKEN: "skHU5MIECFfnXxksQtgTvEuSZt7loWuqFuKKpssu140eQfKU1txOZXQ6EZqcp96E3o5pZGAdyNmSnrgd3v8PQSbaJI7L5nMClr0E80LXfnsR1W5Q1jv9mGon5k64Pz1ld2Bzb1VbyNaHH020PWBs8UcJAWfVFKslr3zUsWk9EedFbOjihBrY"
+      SANITY_API_WRITE_TOKEN: "skbfQMsOOok6YW4Y22bCL8UomyEfp3t5cUxjicKo9tTkhB0UQIKsUYtYXi55D6Cqhn2yvQFlS1hiPMU0KjF2zmrxYo61Uaf7bAdvb3m8K88UI903vI8cFlaPGgqK4eiclIBrJLKt2MULij8dRAWkRJbncqSLHL62WPfh2yEqBgK51MsYPcJS"
+      SANITY_STUDIO_API_DATASET: "production"
+      SANITY_STUDIO_API_PROJECT_ID: "vxev1xw8"
+      STATSIG_SERVER_KEY: "secret-2qFVVi7nbIickDJOCfDBTqcGwM6quY5ynfcleQCfBlX"
+      NEXT_PUBLIC_API_LOGS_URL: "http://logsrv:8442"
+      VERCEL_ENV: "development"
+    ports:
+      - 3000:3000
+    networks:
+      - frontend
+
+
+  hydra-db:
+    image: postgres
+    restart: always
+    ports:
+      - "5564:5432"
+    environment:
+      POSTGRES_PASSWORD: hydra 
+      POSTGRES_DB: hydra
+      POSTGRES_USER: hydra
+    volumes:
+      - hydra_postgres_data:/var/lib/postgresql/data/
+      - hydra_postgres_data_backups:/backups
+    networks:
+      - hydra
+
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/hydra:self-hosted-arm-base-2024-08-29--11-40--dcaa60efb438-dirty
+  hydra:
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/hydra:self-hosted-arm-base-2024-08-29--11-40--dcaa60efb438-dirty
+    container_name: hydra
+    ports:
+      - "8181:8181"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8181/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      - hydra-db
+    environment:
+      - HEADSCALE_DATABASE_TYPE=postgres
+      - HEADSCALE_DATABASE_POSTGRES_SSL=true
+      - HEADSCALE_DATABASE_POSTGRES_HOST=hydra-db
+      - HEADSCALE_DATABASE_POSTGRES_PORT=5432
+      - HEADSCALE_DATABASE_POSTGRES_NAME=hydra
+      - HEADSCALE_DATABASE_POSTGRES_USER=hydra
+      - HEADSCALE_DATABASE_POSTGRES_PASS=hydra
+      - HEADSCALE_DATABASE_REDIS_URL=redis://default:@redis:6379/0
+      - HEADSCALE_CONFIG=/etc/headscale/development.yaml
+    networks:
+      - backend
+      - hydra
+
+  vault:
+    image: vault:1.13.3
+    volumes:
+      - ./vault/config:/vault/config
+      - ./vault/policies:/vault/policies
+      - ./vault/data:/vault/data
+    ports:
+      - 8200:8200
+    environment:
+      - VAULT_ADDR=http://0.0.0.0:8200
+      - VAULT_API_ADDR=http://0.0.0.0:8200
+      - VAULT_ADDRESS=http://0.0.0.0:8200
+    cap_add:
+      - IPC_LOCK
+    command: ["vault", "server", "-dev", "-dev-listen-address=0.0.0.0:8200", "-dev-root-token-id=root"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8200/v1/sys/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - polland-internal
+
+  registry-server:
+    image: registry:2.8.2  # Using a specific version of the registry
+    restart: always
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: 'true'  # Enabling deletion of images
+    volumes:
+      - ./registry/data:/var/lib/registry  # Persistent data storage
+    ports:
+      - 5959:5000
+    networks:
+      - polland-internal
+
+  registry-ui:
+    image: joxit/docker-registry-ui:main  # Using the latest main branch build
+    container_name: registry-ui
+    restart: always
+    ports:
+      - 9997:80  # Exposing UI on port 9997
+    environment:
+      - SINGLE_REGISTRY=true
+      - REGISTRY_TITLE=Docker Registry UI
+      - DELETE_IMAGES=true
+      - SHOW_CONTENT_DIGEST=true
+      - NGINX_PROXY_PASS_URL=http://registry-server:5000  # Link to the registry server
+      - SHOW_CATALOG_NB_TAGS=true
+      - CATALOG_MIN_BRANCHES=1
+      - CATALOG_MAX_BRANCHES=1
+      - TAGLIST_PAGE_SIZE=100
+      - REGISTRY_SECURED=false
+      - CATALOG_ELEMENTS_LIMIT=1000
+    networks:
+      - polland-internal
+
+  elasticmq:
+    image: softwaremill/elasticmq
+    volumes:
+      - ./elasticmq/custom.conf:/opt/elasticmq.conf
+    ports:
+      - 9324:9324
+      - 9325:9325  # Optional, for the web UI
+    networks:
+      - polland-internal
+      - backend
+      - logsrv-internal
