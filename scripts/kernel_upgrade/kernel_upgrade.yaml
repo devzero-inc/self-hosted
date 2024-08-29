@@ -1,0 +1,83 @@
+vmType: "qemu"
+cpus: 6
+memory: "10GiB"
+disk: "100GiB"
+mounts: []
+images:
+  - location: "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-arm64.img"
+    arch: "aarch64"
+  - location: "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
+    arch: "x86_64"
+ssh:
+  loadDotSSHPubKeys: false
+provision:
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
+
+      apt update -y
+
+      # Get current and latest kernel versions
+      CURRENT_KERNEL=$(uname -r | sed 's/-.*//')
+      LATEST_KERNEL=$(apt-cache search --names-only 'linux-image-generic-hwe-22.04' | grep 'linux-image-generic-hwe-22.04' | awk '{print $1}' | sort | tail -n 1 | xargs apt-cache show | grep 'Version:' | head -n 1 | awk '{print $2}' | sed 's/-.*//')
+
+      # Check if the cleanup script exists
+      if [[ ! -e remove_old_kernels.sh ]]; then
+        # Cleanup script to remove old kernels
+        cat <<EOF > remove_old_kernels.sh
+      #!/bin/bash
+
+      uname -a
+      IN_USE=\$(uname -r)
+      echo "Your in-use kernel is \$IN_USE"
+
+      OLD_KERNELS=\$(
+          dpkg --list |
+              grep -v "\$IN_USE" |
+              grep -Ei 'linux-image|linux-headers|linux-modules' |
+              awk '{ print \$2 }'
+      )
+      echo "Old Kernels to be removed:"
+      echo "\$OLD_KERNELS"
+
+      for PACKAGE in \$OLD_KERNELS; do
+          yes | apt purge "\$PACKAGE"
+      done
+      EOF
+        chmod +x remove_old_kernels.sh
+      fi
+
+      # Compare current and latest kernel versions
+      if [[ "$CURRENT_KERNEL" == *"$LATEST_KERNEL"* ]]; then
+        echo "Kernel is up to date."
+        ./remove_old_kernels.sh
+        ./remove_old_kernels.sh
+      else
+        echo "Updating kernel to the latest HWE version."
+        apt install linux-image-generic-hwe-22.04 -y
+        reboot
+      fi
+probes:
+  - script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      output=$(uname -r)
+
+      CURRENT_KERNEL=$(uname -r | sed 's/-.*//')
+      LATEST_KERNEL=$(apt-cache search --names-only 'linux-image-generic-hwe-22.04' | grep 'linux-image-generic-hwe-22.04' | awk '{print $1}' | sort | tail -n 1 | xargs apt-cache show | grep 'Version:' | head -n 1 | awk '{print $2}' | sed 's/-.*//')
+
+      # Check if the output is empty
+      if [ -z "$output" ]; then
+        echo "No kernel version found!"
+        exit 1
+      fi
+
+      # Check if the kernel version is the latest HWE version
+      if [[ "$CURRENT_KERNEL" == *"$LATEST_KERNEL"* ]]; then
+        echo "Kernel is the latest HWE version."
+        exit 0
+      else
+        echo "Kernel is not the latest HWE version."
+        exit 1
+      fi
