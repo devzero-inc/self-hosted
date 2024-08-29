@@ -12,7 +12,6 @@ volumes:
   logsrv_postgres_data:
   logsrv_postgres_data_backups:
   mongodb_data:
-  influxdb_data:
   redis_data:
   hydra_postgres_data:
   hydra_postgres_data_backups:
@@ -260,32 +259,12 @@ services:
       - backend
     command: "--port 9990 --redis-addr=backend-redis:6379"
 
-  influxdb:
-    image: influxdb:2.0.7
-    healthcheck:
-      test: "curl -f http://localhost:8086/ping"
-      interval: 30s
-      timeout: 10s
-      retries: 100
-      start_period: 10s
-      start_interval: 5s
-    env_file:
-      - ./influxdb.env
-    ports:
-      - 8086:8086
-    volumes:
-      - influxdb_data:/var/lib/influxdb2
-    networks:
-      - backend
-
   # 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-arm-base-2024-08-29--12-00--cd0517747f97-dirty
   backend:
     image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-arm-base-2024-08-29--14-44--864a05d7e43d-dirty 
     container_name: backend
     depends_on:
       backend-redis:
-        condition: service_healthy
-      influxdb:
         condition: service_healthy
       mongodb:
         condition: service_healthy
