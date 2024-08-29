@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+
+celery -A config.celery_app -b "${CELERY_BROKER_URL}" flower

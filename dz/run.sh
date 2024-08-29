@@ -1,0 +1,184 @@
+#!/bin/bash
+
+set -euo pipefail
+
+DOCKER_COMPOSE_FILE="docker-compose.yml"
+ENV_FILE=".env"
+EXAMPLE_ENV_FILE=".env.example"
+CONTAINER_NAME="hydra"
+API_KEY_VAR="HYDRA_API_KEY"
+LICENSE_KEY_VAR="LICENSE_KEY"
+RELOAD=false
+BACKEND_CONTAINER_NAME="backend"
+LICENSE_ERROR="Error verifying license token"
+REGISTRY_URL="056855531191.dkr.ecr.us-west-2.amazonaws.com"
+TEMP_TOKEN_FILE="./docker.txt"
+
+# Parse arguments for reload flag
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --reload) RELOAD=true ;;
+        *) printf "Unknown parameter passed: %s\n" "$1" >&2; exit 1 ;;
+    esac
+    shift
+done
+
+# Ensure that docker-compose file exists
+if [[ ! -f "$DOCKER_COMPOSE_FILE" ]]; then
+    printf "Docker compose file %s not found.\n" "$DOCKER_COMPOSE_FILE" >&2
+    exit 1
+fi
+
+# Ensure that .env file exists, if not, copy .env.example to .env
+if [[ ! -f "$ENV_FILE" ]]; then
+    if [[ -f "$EXAMPLE_ENV_FILE" ]]; then
+        cp "$EXAMPLE_ENV_FILE" "$ENV_FILE"
+        printf "Copied %s to %s\n" "$EXAMPLE_ENV_FILE" "$ENV_FILE"
+    else
+        printf "Neither %s nor %s found. Exiting.\n" "$ENV_FILE" "$EXAMPLE_ENV_FILE" >&2
+        exit 1
+    fi
+fi
+
+# Function to check if a variable is already set in the .env file
+is_env_var_set() {
+    local var_name="$1"
+    grep -q "^${var_name}=" "$ENV_FILE" && grep -q "^${var_name}=[^ ]\+$" "$ENV_FILE"
+}
+
+# Function to prompt the user for the license key and inject it into the .env file
+prompt_for_license_key() {
+    if ! is_env_var_set "$LICENSE_KEY_VAR"; then
+        printf "License key not found in .env file.\n"
+        printf "Please enter your license key: "
+        read -r license_key
+        if [[ -z "$license_key" ]]; then
+            printf "No license key provided. Exiting.\n" >&2
+            exit 1
+        fi
+        printf "%s=%s\n" "$LICENSE_KEY_VAR" "$license_key" >> "$ENV_FILE"
+    fi
+}
+
+# Function to check if the user is logged in to the Docker registry
+check_registry_login() {
+    if ! docker system info --format '{{json .RegistryConfig.IndexConfigs}}' | grep -q "$REGISTRY_URL"; then
+        printf "You are not logged into the Docker registry: %s\n" "$REGISTRY_URL"
+        prompt_for_registry_login
+    else
+        printf "Already logged into the Docker registry: %s\n" "$REGISTRY_URL"
+    fi
+}
+
+# Function to prompt the user for Docker registry credentials and log them in
+prompt_for_registry_login() {
+    # If docker.txt exists and has content, use it directly
+    if [[ -f "$TEMP_TOKEN_FILE" && -s "$TEMP_TOKEN_FILE" ]]; then
+        printf "Using existing token from %s\n" "$TEMP_TOKEN_FILE"
+        registry_token=$(<"$TEMP_TOKEN_FILE")
+    else
+        printf "Please paste your Docker registry token into the following file and save it:\n"
+        printf "%s\n" "$TEMP_TOKEN_FILE"
+        read -p "Press Enter when done..."
+        if ! registry_token=$(<"$TEMP_TOKEN_FILE"); then
+            printf "Failed to read the registry token from the file. Exiting.\n" >&2
+            exit 1
+        fi
+    fi
+    
+    # Perform Docker login
+    if [[ -z "$registry_token" ]]; then
+        printf "No registry token provided. Exiting.\n" >&2
+        exit 1
+    fi
+    if ! echo "$registry_token" | docker login --username AWS --password-stdin "$REGISTRY_URL"; then
+        printf "Docker registry login failed. Exiting.\n" >&2
+        exit 1
+    fi
+    printf "Successfully logged into Docker registry: %s\n" "$REGISTRY_URL"
+}
+
+# Function to start docker-compose and wait until services are up
+start_docker_compose() {
+    docker-compose up -d
+
+    # Wait until the hydra container is healthy
+    wait_for_container_healthy() {
+        local container="$1"
+        local retries=10
+        local wait=5
+        for ((i=0; i<retries; i++)); do
+            if [[ $(docker inspect --format='{{.State.Health.Status}}' "$container") == "healthy" ]]; then
+                return 0
+            fi
+            printf "Waiting for container %s to become healthy...\n" "$container"
+            sleep "$wait"
+        done
+        printf "Container %s did not become healthy in time.\n" "$container" >&2
+        return 1
+    }
+
+    if ! wait_for_container_healthy "$CONTAINER_NAME"; then
+        exit 1
+    fi
+}
+
+# Function to create API key and inject it into .env
+create_and_inject_api_key() {
+    # Run the command inside the "hydra" container and capture the output
+    if ! output=$(docker exec "$CONTAINER_NAME" /bin/bash -c "headscale apikeys create"); then
+        printf "Failed to run the API key creation command inside %s container.\n" "$CONTAINER_NAME" >&2
+        exit 1
+    fi
+
+    # Extract the key from the output
+    api_key=$(echo "$output" | awk NF | tail -n 1)
+    if [[ -z "$api_key" ]]; then
+        printf "Failed to extract the API key from the output.\n" >&2
+        exit 1
+    fi
+    printf "API Key generated: %s\n" "$api_key"
+
+    # Inject the API key into the .env file
+    sed -i.bak "s/^${API_KEY_VAR}=.*/${API_KEY_VAR}=${api_key}/" "$ENV_FILE"
+}
+
+# Function to check for license errors in the backend service logs
+check_license_error() {
+    if docker logs "$BACKEND_CONTAINER_NAME" 2>&1 | grep -q "$LICENSE_ERROR"; then
+        printf "License key validation failed: %s\n" "$LICENSE_ERROR" >&2
+        docker-compose down
+        exit 1
+    fi
+}
+
+# Main execution logic
+main() {
+    # Check if the user is logged into the Docker registry
+    check_registry_login
+
+    # Prompt for license key if not already set
+    prompt_for_license_key
+
+    if is_env_var_set "$API_KEY_VAR" && [[ "$RELOAD" = false ]]; then
+        printf "API Key is already set. Skipping API key generation and injection.\n"
+        docker-compose up -d
+    else
+        printf "Starting the API key generation and injection process...\n"
+        docker-compose down
+        start_docker_compose
+        create_and_inject_api_key
+        docker-compose down
+        docker-compose up -d
+        # Clean up the backup .env file
+        rm -f "${ENV_FILE}.bak"
+    fi
+
+    # Check for license errors in the backend service logs
+    printf "Checking backend service for license validation...\n"
+    check_license_error
+
+    printf "Docker setup complete.\n"
+}
+
+main

@@ -1,0 +1,8 @@
+# MySQL
+# ------------------------------------------------------------------------------
+MYSQL_HOST=polland-mysql
+MYSQL_PORT=3306
+MYSQL_DATABASE=polland
+MYSQL_USER=MkHqCahbCImFqRlnGoqIZPsvddlWHSbh
+MYSQL_PASSWORD=pe6hYO141rRuxE3ePpjTRsDE3AohQeTyoamhNo4iCN5TeGlwdu0snTnsIF7OUVsQ
+MYSQL_ROOT_PASSWORD=pe6hYO141rRuxE3ePpjTRsDE3AohQeTyoamhNo4iCN5TeGlwdu0snTnsIF7OUVsQ

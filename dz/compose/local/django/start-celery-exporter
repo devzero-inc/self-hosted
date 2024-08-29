@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+
+
+exec python -m celery_exporter -q celery -n polland_celery
