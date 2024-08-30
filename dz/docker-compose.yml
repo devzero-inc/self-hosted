@@ -48,7 +48,8 @@ services:
 
   # 056855531191.dkr.ecr.us-west-2.amazonaws.com/polland:self-hosted-arm-base-2024-08-29--12-35--cd0517747f97-dirty 
   polland: &polland
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/polland:self-hosted-arm-base-2024-08-29--21-08--864a05d7e43d-dirty
+    #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/polland:self-hosted-arm-base-2024-08-29--21-08--864a05d7e43d-dirty
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/polland:self-hosted-arm-base-2024-08-30--13-25--faff35b44be8-dirty 
     command: "/wait-for-it.sh -- /start"
     container_name: polland_django
     stdin_open: true # for ipdb

@@ -46,8 +46,7 @@ echo "Credentials copied."
 echo "Starting the cluster..."
 limactl create dz_cluster.yaml --tty=false
 limactl start dz_cluster
-#limactl shell dz_cluster -- cat .kube/config | tail -n +2 | sed -e 's|server:.*|server: https://127.0.0.1:8443|' > kubeconfig
-make kubeconfig
+limactl shell dz_cluster -- sudo -i -u devzero cat .kube/config | tail -n +2 | sed -e 's|server:.*|server: https://127.0.0.1:8443|' > kubeconfig
 echo "Data plane started."
 
 # Determine the script directory
