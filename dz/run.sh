@@ -13,6 +13,7 @@ BACKEND_CONTAINER_NAME="backend"
 LICENSE_ERROR="Error verifying license token"
 REGISTRY_URL="056855531191.dkr.ecr.us-west-2.amazonaws.com"
 TEMP_TOKEN_FILE="./docker.txt"
+KUBECONFIG_FILE="../kubeconfig"
 
 # Parse arguments for reload flag
 while [[ "$#" -gt 0 ]]; do
@@ -91,7 +92,6 @@ prompt_for_registry_login() {
         printf "No registry token provided. Exiting.\n" >&2
         exit 1
     fi
-    printf "Connection to %s with token %s...\n" "$REGISTRY_URL" "$registry_token"
     if ! echo "$registry_token" | docker login --username AWS --password-stdin "$REGISTRY_URL"; then
         printf "Docker registry login failed. Exiting.\n" >&2
         exit 1
@@ -153,6 +153,47 @@ check_license_error() {
     fi
 }
 
+# Function to create the cluster in Poland
+create_cluster_in_poland() {
+    # Extract data from the kubeconfig file
+    certificate_authority_data=$(cat "$KUBECONFIG_FILE" | yq e '.clusters[0].cluster."certificate-authority-data"' -)
+    token=$(kubectl get secret devzero-sa0-token -n default -o jsonpath='{.data.token}' --kubeconfig "$KUBECONFIG_FILE" | base64 -d)
+
+    # Run the commands to set up the cluster in Poland
+    printf "Creating devzero user.\n" >&2
+    docker-compose -f ./docker-compose.yml run polland /wait-for-it.sh -- ./manage.py createsuperuser  --email devzero@devzero.io --noinput || true
+    printf "Setting password for superuser.\n" >&2
+    docker-compose -f ./docker-compose.yml run polland ./manage.py shell_plus -c 'user = User.objects.get(email="devzero@devzero.io"); user.set_password("123123"); user.save();' || true
+    printf "Creating cluster object.\n" >&2
+    docker-compose -f ./docker-compose.yml run polland ./manage.py shell_plus -c "
+from django.db.utils import IntegrityError
+from polland.clusters.models.cluster import Cluster
+
+try:
+    cluster, created = Cluster.objects.get_or_create(
+        cluster_id=1,
+        defaults={
+            'name': 'minikube',
+            'certificate_authority_data': \"$certificate_authority_data\",
+            'server': 'https://host.docker.internal:8443',
+            'service_account_name': 'devzero-sa0',
+            'service_account_token': \"$token\",
+            'slug': 'minikube'
+        }
+    )
+    if not created:
+        cluster.name = 'minikube'
+        cluster.certificate_authority_data = \"$certificate_authority_data\"
+        cluster.server = 'https://host.docker.internal:8443'
+        cluster.service_account_name = 'devzero-sa0'
+        cluster.service_account_token = \"$token\"
+        cluster.slug = 'minikube'
+        cluster.save()
+except IntegrityError:
+    pass
+"
+}
+
 # Main execution logic
 main() {
     # Check if the user is logged into the Docker registry
@@ -178,6 +219,10 @@ main() {
     # Check for license errors in the backend service logs
     printf "Checking backend service for license validation...\n"
     check_license_error
+
+    # Create the cluster in Poland
+    printf "Creating the cluster in Poland...\n"
+    create_cluster_in_poland
 
     printf "Docker setup complete.\n"
 }

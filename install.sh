@@ -46,34 +46,15 @@ echo "Credentials copied."
 echo "Starting the cluster..."
 limactl create dz_cluster.yaml --tty=false
 limactl start dz_cluster
-limactl shell dz_cluster -- cat .kube/config | tail -n +2 | sed -e 's|server:.*|server: https://127.0.0.1:8443|' > kubeconfig
+#limactl shell dz_cluster -- cat .kube/config | tail -n +2 | sed -e 's|server:.*|server: https://127.0.0.1:8443|' > kubeconfig
+make kubeconfig
 echo "Data plane started."
 
-# Install control plane
-/bin/bash ./dz/run.sh
+# Determine the script directory
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-# Create cluster in polland
-certificate_authority_data=$(cat kubeconfig | yq e '.clusters[0].cluster."certificate-authority-data"' -)
-token=$(kubectl get secret devzero-sa0-token -n default -o jsonpath='{.data.token}' --kubeconfig kubeconfig| base64 -d)
+# Set the working directory to the script directory
+cd "$SCRIPT_DIR/dz"
 
-docker compose -f ./dz/docker-compose.yml run polland ./manage.py shell_plus -c 'user = User.objects.get(email="devzero@devzero.io"); user.set_password("123123"); user.save();'
-docker compose -f ./dz/docker-compose.yml run polland ./manage.py shell_plus -c "cluster, created = Cluster.objects.get_or_create(
-  cluster_id=1,
-  defaults={
-      'name': 'minikube',
-      'certificate_authority_data': \"$certificate_authority_data\",
-      'server': 'https://host.docker.internal:8443',
-      'service_account_name': 'devzero-sa0',
-      'service_account_token': \"$token\",
-      'slug': 'minikube'
-  }
-)
-if not created:
-  # Update the existing cluster with new values
-  cluster.name = 'minikube'
-  cluster.certificate_authority_data = \"$certificate_authority_data\"
-  cluster.server = 'https://host.docker.internal:8443'
-  cluster.service_account_name = 'devzero-sa0'
-  cluster.service_account_token = \"$token\"
-  cluster.slug = 'minikube'
-  cluster.save()"
+# Execute the run.sh script
+/bin/bash ./run.sh
