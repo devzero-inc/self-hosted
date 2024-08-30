@@ -56,8 +56,8 @@ echo "Data plane started."
 certificate_authority_data=$(cat kubeconfig | yq e '.clusters[0].cluster."certificate-authority-data"' -)
 token=$(kubectl get secret devzero-sa0-token -n default -o jsonpath='{.data.token}' --kubeconfig kubeconfig| base64 -d)
 
-docker compose run polland ./manage.py shell_plus -c 'user = User.objects.get(email="devzero@devzero.io"); user.set_password("123123"); user.save();'
-docker compose run polland ./manage.py shell_plus -c "cluster, created = Cluster.objects.get_or_create(
+docker compose -f ./dz/docker-compose.yml run polland ./manage.py shell_plus -c 'user = User.objects.get(email="devzero@devzero.io"); user.set_password("123123"); user.save();'
+docker compose -f ./dz/docker-compose.yml run polland ./manage.py shell_plus -c "cluster, created = Cluster.objects.get_or_create(
   cluster_id=1,
   defaults={
       'name': 'minikube',
