@@ -93,9 +93,9 @@ provision:
 
       # Add insecure_registries under [crio.image] if it doesn't exist
       if grep -q "\[crio.image\]" "$CONFIG_FILE"; then
-        sudo sed -i '/\[crio.image\]/a\insecure_registries = ["lima.host.internal:9997"]' "$CONFIG_FILE"
+        sudo sed -i '/\[crio.image\]/a\      insecure_registries = ["host.lima.internal:9997"]' "$CONFIG_FILE"
       else
-        sudo echo -e "\n[crio.image]\ninsecure_registries = [\"lima.host.internal:9997\"]" >> "$CONFIG_FILE"
+        sudo echo -e "\n[crio.image]\n       insecure_registries = [\"host.lima.internal:9997\"]" >> "$CONFIG_FILE"
       fi
       sudo systemctl daemon-reload
       sudo systemctl restart crio
