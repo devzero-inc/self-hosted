@@ -40,4 +40,4 @@ List your workspaces:
 `dz ws list`
 
 After you list your workspace, use the name of the workspace to connect to it (or you can tab into it :D)
-`dz ws connect <WORKSPACE_NAME>
+`dz ws connect <WORKSPACE_NAME>`
