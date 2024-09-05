@@ -43,8 +43,6 @@ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 sudo systemctl daemon-reload
 
 # Switch to the devzero user to continue execution
-sudo chmod 666 /etc/kubernetes/admin.conf
-sudo chmod 666 /etc/kubernetes/kubelet.conf
 minikube start --kubernetes-version=1.29 --driver=none --container-runtime=containerd --cni=bridge --embed-certs
 
 # Allow any user to modify kubeconfig
