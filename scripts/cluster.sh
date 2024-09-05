@@ -20,8 +20,7 @@ install -m 0755 -d /etc/apt/keyrings
 
 # install minikube
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-${arch}
-install minikube-linux-${arch} /usr/local/bin/minikube && rm minikube-linux-${arch}
-sudo ln -s minikube /usr/local/bin/kubectl
+sudo install minikube-linux-${arch} /usr/local/bin/minikube && rm minikube-linux-${arch}
 sudo ln -s /bin/false /usr/local/bin/docker # bug in "none" driver
 sudo mkdir -p /etc/containerd && touch /etc/containerd/config.toml
 
@@ -29,7 +28,7 @@ sudo mkdir -p /etc/containerd && touch /etc/containerd/config.toml
 VERSION="v1.29.0"
 curl -LO https://github.com/kubernetes-sigs/cri-tools/releases/download/$VERSION/crictl-$VERSION-linux-${arch}.tar.gz
 tar -xzvf crictl-$VERSION-linux-${arch}.tar.gz crictl
-install crictl /usr/local/bin/crictl && rm crictl-$VERSION-linux-${arch}.tar.gz crictl
+sudo install crictl /usr/local/bin/crictl && rm crictl-$VERSION-linux-${arch}.tar.gz crictl
 
 # setup cni-plugins
 sudo mkdir -p /opt/cni && sudo ln -s /usr/local/libexec/cni /opt/cni/bin
