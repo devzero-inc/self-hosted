@@ -3,7 +3,7 @@
 OS=$(uname -s)
 
 arch=$(uname -m)
-case $(uname -m) in
+case $arch in
   x86_64)
     arch=amd64
     ;;
@@ -22,7 +22,21 @@ if [ "$OS" = "Darwin" ]; then
   brew install qemu jq lima make kubectl yq
 elif [ "$OS" = "Linux" ]; then
   # id -u devzero &>/dev/null || sudo useradd -m -s /bin/bash devzero && sudo usermod -aG sudo devzero && echo "devzero ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/devzero
-  sudo apt-get install qemu-system jq make -y
+  if [ -x "$(command -v apt-get)" ]; then
+    sudo apt-get update && sudo apt-get install qemu-system jq make yq -y
+  elif [ -x "$(command -v dnf)" ]; then
+    sudo dnf install qemu jq make yq -y
+  elif [ -x "$(command -v yum)" ]; then
+    sudo yum install qemu-kvm jq make yq -y
+  elif [ -x "$(command -v zypper)" ]; then
+    sudo zypper install qemu jq make yq
+  elif [ -x "$(command -v pacman)" ]; then
+    sudo pacman -Sy qemu jq make yq --noconfirm
+  else
+      echo "Unsupported package manager. Please install qemu-system, jq, make, and yq manually."
+      exit 1
+  fi
+
   VERSION=$(curl -fsSL https://api.github.com/repos/lima-vm/lima/releases/latest | jq -r .tag_name)
   curl -fsSL "https://github.com/lima-vm/lima/releases/download/${VERSION}/lima-${VERSION:1}-$(uname -s)-$(uname -m).tar.gz" | sudo tar Cxzvm /usr/local >/dev/null 2>&1
   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$arch/kubectl" >/dev/null 2>&1
