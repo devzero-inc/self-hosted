@@ -34,6 +34,15 @@ sudo install crictl /usr/local/bin/crictl && rm crictl-$VERSION-linux-${arch}.ta
 sudo mkdir -p /opt/cni && sudo ln -s /usr/local/libexec/cni /opt/cni/bin || true
 sudo rm -f /etc/cni/net.d/*.conf*
 
+CNI_PLUGIN_VERSION="v1.5.1"
+CNI_PLUGIN_TAR="cni-plugins-linux-amd64-$CNI_PLUGIN_VERSION.tgz" # change arch if not on amd64
+CNI_PLUGIN_INSTALL_DIR="/opt/cni/bin"
+
+curl -LO "https://github.com/containernetworking/plugins/releases/download/$CNI_PLUGIN_VERSION/$CNI_PLUGIN_TAR"
+sudo mkdir -p "$CNI_PLUGIN_INSTALL_DIR"
+sudo tar -xf "$CNI_PLUGIN_TAR" -C "$CNI_PLUGIN_INSTALL_DIR"
+rm "$CNI_PLUGIN_TAR"
+
 # setup cri-o
 sudo mkdir -p /etc/crio /etc/crio/crio.conf.d && sudo touch /etc/crio/crio.conf.d/02-crio.conf
 
