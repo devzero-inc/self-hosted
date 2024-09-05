@@ -31,7 +31,7 @@ tar -xzvf crictl-$VERSION-linux-${arch}.tar.gz crictl
 sudo install crictl /usr/local/bin/crictl && rm crictl-$VERSION-linux-${arch}.tar.gz crictl
 
 # setup cni-plugins
-sudo mkdir -p /opt/cni && sudo ln -s /usr/local/libexec/cni /opt/cni/bin
+sudo mkdir -p /opt/cni && sudo ln -s /usr/local/libexec/cni /opt/cni/bin || true
 sudo rm -f /etc/cni/net.d/*.conf*
 
 # setup cri-o
