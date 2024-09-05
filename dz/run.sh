@@ -120,7 +120,7 @@ prompt_for_registry_login() {
 
 # Function to start docker-compose and wait until services are up
 start_docker_compose() {
-    docker-compose up -d
+    docker compose up -d
 
     # Wait until the hydra container is healthy
     wait_for_container_healthy() {
@@ -167,7 +167,7 @@ create_and_inject_api_key() {
 check_license_error() {
     if docker logs "$BACKEND_CONTAINER_NAME" 2>&1 | grep -q "$LICENSE_ERROR"; then
         printf "License key validation failed: %s\n" "$LICENSE_ERROR" >&2
-        docker-compose down
+        docker compose down
         exit 1
     fi
 }
@@ -180,11 +180,11 @@ create_cluster_in_poland() {
 
     # Run the commands to set up the cluster in Poland
     printf "Creating devzero user.\n" >&2
-    docker-compose -f ./docker-compose.yml run polland /wait-for-it.sh -- ./manage.py createsuperuser  --email devzero@devzero.io --noinput || true
+    docker compose -f ./docker-compose.yml run polland /wait-for-it.sh -- ./manage.py createsuperuser  --email devzero@devzero.io --noinput || true
     printf "Setting password for superuser.\n" >&2
-    docker-compose -f ./docker-compose.yml run polland ./manage.py shell_plus -c 'user = User.objects.get(email="devzero@devzero.io"); user.set_password("123123"); user.save();' || true
+    docker compose -f ./docker-compose.yml run polland ./manage.py shell_plus -c 'user = User.objects.get(email="devzero@devzero.io"); user.set_password("123123"); user.save();' || true
     printf "Creating cluster object.\n" >&2
-    docker-compose -f ./docker-compose.yml run polland ./manage.py shell_plus -c "
+    docker compose -f ./docker-compose.yml run polland ./manage.py shell_plus -c "
 from django.db.utils import IntegrityError
 from polland.clusters.models.cluster import Cluster
 
@@ -223,14 +223,14 @@ main() {
 
     if is_env_var_set "$API_KEY_VAR" && [[ "$RELOAD" = false ]]; then
         printf "API Key is already set. Skipping API key generation and injection.\n"
-        docker-compose up -d
+        docker compose up -d
     else
         printf "Starting the API key generation and injection process...\n"
-        docker-compose down
+        docker compose down
         start_docker_compose
         create_and_inject_api_key
-        docker-compose down
-        docker-compose up -d
+        docker compose down
+        docker compose up -d
         # Clean up the backup .env file
         rm -f "${ENV_FILE}.bak"
     fi
