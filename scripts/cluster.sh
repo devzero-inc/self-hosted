@@ -21,7 +21,7 @@ install -m 0755 -d /etc/apt/keyrings
 # install minikube
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-${arch}
 sudo install minikube-linux-${arch} /usr/local/bin/minikube && rm minikube-linux-${arch}
-sudo ln -s /bin/false /usr/local/bin/docker # bug in "none" driver
+sudo ln -s /bin/false /usr/local/bin/docker || true # bug in minikube
 sudo mkdir -p /etc/containerd && sudo touch /etc/containerd/config.toml
 
 # install cri-tools
