@@ -8,6 +8,9 @@ images:
   - location: "https://self-hosted.devzero.io/dz-cluster-base-amd64.qcow2"
     arch: "x86_64"
 mounts: []
+portForwards:
+  - guestPort: 8443
+    hostIP: "0.0.0.0"
 provision:
   - mode: user
     script: |
