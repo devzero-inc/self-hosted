@@ -290,12 +290,12 @@ services:
     container_name: api-gateway
     environment:
       ENVIRONMENT: development
-      LISTENER_ENDPOINT: 0.0.0.0:8443
+      LISTENER_ENDPOINT: 0.0.0.0:8445
       BACKEND_URL: http://backend:8444
       VAULTED_AUTH_PUBLIC_KEY: ${PUBLIC_KEY}
     ports:
-      - 8443:8443
-      - 8831:8443
+      - 8445:8445
+      - 8831:8445
     networks:
       - backend
       - frontend
@@ -305,8 +305,8 @@ services:
     container_name: devzero-website
     environment:
       NEXT_AUTH_JWT_SIGNING_PRIV_KEY: ${PRIVATE_KEY}
-      API_BASE_URL: "http://api-gateway:8443/api/v0"
-      API_BASE_URL_V2: "http://api-gateway:8443/backend/v0"
+      API_BASE_URL: "http://api-gateway:8445/api/v0"
+      API_BASE_URL_V2: "http://api-gateway:8445/backend/v0"
       AUTH0_BASE_URL: "https://www.devzero.io"
       NEXT_PUBLIC_BYPASS_AUTH0_FLOW: "true"
       NEXTAUTH_SECRET: "testingindev"
@@ -345,6 +345,7 @@ services:
     depends_on:
       - hydra-db
     environment:
+      - HEADSCALE_DERP_SERVER_ENABLED=true
       - HEADSCALE_DATABASE_TYPE=postgres
       - HEADSCALE_DATABASE_POSTGRES_SSL=true
       - HEADSCALE_DATABASE_POSTGRES_HOST=hydra-db

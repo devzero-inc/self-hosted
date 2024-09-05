@@ -175,14 +175,30 @@ check_license_error() {
 # Function to create the cluster in Poland
 create_cluster_in_poland() {
     # Extract data from the kubeconfig file
-    certificate_authority_data=$(cat "$KUBECONFIG_FILE" | yq e '.clusters[0].cluster."certificate-authority-data"' -)
-    token=$(kubectl get secret devzero-sa0-token -n default -o jsonpath='{.data.token}' --kubeconfig "$KUBECONFIG_FILE" | base64 -d)
+    local certificate_authority_data token
+    certificate_authority_data=$(yq e '.clusters[0].cluster."certificate-authority-data"' "$KUBECONFIG_FILE")
+    
+    if ! token=$(kubectl get secret devzero-sa0-token -n default -o jsonpath='{.data.token}' --kubeconfig "$KUBECONFIG_FILE" | base64 -d); then
+        printf "Failed to retrieve service account token.\n" >&2
+        return 1
+    fi
+
+    # Determine the correct server based on the OS
+    local server_address
+    if [[ "$(uname)" == "Darwin" ]]; then
+        server_address="https://host.docker.internal:8443"
+    else
+        # Assuming Linux will use 172.17.0.1, you can adjust this IP if needed
+        server_address="https://172.17.0.1:8443"
+    fi
 
     # Run the commands to set up the cluster in Poland
     printf "Creating devzero user.\n" >&2
-    docker compose -f ./docker-compose.yml run polland /wait-for-it.sh -- ./manage.py createsuperuser  --email devzero@devzero.io --noinput || true
+    docker compose -f ./docker-compose.yml run polland /wait-for-it.sh -- ./manage.py createsuperuser --email devzero@devzero.io --noinput || true
+    
     printf "Setting password for superuser.\n" >&2
     docker compose -f ./docker-compose.yml run polland ./manage.py shell_plus -c 'user = User.objects.get(email="devzero@devzero.io"); user.set_password("123123"); user.save();' || true
+    
     printf "Creating cluster object.\n" >&2
     docker compose -f ./docker-compose.yml run polland ./manage.py shell_plus -c "
 from django.db.utils import IntegrityError
@@ -194,7 +210,7 @@ try:
         defaults={
             'name': 'minikube',
             'certificate_authority_data': \"$certificate_authority_data\",
-            'server': 'https://host.docker.internal:8443',
+            'server': \"$server_address\",
             'service_account_name': 'devzero-sa0',
             'service_account_token': \"$token\",
             'slug': 'minikube'
@@ -203,7 +219,7 @@ try:
     if not created:
         cluster.name = 'minikube'
         cluster.certificate_authority_data = \"$certificate_authority_data\"
-        cluster.server = 'https://host.docker.internal:8443'
+        cluster.server = \"$server_address\"
         cluster.service_account_name = 'devzero-sa0'
         cluster.service_account_token = \"$token\"
         cluster.slug = 'minikube'
