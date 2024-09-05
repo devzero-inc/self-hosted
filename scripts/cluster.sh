@@ -218,3 +218,23 @@ kind: ClusterRole
 name: cluster-admin
 EOF
 kubectl apply -f service-account.yaml
+
+while true; do
+  output=$(kubectl get pods -A)
+
+  # Check if the output is empty
+  if [ -z "$output" ]; then
+    echo "No pods found!"
+    sleep 5  # Wait for 5 seconds before retrying
+    continue  # Retry the loop
+  fi
+
+  # Check if any pod is not in Running status
+  if echo "$output" | grep -v -E 'Running|STATUS'; then
+    echo "One or more pods are not in Running status!"
+    sleep 5  # Wait for 5 seconds before retrying
+  else
+    echo "All pods are in Running status!"
+    break  # Exit the loop once all pods are Running
+  fi
+done
