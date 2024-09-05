@@ -24,7 +24,6 @@ if [ "$OS" = "Darwin" ]; then
   fi
   brew install qemu jq lima make kubectl yq
 elif [ "$OS" = "Linux" ]; then
-  # id -u devzero &>/dev/null || sudo useradd -m -s /bin/bash devzero && sudo usermod -aG sudo devzero && echo "devzero ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/devzero
   if [ -x "$(command -v apt-get)" ]; then
     sudo apt-get update && sudo apt-get install qemu-system jq make yq -y
   elif [ -x "$(command -v dnf)" ]; then

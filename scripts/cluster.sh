@@ -13,6 +13,13 @@ aarch64)
     ;;
 esac
 
+if ! command -v apt-get >/dev/null 2>&1; then
+  echo "Error: 'apt-get' is not available on this system."
+  echo "The devzero data plane installation requires a Debian-based system (e.g., Ubuntu) with 'apt-get'."
+  echo "Alternatively, install on a system that supports the KVM kernel module for KVM-based installation."
+  exit 1
+fi
+
 # install prerequisites
 sudo apt-get update -y 
 sudo apt-get install iptables conntrack apt-transport-https gpg ca-certificates curl wget jq conmon -y
