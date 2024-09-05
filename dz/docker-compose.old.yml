@@ -46,8 +46,10 @@ services:
     networks:
       - polland-internal
 
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/polland:self-hosted-arm-base-2024-08-29--12-35--cd0517747f97-dirty 
   polland: &polland
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/polland:self-hosted-base-2024-09-05--11-31--d94d90557be2-dirty
+    #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/polland:self-hosted-arm-base-2024-08-29--21-08--864a05d7e43d-dirty
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/polland:self-hosted-arm-base-2024-08-30--13-25--faff35b44be8-dirty 
     command: "/wait-for-it.sh -- /start"
     container_name: polland_django
     stdin_open: true # for ipdb
@@ -78,7 +80,6 @@ services:
       VAULT_TOKEN: "root"
       DOCKER_REGISTRY: "registry-server:5000"
       SELF_HOSTED: True
-      ARCH: ${ARCH}
     ports:
       - 8000:8000
       - 8999:8000
@@ -129,7 +130,6 @@ services:
       VAULT_TOKEN: "root"
       DOCKER_REGISTRY: "registry-server:5000"
       SELF_HOSTED: True
-      ARCH: ${ARCH}
     ports: []
     command: /start-celeryworker
     networks:
@@ -197,8 +197,9 @@ services:
       - backend
     command: "--port 9990 --redis-addr=backend-redis:6379"
 
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-arm-base-2024-08-29--12-00--cd0517747f97-dirty
   backend:
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-base-2024-09-05--12-40--dd252f14ff3c-dirty
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-arm-base-2024-08-29--14-44--864a05d7e43d-dirty 
     container_name: backend
     depends_on:
       backend-redis:
@@ -206,7 +207,6 @@ services:
       mongodb:
         condition: service_healthy
     environment:
-      ARCH: ${ARCH}
       CONFIG_FILENAME: development
       ENVIRONMENT: development
       INFLUXDB_URL: http://influxdb:8086
@@ -215,20 +215,21 @@ services:
       POLLAND_URL: http://polland:8000/
       MONGODB_URL: mongodb://mongodb:27017
       REDIS_URL: redis://backend-redis:6379
-      DEFAULT_DZ_BASE_IMAGE_TAG: ${DEVBOX_IMAGE_TAG}
+      DEFAULT_DZ_BASE_IMAGE_TAG: "base-2024-08-28--12-12--9f59e629cf18-dirty"
       CONTROL_PLANE_URL: http://host.lima.internal:8831
       HYDRA_URL: http://hydra:8181
       HYDRA_API_KEY: ${HYDRA_API_KEY}
       LICENSE_KEY: ${LICENSE_KEY}
       SELF_HOSTED: true
-      JWT_PRIVATE_KEY: ${PRIVATE_KEY}
+      JWT_PRIVATE_KEY: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBck5paU5xcUtHaU1RNFdCNjhxemNpRVBnK1dOaFpoMjdabjVRNU8rbVhCMlNnNjBCCnNRd2JmWGd5UGJ4ckU1VlZGMHZ6SzZ4ZFlGblRxZXA2a0tXVURuYUJuczljN2R1T0huVTByaGxOTGt0d0ZDb2sKcHJKNFVwUUNWZDYzajBvZ0lBUzhHKzJrVFdMS09rLzBKUVdUTlY0Umx1cHdMMFFWd0ZteWxuSFBaU1IraVBZdwpsOEZKcllKWVYrZzZ3RXYxQit4RVdHek1tU1F6QlJKRFZJNjhhS1dGdVJCZ1UvWTVHTDFHQ21sRXZna3RFc29WCjFhZVpqcExIdmJUSVo4Tk1rVUNBMDdheG1RQUJoeURmTFNBaVg4S3k0VjZ3UmRMN2NNQitIQm8yTktMQjRzMG8KZEFobUt0L0xBTjBVODRWdXgvZXZXSDBFa2dWTjlabVdLb2J4RHdJREFRQUJBb0lCQVFDU3hwTlpJSkNOaVdGNApRVm1tWWF3VCtyQThsbXZMTDB4SHlOUWcxSERNb0VBZW1QZHF4UUZERnFKelVtRUxEREJwekJEKzhTdUorajJICmVKb0Q0dGRMUU03cGNPVlZCckEwcFFyTEhLa3h1dFcrQ2R0OXd1ZnlGOFd6N2FDcWlTT21qTjdBU0pqUkxpYlUKUmJqcEIwYnVkcWN4Skh1SFo2V2c1WXFGdnJlREJvaG4weG5FVkd5c2lwVGREc3hoUWZ3Yk5sdkMxc1JrbHlBMQpjVGdoMS84UE5TQytIU0FpVjE4aWhQVDh2UjQ0V2NXQ3k0QmFCZkJqbkloRGZFL2J3Z2NSUGg4Y0lGR1B0VFNMCkJsMWtPeUc4R2pPTG5jMHpFRmVGSVF5VmZtdDYvTXB6enRtMVFqOXpkMnh3Y1ExSkNDZExESDdmWEFmRzFGTzkKdGZsZVprY2hBb0dCQU9FbU9DKytjbE9nQUQ5bW5KRGlRejRDeExMTG9HMVZncHRNQWw2SDhaeG93b0NheFFRMQpBQStkM2ZPVXJ3TzFsU2IwUDFQNDBBL252QVIxZ2IwRVJSNlE0d0tBVnovQWp2REh1QUM0SjU0enZncHlhTzBDCmhQUllhdzVnYmFSYk4rQWx4SDNmWXhiaUx0dUNFTitoOFluOE5lbmJwU0J2WVFxVzBSSDR6RGlGQW9HQkFNU0gKdW9TMHo2RE5CUGgzMXAwNTZiM0pMV3lydDVvY1MwcnYxUjNoYkhQam11Ulo4Rk1OV3VDTlJhRHlYQi9IQVJhdApQNHF4T1NoRmY1Vjc5TU5vUktxZzNRcUJZQ2VRZDJBZjNpWW1abTNmNWI5Wi93T2tCdHpnNlA4OTZnN29jdmlnCkZhWlpIeXVHVmlacmkxdkltZDlNU0VSYlVzNjVEOGdCdzFtbXo0R0RBb0dCQUozNDhnMVZ3K08yN05XUFNxVkIKakVxVEtLNEd2NTVYRkJlZ2dqMFBoMC9tRlNxazdUMWhicFNHZ0xlcWlBM0ROMDZvcTFKZ3pxT0tSZHFmRkJPcQpUbEQrK2JqRWtmTXlTVmpaMk5ud1hDUGRUQ2NLVldLT2xQalluT3p1YlorWFBTSXhmYWVQdUhmUzVXdXcyK1A5ClBYdENraFZ1dm5KK2s0a1pmc0hzWG1YOUFvR0FOMVBHckttQ2NsQ0ZmN1d0RTZKRUxZdS9ZQUtQczdFWGVVYy8KaGlQNk5qM3pVeW9Hd0RyWVJMTkEwT2lxQ3NBcGpFckZ3clBWMVlLTFFuZ2RGZzM2bHRhbW85aDhTMmNlVkU5awphUFVTalFnbFU5TndPWVFwOG5EVzUxUjAyakdTZkhBRTZFbmF2cFFaR01QWi9jTGhucjJJOHNXSzhHdWxCN2VICldXdmVxeVVDZ1lFQXAwY0JBcUpEQzVPTFRYZHRUYkJYaW8zaHhnSktuTmIxVnROZzFpcXY2Q1lYVlBtQjFaT3cKUHB6bm5GSE5UVDhtLzhXbVBHMEkyZi84Ni9WWUUzTlYrdDZpZFRDK2g0S1NUQVlrUG55YmdKc1BLcjNyVFZ2UwpWK0dXWHhjb1VLZWZCaGkzTDN4SEcrNmxDbW5ldkNTdW03NjRhSEJkc2JTdTZBUWtldEpuNFN3PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ=="
     ports:
       - 8444:8444
     networks:
       - backend
 
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/buildqd:self-hosted-arm-base-2024-08-29--12-24--cd0517747f97-dirty
   buildqd:
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/buildqd:self-hosted-base-2024-09-05--09-00--b3f4b47bdd67-dirty
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/buildqd:self-hosted-arm-base-2024-08-29--12-24--cd0517747f97-dirty
     container_name: buildqd
     environment:
       REDIS_ADDRESS: polland-redis:6379
@@ -263,8 +264,9 @@ services:
     networks:
       - logsrv-internal
 
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/logsrv:self-hosted-arm-base-2024-08-29--12-02--cd0517747f97-dirty
   logsrv:
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/logsrv:self-hosted-base-2024-09-05--08-57--b3f4b47bdd67-dirty
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/logsrv:self-hosted-arm-base-2024-08-29--12-02--cd0517747f97-dirty
     container_name: logsrv
     depends_on:
       - logsrv-postgres
@@ -278,21 +280,22 @@ services:
       USE_FAKE_DB: false 
       USE_FAKE_QUEUE: false 
       USE_FAKE_AUTH_MIDDLEWARE: false 
-      VAULTED_AUTH_PUBLIC_KEY: ${PUBLIC_KEY}
+      VAULTED_AUTH_PUBLIC_KEY: "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFyTmlpTnFxS0dpTVE0V0I2OHF6YwppRVBnK1dOaFpoMjdabjVRNU8rbVhCMlNnNjBCc1F3YmZYZ3lQYnhyRTVWVkYwdnpLNnhkWUZuVHFlcDZrS1dVCkRuYUJuczljN2R1T0huVTByaGxOTGt0d0ZDb2twcko0VXBRQ1ZkNjNqMG9nSUFTOEcrMmtUV0xLT2svMEpRV1QKTlY0Umx1cHdMMFFWd0ZteWxuSFBaU1IraVBZd2w4RkpyWUpZVitnNndFdjFCK3hFV0d6TW1TUXpCUkpEVkk2OAphS1dGdVJCZ1UvWTVHTDFHQ21sRXZna3RFc29WMWFlWmpwTEh2YlRJWjhOTWtVQ0EwN2F4bVFBQmh5RGZMU0FpClg4S3k0VjZ3UmRMN2NNQitIQm8yTktMQjRzMG9kQWhtS3QvTEFOMFU4NFZ1eC9ldldIMEVrZ1ZOOVptV0tvYngKRHdJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t"
     ports:
       - 8442:8442
     networks:
       - frontend
       - logsrv-internal
 
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/api-gateway:self-hosted-arm-base-2024-08-29--11-58--cd0517747f97-dirty
   api-gateway:
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/api-gateway:self-hosted-base-2024-09-05--08-49--b3f4b47bdd67-dirty
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/api-gateway:self-hosted-arm-base-2024-08-29--11-58--cd0517747f97-dirty
     container_name: api-gateway
     environment:
       ENVIRONMENT: development
       LISTENER_ENDPOINT: 0.0.0.0:8443
       BACKEND_URL: http://backend:8444
-      VAULTED_AUTH_PUBLIC_KEY: ${PUBLIC_KEY}
+      VAULTED_AUTH_PUBLIC_KEY: "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFyTmlpTnFxS0dpTVE0V0I2OHF6YwppRVBnK1dOaFpoMjdabjVRNU8rbVhCMlNnNjBCc1F3YmZYZ3lQYnhyRTVWVkYwdnpLNnhkWUZuVHFlcDZrS1dVCkRuYUJuczljN2R1T0huVTByaGxOTGt0d0ZDb2twcko0VXBRQ1ZkNjNqMG9nSUFTOEcrMmtUV0xLT2svMEpRV1QKTlY0Umx1cHdMMFFWd0ZteWxuSFBaU1IraVBZd2w4RkpyWUpZVitnNndFdjFCK3hFV0d6TW1TUXpCUkpEVkk2OAphS1dGdVJCZ1UvWTVHTDFHQ21sRXZna3RFc29WMWFlWmpwTEh2YlRJWjhOTWtVQ0EwN2F4bVFBQmh5RGZMU0FpClg4S3k0VjZ3UmRMN2NNQitIQm8yTktMQjRzMG9kQWhtS3QvTEFOMFU4NFZ1eC9ldldIMEVrZ1ZOOVptV0tvYngKRHdJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t"
     ports:
       - 8443:8443
       - 8831:8443
@@ -300,11 +303,14 @@ services:
       - backend
       - frontend
 
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/devzero-website:self-hosted-armbase-2024-08-29--13-09--f2d2c8c897eb-dirty 
   devzero-website:
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/devzero-website:self-hosted-base-2024-09-05--10-25--ea407c8248bd-dirty
+    #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/devzero-website:self-hosted-armbase-2024-08-29--23-52--963504921784-dirty 
+    #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/devzero-website:self-hosted-armbase-2024-08-30--00-26--b951754d978e
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/devzero-website:self-hosted-armbase-2024-08-30--14-14--b951754d978e-dirty
     container_name: devzero-website
     environment:
-      NEXT_AUTH_JWT_SIGNING_PRIV_KEY: ${PRIVATE_KEY}
+      NEXT_AUTH_JWT_SIGNING_PRIV_KEY: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBck5paU5xcUtHaU1RNFdCNjhxemNpRVBnK1dOaFpoMjdabjVRNU8rbVhCMlNnNjBCCnNRd2JmWGd5UGJ4ckU1VlZGMHZ6SzZ4ZFlGblRxZXA2a0tXVURuYUJuczljN2R1T0huVTByaGxOTGt0d0ZDb2sKcHJKNFVwUUNWZDYzajBvZ0lBUzhHKzJrVFdMS09rLzBKUVdUTlY0Umx1cHdMMFFWd0ZteWxuSFBaU1IraVBZdwpsOEZKcllKWVYrZzZ3RXYxQit4RVdHek1tU1F6QlJKRFZJNjhhS1dGdVJCZ1UvWTVHTDFHQ21sRXZna3RFc29WCjFhZVpqcExIdmJUSVo4Tk1rVUNBMDdheG1RQUJoeURmTFNBaVg4S3k0VjZ3UmRMN2NNQitIQm8yTktMQjRzMG8KZEFobUt0L0xBTjBVODRWdXgvZXZXSDBFa2dWTjlabVdLb2J4RHdJREFRQUJBb0lCQVFDU3hwTlpJSkNOaVdGNApRVm1tWWF3VCtyQThsbXZMTDB4SHlOUWcxSERNb0VBZW1QZHF4UUZERnFKelVtRUxEREJwekJEKzhTdUorajJICmVKb0Q0dGRMUU03cGNPVlZCckEwcFFyTEhLa3h1dFcrQ2R0OXd1ZnlGOFd6N2FDcWlTT21qTjdBU0pqUkxpYlUKUmJqcEIwYnVkcWN4Skh1SFo2V2c1WXFGdnJlREJvaG4weG5FVkd5c2lwVGREc3hoUWZ3Yk5sdkMxc1JrbHlBMQpjVGdoMS84UE5TQytIU0FpVjE4aWhQVDh2UjQ0V2NXQ3k0QmFCZkJqbkloRGZFL2J3Z2NSUGg4Y0lGR1B0VFNMCkJsMWtPeUc4R2pPTG5jMHpFRmVGSVF5VmZtdDYvTXB6enRtMVFqOXpkMnh3Y1ExSkNDZExESDdmWEFmRzFGTzkKdGZsZVprY2hBb0dCQU9FbU9DKytjbE9nQUQ5bW5KRGlRejRDeExMTG9HMVZncHRNQWw2SDhaeG93b0NheFFRMQpBQStkM2ZPVXJ3TzFsU2IwUDFQNDBBL252QVIxZ2IwRVJSNlE0d0tBVnovQWp2REh1QUM0SjU0enZncHlhTzBDCmhQUllhdzVnYmFSYk4rQWx4SDNmWXhiaUx0dUNFTitoOFluOE5lbmJwU0J2WVFxVzBSSDR6RGlGQW9HQkFNU0gKdW9TMHo2RE5CUGgzMXAwNTZiM0pMV3lydDVvY1MwcnYxUjNoYkhQam11Ulo4Rk1OV3VDTlJhRHlYQi9IQVJhdApQNHF4T1NoRmY1Vjc5TU5vUktxZzNRcUJZQ2VRZDJBZjNpWW1abTNmNWI5Wi93T2tCdHpnNlA4OTZnN29jdmlnCkZhWlpIeXVHVmlacmkxdkltZDlNU0VSYlVzNjVEOGdCdzFtbXo0R0RBb0dCQUozNDhnMVZ3K08yN05XUFNxVkIKakVxVEtLNEd2NTVYRkJlZ2dqMFBoMC9tRlNxazdUMWhicFNHZ0xlcWlBM0ROMDZvcTFKZ3pxT0tSZHFmRkJPcQpUbEQrK2JqRWtmTXlTVmpaMk5ud1hDUGRUQ2NLVldLT2xQalluT3p1YlorWFBTSXhmYWVQdUhmUzVXdXcyK1A5ClBYdENraFZ1dm5KK2s0a1pmc0hzWG1YOUFvR0FOMVBHckttQ2NsQ0ZmN1d0RTZKRUxZdS9ZQUtQczdFWGVVYy8KaGlQNk5qM3pVeW9Hd0RyWVJMTkEwT2lxQ3NBcGpFckZ3clBWMVlLTFFuZ2RGZzM2bHRhbW85aDhTMmNlVkU5awphUFVTalFnbFU5TndPWVFwOG5EVzUxUjAyakdTZkhBRTZFbmF2cFFaR01QWi9jTGhucjJJOHNXSzhHdWxCN2VICldXdmVxeVVDZ1lFQXAwY0JBcUpEQzVPTFRYZHRUYkJYaW8zaHhnSktuTmIxVnROZzFpcXY2Q1lYVlBtQjFaT3cKUHB6bm5GSE5UVDhtLzhXbVBHMEkyZi84Ni9WWUUzTlYrdDZpZFRDK2g0S1NUQVlrUG55YmdKc1BLcjNyVFZ2UwpWK0dXWHhjb1VLZWZCaGkzTDN4SEcrNmxDbW5ldkNTdW03NjRhSEJkc2JTdTZBUWtldEpuNFN3PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ=="
       API_BASE_URL: "http://api-gateway:8443/api/v0"
       API_BASE_URL_V2: "http://api-gateway:8443/backend/v0"
       AUTH0_BASE_URL: "https://www.devzero.io"
@@ -331,8 +337,9 @@ services:
     networks:
       - hydra
 
+  # 056855531191.dkr.ecr.us-west-2.amazonaws.com/hydra:self-hosted-arm-base-2024-08-29--11-40--dcaa60efb438-dirty
   hydra:
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/hydra:self-hosted-base-2024-09-05--09-25--1e367a8a8682-dirty
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/hydra:self-hosted-arm-base-2024-08-29--11-40--dcaa60efb438-dirty
     container_name: hydra
     ports:
       - "8181:8181"

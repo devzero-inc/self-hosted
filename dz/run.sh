@@ -5,6 +5,8 @@ set -euo pipefail
 DOCKER_COMPOSE_FILE="docker-compose.yml"
 ENV_FILE=".env"
 EXAMPLE_ENV_FILE=".env.example"
+ARM_ENV_FILE=".env.arm64"
+AMD_ENV_FILE=".env.amd64"
 CONTAINER_NAME="hydra"
 API_KEY_VAR="HYDRA_API_KEY"
 LICENSE_KEY_VAR="LICENSE_KEY"
@@ -30,13 +32,30 @@ if [[ ! -f "$DOCKER_COMPOSE_FILE" ]]; then
     exit 1
 fi
 
-# Ensure that .env file exists, if not, copy .env.example to .env
-if [[ ! -f "$ENV_FILE" ]]; then
-    if [[ -f "$EXAMPLE_ENV_FILE" ]]; then
+# Detect system architecture (arm64 or amd64)
+ARCH=$(uname -m)
+if [[ "$ARCH" == "x86_64" || "$ARCH" == "amd64" ]]; then
+    ARCH_ENV_FILE="$AMD_ENV_FILE"
+elif [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
+    ARCH_ENV_FILE="$ARM_ENV_FILE"
+else
+    printf "Unsupported architecture: %s\n" "$ARCH" >&2
+    exit 1
+fi
+
+# Check if .env file exists, skip copying if it does
+if [[ -f "$ENV_FILE" ]]; then
+    printf "%s already exists. Skipping copy.\n" "$ENV_FILE"
+else
+    # Ensure that the appropriate architecture-specific .env file exists, and copy it to .env
+    if [[ -f "$ARCH_ENV_FILE" ]]; then
+        cp "$ARCH_ENV_FILE" "$ENV_FILE"
+        printf "Copied %s to %s\n" "$ARCH_ENV_FILE" "$ENV_FILE"
+    elif [[ -f "$EXAMPLE_ENV_FILE" ]]; then
         cp "$EXAMPLE_ENV_FILE" "$ENV_FILE"
         printf "Copied %s to %s\n" "$EXAMPLE_ENV_FILE" "$ENV_FILE"
     else
-        printf "Neither %s nor %s found. Exiting.\n" "$ENV_FILE" "$EXAMPLE_ENV_FILE" >&2
+        printf "Neither %s nor %s found. Exiting.\n" "$ARCH_ENV_FILE" "$EXAMPLE_ENV_FILE" >&2
         exit 1
     fi
 fi
