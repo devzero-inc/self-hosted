@@ -18,7 +18,6 @@ sudo apt-get update -y
 sudo apt-get install iptables conntrack apt-transport-https gpg ca-certificates curl wget jq conmon -y
 install -m 0755 -d /etc/apt/keyrings
 
-
 # Add Docker's official GPG key:
 sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -30,6 +29,15 @@ $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
 sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update -y
 sudo apt-get install docker-ce docker-ce-cli containerd.io -y
+
+# Path to the containerd configuration file
+CONFIG_FILE="/etc/containerd/config.toml"
+
+# Use sed to remove the line containing 'disabled_plugins = ["cri"]'
+sed -i '/disabled_plugins = \["cri"\]/d' "$CONFIG_FILE"
+
+# Restart containerd to apply the changes
+sudo systemctl restart containerd
 
 # install minikube
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-${arch}
