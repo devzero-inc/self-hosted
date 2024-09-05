@@ -34,7 +34,7 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 CONFIG_FILE="/etc/containerd/config.toml"
 
 # Use sed to remove the line containing 'disabled_plugins = ["cri"]'
-sed -i '/disabled_plugins = \["cri"\]/d' "$CONFIG_FILE"
+sudo sed -i '/disabled_plugins = \["cri"\]/d' "$CONFIG_FILE"
 
 # Restart containerd to apply the changes
 sudo systemctl restart containerd
