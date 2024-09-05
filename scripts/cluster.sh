@@ -18,6 +18,19 @@ sudo apt-get update -y
 sudo apt-get install iptables conntrack apt-transport-https gpg ca-certificates curl wget jq conmon -y
 install -m 0755 -d /etc/apt/keyrings
 
+
+# Add Docker's official GPG key:
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+echo \
+"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+$(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
 # install minikube
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-${arch}
 sudo install minikube-linux-${arch} /usr/local/bin/minikube && rm minikube-linux-${arch}
@@ -31,6 +44,7 @@ tar -xzvf crictl-$VERSION-linux-${arch}.tar.gz crictl
 sudo install crictl /usr/local/bin/crictl && rm crictl-$VERSION-linux-${arch}.tar.gz crictl
 
 # setup cni-plugins
+sudo rm -f /etc/cni/net.d/*.conf*
 CNI_PLUGIN_VERSION="v1.5.1"
 CNI_PLUGIN_TAR="cni-plugins-linux-amd64-$CNI_PLUGIN_VERSION.tgz" # change arch if not on amd64
 CNI_PLUGIN_INSTALL_DIR="/opt/cni/bin"
