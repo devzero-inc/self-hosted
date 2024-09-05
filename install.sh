@@ -2,6 +2,9 @@
 
 OS=$(uname -s)
 
+# Determine the script directory
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
 arch=$(uname -m)
 case $arch in
   x86_64)
@@ -61,22 +64,25 @@ else
 fi
 echo "Dependencies installed."
 
-# Copy credentials to the correct location
-echo "Copying credentials..."
-mkdir -p ~/.lima ~/.lima/_config
-cp -r ./keys ~/.lima/_config
-chmod 400 ~/.lima/_config/user
-echo "Credentials copied."
+if [[ "$OS" == "Linux" ]] && ! sudo kvm-ok >/dev/null 2>&1; then
+  echo "Starting the cluster..."
+  /bin/bash $SCRIPT_DIR/scripts/cluster.sh
+  echo "Data plane started."
+else
+  # Copy credentials to the correct location
+  echo "Copying credentials..."
+  mkdir -p ~/.lima ~/.lima/_config
+  cp ./keys/* ~/.lima/_config
+  chmod 400 ~/.lima/_config/user
+  echo "Credentials copied."
 
-# Start the VM
-echo "Starting the cluster..."
-limactl create dz_cluster.yaml --tty=false
-limactl start dz_cluster
-limactl shell dz_cluster -- sudo -i -u devzero cat .kube/config | tail -n +2 | sed -e 's|server:.*|server: https://127.0.0.1:8443|' > kubeconfig
-echo "Data plane started."
-
-# Determine the script directory
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  # Start the VM
+  echo "Starting the cluster..."
+  limactl create dz_cluster.yaml --tty=false
+  limactl start dz_cluster
+  limactl shell dz_cluster -- sudo -i -u devzero cat .kube/config | tail -n +2 | sed -e 's|server:.*|server: https://127.0.0.1:8443|' > kubeconfig
+  echo "Data plane started."
+fi
 
 # Set the working directory to the script directory
 cd "$SCRIPT_DIR/dz"
