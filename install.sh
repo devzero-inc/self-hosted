@@ -37,12 +37,24 @@ elif [ "$OS" = "Linux" ]; then
       exit 1
   fi
 
-  VERSION=$(curl -fsSL https://api.github.com/repos/lima-vm/lima/releases/latest | jq -r .tag_name)
-  curl -fsSL "https://github.com/lima-vm/lima/releases/download/${VERSION}/lima-${VERSION:1}-$(uname -s)-$(uname -m).tar.gz" | sudo tar Cxzvm /usr/local >/dev/null 2>&1
+  # Check if KVM is supported
+  if sudo kvm-ok >/dev/null 2>&1; then
+    # Install Lima if KVM is supported
+    VERSION=$(curl -fsSL https://api.github.com/repos/lima-vm/lima/releases/latest | jq -r .tag_name)
+    curl -fsSL "https://github.com/lima-vm/lima/releases/download/${VERSION}/lima-${VERSION:1}-$(uname -s)-$(uname -m).tar.gz" | sudo tar Cxzvm /usr/local >/dev/null 2>&1
+    
+    # Change permissions for /dev/kvm and add user to kvm group
+    sudo chmod 666 /dev/kvm >/dev/null 2>&1 || true
+    sudo usermod -a -G kvm $USER >/dev/null 2>&1 || true
+  else
+    # Install Minikube if KVM is not supported
+    curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-$arch
+    sudo install minikube-linux-$arch /usr/local/bin/minikube && rm minikube-linux-$arch
+  fi
+
+  # Install kubectl
   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$arch/kubectl" >/dev/null 2>&1
   sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl >/dev/null 2>&1 && rm kubectl
-  sudo chmod 666 /dev/kvm >/dev/null 2>&1 || true
-  sudo usermod -a -G kvm $USER >/dev/null 2>&1 || true
 else
   echo "Unsupported OS $OS"
   exit 1
