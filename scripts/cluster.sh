@@ -248,7 +248,7 @@ EOF
   done
 
   echo "Cluster setup complete!" 
-  mkdir -p /etc/devzero && touch /etc/devzero/CLUSTER_SETUP
+  sudo mkdir -p /etc/devzero && sudo touch /etc/devzero/CLUSTER_SETUP
 else
   minikube start --driver=none --container-runtime=cri-o --kubernetes-version=v1.29.0 --cni=bridge --embed-certs --extra-config=kubeadm.node-name=minikube --extra-config=kubelet.hostname-override=minikube
 fi
