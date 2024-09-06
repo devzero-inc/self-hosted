@@ -136,10 +136,10 @@ cat <<EOF > generic-device-plugin.yaml
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  labels:
-    app.kubernetes.io/name: generic-device-plugin
   name: generic-device-plugin
   namespace: kube-system
+  labels:
+    app.kubernetes.io/name: generic-device-plugin
 spec:
   selector:
     matchLabels:
@@ -148,44 +148,48 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: generic-device-plugin
-    spec:
-      containers:
-      - args:
-        - --device
-        image: ghcr.io/squat/generic-device-plugin:${arch}-36bfc606bba2064de6ede0ff2764cbb52edff70d
-        name: generic-device-plugin
-        ports:
-        - containerPort: 8080
-          name: http
-        resources:
-          limits:
-            cpu: 50m
-            memory: 20Mi
-          requests:
-            cpu: 50m
-            memory: 10Mi
-        volumeMounts:
-        - mountPath: /var/lib/kubelet/device-plugins
-          name: device-plugin
-        - mountPath: /dev
-          name: dev
-      nodeSelector:
-        node-role.kubernetes.io/devpod-node: "1"
-      priorityClassName: system-node-critical
-      tolerations:
-      - effect: NoExecute
-        operator: Exists
-      - effect: NoSchedule
-        operator: Exists
-      volumes:
-      - hostPath:
-          path: /var/lib/kubelet/device-plugins
-        name: device-plugin
-      - hostPath:
-          path: /dev
-        name: dev
+      spec:
+        priorityClassName: system-node-critical
+        nodeSelector:
+          node-role.kubernetes.io/devpod-node: "1"
+        tolerations:
+          - operator: "Exists"
+            effect: "NoExecute"
+          - operator: "Exists"
+            effect: "NoSchedule"
+        containers:
+          - image: ghcr.io/squat/generic-device-plugin:${arch}-36bfc606bba2064de6ede0ff2764cbb52edff70d
+            args:
+              - --device
+            name: tuntap
+            groups:
+              - count: 999
+                paths:
+                  - path: /dev/net/tun
+            name: generic-device-plugin
+            resources:
+            requests:
+              cpu: 50m
+              memory: 10Mi
+            limits:
+              cpu: 50m
+              memory: 20Mi
+            ports:
+              - containerPort: 8080
+                name: http
+                volumeMounts:
+              - name: device-plugin
+                mountPath: /var/lib/kubelet/device-plugins
+              - name: dev
+                mountPath: /dev
+        volumes:
+          - name: device-plugin
+            hostPath:
+            path: /var/lib/kubelet/device-plugins
+          - name: dev
+            hostPath:
+            path: /dev
   updateStrategy:
-    type: RollingUpdate
 EOF
 kubectl apply -f generic-device-plugin.yaml
 
