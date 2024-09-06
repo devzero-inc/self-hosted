@@ -120,111 +120,111 @@ if [ ! -f /etc/devzero/CLUSTER_SETUP ]; then
 
   # add fake gp2 storage class
   cat <<EOF > storage-class.yaml
-  apiVersion: storage.k8s.io/v1
-  kind: StorageClass
-  metadata:
-    name: gp2
-    labels:
-      addonmanager.kubernetes.io/mode: EnsureExists
-    annotations:
-      storageclass.kubernetes.io/is-default-class: "true"
-  provisioner: k8s.io/minikube-hostpath
-  EOF
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp2
+  labels:
+    addonmanager.kubernetes.io/mode: EnsureExists
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: k8s.io/minikube-hostpath
+EOF
   kubectl apply -f storage-class.yaml
 
-  # add generic device plugin
-  cat <<EOF > generic-device-plugin.yaml
-  apiVersion: apps/v1
-  kind: DaemonSet
-  metadata:
-    name: generic-device-plugin
-    namespace: kube-system
-    labels:
+# add generic device plugin
+cat <<EOF > generic-device-plugin.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: generic-device-plugin
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: generic-device-plugin
+spec:
+  selector:
+    matchLabels:
       app.kubernetes.io/name: generic-device-plugin
-  spec:
-    selector:
-      matchLabels:
+  template:
+    metadata:
+      labels:
         app.kubernetes.io/name: generic-device-plugin
-    template:
-      metadata:
-        labels:
-          app.kubernetes.io/name: generic-device-plugin
-      spec:
-        priorityClassName: system-node-critical
-        nodeSelector:
-          node-role.kubernetes.io/devpod-node: "1"
-        tolerations:
-        - operator: "Exists"
-          effect: "NoExecute"
-        - operator: "Exists"
-          effect: "NoSchedule"
-        containers:
-        - image: ghcr.io/squat/generic-device-plugin:${arch}-36bfc606bba2064de6ede0ff2764cbb52edff70d
-          args:
-          - --device
-          - |
-            name: tuntap
-            groups:
-              - count: 999
-                paths:
-                  - path: /dev/net/tun
-          name: generic-device-plugin
-          resources:
-            requests:
-              cpu: 50m
-              memory: 10Mi
-            limits:
-              cpu: 50m
-              memory: 20Mi
-          ports:
-          - containerPort: 8080
-            name: http
-          volumeMounts:
-          - name: device-plugin
-            mountPath: /var/lib/kubelet/device-plugins
-          - name: dev
-            mountPath: /dev
-        volumes:
+    spec:
+      priorityClassName: system-node-critical
+      nodeSelector:
+        node-role.kubernetes.io/devpod-node: "1"
+      tolerations:
+      - operator: "Exists"
+        effect: "NoExecute"
+      - operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+      - image: ghcr.io/squat/generic-device-plugin:${arch}-36bfc606bba2064de6ede0ff2764cbb52edff70d
+        args:
+        - --device
+        - |
+          name: tuntap
+          groups:
+            - count: 999
+              paths:
+                - path: /dev/net/tun
+        name: generic-device-plugin
+        resources:
+          requests:
+            cpu: 50m
+            memory: 10Mi
+          limits:
+            cpu: 50m
+            memory: 20Mi
+        ports:
+        - containerPort: 8080
+          name: http
+        volumeMounts:
         - name: device-plugin
-          hostPath:
-            path: /var/lib/kubelet/device-plugins
+          mountPath: /var/lib/kubelet/device-plugins
         - name: dev
-          hostPath:
-            path: /dev
-    updateStrategy:
-      type: RollingUpdate
-  EOF
+          mountPath: /dev
+      volumes:
+      - name: device-plugin
+        hostPath:
+          path: /var/lib/kubelet/device-plugins
+      - name: dev
+        hostPath:
+          path: /dev
+  updateStrategy:
+    type: RollingUpdate
+EOF
   kubectl apply -f generic-device-plugin.yaml
 
   cat <<EOF > service-account.yaml
-  apiVersion: v1
-  kind: ServiceAccount
-  metadata:
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: devzero-sa0
+  namespace: default
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: devzero-sa0-token
+  namespace: default
+  annotations:
+    kubernetes.io/service-account.name: devzero-sa0
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: devzero-sa0-cluster-admin-binding
+subjects:
+  - kind: ServiceAccount
     name: devzero-sa0
     namespace: default
-  ---
-  apiVersion: v1
-  kind: Secret
-  metadata:
-    name: devzero-sa0-token
-    namespace: default
-    annotations:
-      kubernetes.io/service-account.name: devzero-sa0
-  type: kubernetes.io/service-account-token
-  ---
-  apiVersion: rbac.authorization.k8s.io/v1
-  kind: ClusterRoleBinding
-  metadata:
-    name: devzero-sa0-cluster-admin-binding
-  subjects:
-    - kind: ServiceAccount
-      name: devzero-sa0
-      namespace: default
-  roleRef:
-    apiGroup: rbac.authorization.k8s.io
-    kind: ClusterRole
-    name: cluster-admin
-  EOF
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+EOF
   kubectl apply -f service-account.yaml
 
   while true; do
