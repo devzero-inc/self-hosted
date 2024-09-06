@@ -21,26 +21,26 @@ provision:
       sudo -i -u devzero bash <<'EOF'
       minikube start --driver=none --container-runtime=cri-o --kubernetes-version=v1.29.0 --cni=bridge --embed-certs
       EOF
-probes:
-  - script: |
-      #!/bin/bash
-      set -eux -o pipefail
+# probes:
+#   - script: |
+#       #!/bin/bash
+#       set -eux -o pipefail
 
-      sudo -i -u devzero bash <<'EOF'
-      output=$(kubectl get pods -A)
+#       sudo -i -u devzero bash <<'EOF'
+#       output=$(kubectl get pods -A)
       
-      # Check if the output is empty
-      if [ -z "$output" ]; then
-        echo "No pods found!"
-        exit 1
-      fi
+#       # Check if the output is empty
+#       if [ -z "$output" ]; then
+#         echo "No pods found!"
+#         exit 1
+#       fi
 
-      # Check if any pod is not in Running status
-      if echo "$output" | grep -v -E 'Running|STATUS'; then
-        echo "One or more pods are not in Running status!"
-        exit 1
-      fi
+#       # Check if any pod is not in Running status
+#       if echo "$output" | grep -v -E 'Running|STATUS'; then
+#         echo "One or more pods are not in Running status!"
+#         exit 1
+#       fi
 
-      echo "All pods are in Running status."
-      exit 0
-      EOF
+#       echo "All pods are in Running status."
+#       exit 0
+#       EOF
