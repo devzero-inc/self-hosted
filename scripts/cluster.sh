@@ -78,22 +78,14 @@ if [ ! -f /etc/devzero/CLUSTER_SETUP ]; then
 
   sudo systemctl daemon-reload
 
-  # Switch to the devzero user to continue execution
-  minikube start --kubernetes-version=1.29 --driver=none --container-runtime=containerd --cni=bridge --embed-certs --extra-config=kubeadm.node-name=minikube --extra-config=kubelet.hostname-override=minikube
 
+  curl -fsSL -O https://downloads.nestybox.com/sysbox/releases/v0.6.4/sysbox-ce_0.6.4-0.linux_amd64.deb
+  sudo dpkg -i sysbox-ce_0.6.4-0.linux_amd64.deb
+  sudo systemctl enable --now sysbox-fs.service sysbox-mgr.service sysbox.service
+
+  minikube start --driver=none --container-runtime=cri-o --kubernetes-version=v1.29.0 --cni=bridge --embed-certs --extra-config=kubeadm.node-name=minikube --extra-config=kubelet.hostname-override=minikube
   # Allow any user to modify kubeconfig
   sudo chmod o+w /etc/kubernetes/admin.conf
-
-  kubectl label nodes --all node-role.kubernetes.io/devpod-node=1
-  kubectl label nodes --all sysbox-install=yes
-  kubectl apply -f https://raw.githubusercontent.com/nestybox/sysbox/master/sysbox-k8s-manifests/sysbox-install.yaml
-
-  until kubectl logs daemonset/sysbox-deploy-k8s -n kube-system | grep -q 'Sysbox installation completed'; do
-  sleep 10
-  done
-
-  minikube delete
-  minikube start --driver=none --container-runtime=cri-o --kubernetes-version=v1.29.0 --cni=bridge --embed-certs --extra-config=kubeadm.node-name=minikube --extra-config=kubelet.hostname-override=minikube
 
   # Path to your configuration file
   CONFIG_FILE="/etc/crio/crio.conf"
@@ -113,8 +105,18 @@ if [ ! -f /etc/devzero/CLUSTER_SETUP ]; then
   done
 
   kubectl label nodes --all node-role.kubernetes.io/devpod-node=1
-  kubectl label nodes --all sysbox-install=yes
-  kubectl apply -f https://raw.githubusercontent.com/nestybox/sysbox/master/sysbox-k8s-manifests/sysbox-install.yaml
+  kubectl label nodes --all sysbox-runtime=running
+
+cat <<EOF > runtime.yaml
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: sysbox-runc
+handler: sysbox-runc
+scheduling:
+  nodeSelector:
+    sysbox-runtime: running
+EOF
 
   kubectl apply -f https://raw.githubusercontent.com/external-secrets/external-secrets/v0.9.20/deploy/crds/bundle.yaml
 
