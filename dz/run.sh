@@ -94,13 +94,36 @@ check_registry_login() {
     fi
 }
 
-# Function to load and push images based on the architecture
+# Function to download images if the images directory is empty and then load and push images based on architecture
 load_and_push_images_to_local_registry() {
     if [[ ! -d "$IMAGES_DIR" ]]; then
-        printf "Images directory %s not found.\n" "$IMAGES_DIR" >&2
-        exit 1
+        printf "Images directory %s not found, creating it.\n" "$IMAGES_DIR"
+        mkdir -p "$IMAGES_DIR"
     fi
 
+    # Check if the IMAGES_DIR is empty
+    if [[ -z "$(ls -A "$IMAGES_DIR")" ]]; then
+        printf "Images directory is empty. Downloading images...\n"
+
+        # Define URLs for arm64 and amd64 images
+        ARM64_URL="https://self-hosted.devzero.io/devzero-devbox-base_base-2024-09-10--10-35--c174d3c4a878-dirty_arm64.tar"
+        AMD64_URL="https://self-hosted.devzero.io/devzero-devbox-base_base-2024-09-10--10-38--c174d3c4a878-dirty_amd64.tar"
+
+        # Download appropriate image based on architecture
+        if [[ "$ARCH_TYPE" == "arm64" ]]; then
+            printf "Downloading arm64 image...\n"
+            curl -L "$ARM64_URL" -o "$IMAGES_DIR/devzero-devbox-base_base_arm64.tar"
+        elif [[ "$ARCH_TYPE" == "amd64" ]]; then
+            printf "Downloading amd64 image...\n"
+            curl -L "$AMD64_URL" -o "$IMAGES_DIR/devzero-devbox-base_base_amd64.tar"
+        else
+            printf "Unsupported architecture: %s\n" "$ARCH_TYPE" >&2
+            exit 1
+        fi
+        printf "Image download complete.\n"
+    fi
+
+    # Continue with loading and pushing images
     for image_tar in "$IMAGES_DIR"/*_"$ARCH_TYPE".tar; do
         if [[ -f "$image_tar" ]]; then
             printf "Loading image from %s\n" "$image_tar"
