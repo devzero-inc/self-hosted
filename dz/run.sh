@@ -254,7 +254,7 @@ create_cluster_in_poland() {
         server_address="https://host.docker.internal:8443"
     else
         # Assuming Linux will use 172.17.0.1, you can adjust this IP if needed
-        server_address="https://172.17.0.1:8443"
+        server_address="https://172.20.0.1:8443"
     fi
 
     # Run the commands to set up the cluster in Poland

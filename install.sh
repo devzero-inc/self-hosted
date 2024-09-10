@@ -25,7 +25,7 @@ if [ "$OS" = "Darwin" ]; then
   brew install qemu jq lima make kubectl yq
 elif [ "$OS" = "Linux" ]; then
   if [ -x "$(command -v apt-get)" ]; then
-    sudo apt-get update && sudo apt-get install qemu-system jq make yq -y
+    sudo apt-get update && sudo apt-get install qemu-system jq make -y
   elif [ -x "$(command -v dnf)" ]; then
     sudo dnf install qemu jq make yq -y
   elif [ -x "$(command -v yum)" ]; then
@@ -39,6 +39,9 @@ elif [ "$OS" = "Linux" ]; then
       exit 1
   fi
 
+  curl -fsSL -O https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
+  sudo mv yq_linux_amd64 /usr/bin/yq
+  sudo chmod +x /usr/bin/yq
   # Check if KVM is supported
   if sudo kvm-ok >/dev/null 2>&1; then
     # Install Lima if KVM is supported
