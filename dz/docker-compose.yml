@@ -38,8 +38,10 @@ services:
       - tcp://0.0.0.0:1234
       - --oci-worker-no-process-sandbox
       - --debug
-#      - --config=/etc/buildkit/buildkitd.toml
+      - --config=/home/user/buildkit/buildkitd.toml
     user: "1000"
+    volumes:
+      - ./buildkit:/home/user/buildkit
     privileged: true
     ports:
       - 1234:1234/tcp
@@ -198,7 +200,8 @@ services:
     command: "--port 9990 --redis-addr=backend-redis:6379"
 
   backend:
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-base-2024-09-05--12-40--dd252f14ff3c-dirty
+    #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-base-2024-09-05--12-40--dd252f14ff3c-dirty
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-base-2024-09-09--23-43--c174d3c4a878-dirty
     container_name: backend
     depends_on:
       backend-redis:
@@ -222,6 +225,7 @@ services:
       LICENSE_KEY: ${LICENSE_KEY}
       SELF_HOSTED: true
       JWT_PRIVATE_KEY: ${PRIVATE_KEY}
+      DOCKER_REGISTRY: registry-server:5000/devzero-devbox-base
     ports:
       - 8444:8444
     networks:
@@ -393,6 +397,7 @@ services:
       - 5959:5000
     networks:
       - polland-internal
+      - backend
 
   registry-ui:
     image: joxit/docker-registry-ui:main  # Using the latest main branch build

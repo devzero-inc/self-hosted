@@ -14,8 +14,10 @@ RELOAD=false
 BACKEND_CONTAINER_NAME="backend"
 LICENSE_ERROR="Error verifying license token"
 REGISTRY_URL="056855531191.dkr.ecr.us-west-2.amazonaws.com"
+LOCAL_REGISTRY_URL="localhost:5959"
 TEMP_TOKEN_FILE="./docker.txt"
 KUBECONFIG_FILE="../kubeconfig"
+IMAGES_DIR="./images"
 
 # Parse arguments for reload flag
 while [[ "$#" -gt 0 ]]; do
@@ -36,8 +38,10 @@ fi
 ARCH=$(uname -m)
 if [[ "$ARCH" == "x86_64" || "$ARCH" == "amd64" ]]; then
     ARCH_ENV_FILE="$AMD_ENV_FILE"
+    ARCH_TYPE="amd64"
 elif [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
     ARCH_ENV_FILE="$ARM_ENV_FILE"
+    ARCH_TYPE="arm64"
 else
     printf "Unsupported architecture: %s\n" "$ARCH" >&2
     exit 1
@@ -88,6 +92,66 @@ check_registry_login() {
     else
         printf "Already logged into the Docker registry: %s\n" "$REGISTRY_URL"
     fi
+}
+
+# Function to download images if the images directory is empty and then load and push images based on architecture
+load_and_push_images_to_local_registry() {
+    if [[ ! -d "$IMAGES_DIR" ]]; then
+        printf "Images directory %s not found, creating it.\n" "$IMAGES_DIR"
+        mkdir -p "$IMAGES_DIR"
+    fi
+
+    # Check if the IMAGES_DIR is empty
+    if [[ -z "$(ls -A "$IMAGES_DIR")" ]]; then
+        printf "Images directory is empty. Downloading images...\n"
+
+        # Define URLs for arm64 and amd64 images
+        ARM64_URL="https://self-hosted.devzero.io/devzero-devbox-base_base-2024-09-10--10-35--c174d3c4a878-dirty_arm64.tar"
+        AMD64_URL="https://self-hosted.devzero.io/devzero-devbox-base_base-2024-09-10--10-38--c174d3c4a878-dirty_amd64.tar"
+
+        # Download appropriate image based on architecture
+        if [[ "$ARCH_TYPE" == "arm64" ]]; then
+            printf "Downloading arm64 image...\n"
+            curl -L "$ARM64_URL" -o "$IMAGES_DIR/devzero-devbox-base_base_arm64.tar"
+        elif [[ "$ARCH_TYPE" == "amd64" ]]; then
+            printf "Downloading amd64 image...\n"
+            curl -L "$AMD64_URL" -o "$IMAGES_DIR/devzero-devbox-base_base_amd64.tar"
+        else
+            printf "Unsupported architecture: %s\n" "$ARCH_TYPE" >&2
+            exit 1
+        fi
+        printf "Image download complete.\n"
+    fi
+
+    # Continue with loading and pushing images
+    for image_tar in "$IMAGES_DIR"/*_"$ARCH_TYPE".tar; do
+        if [[ -f "$image_tar" ]]; then
+            printf "Loading image from %s\n" "$image_tar"
+
+            # Optionally, remove any existing images for this tag to ensure a clean load
+            docker image prune -a --force
+
+            # Load image from tar file
+            docker load -i "$image_tar"
+            
+            # Extract image name from the loaded image
+            image_name=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep "$ARCH_TYPE" | head -n 1)
+
+            if [[ -z "$image_name" ]]; then
+                printf "No matching image found for architecture %s.\n" "$ARCH_TYPE" >&2
+                exit 1
+            fi
+
+            # Tag and push the image to the local registry
+            printf "Tagging and pushing %s to local registry %s\n" "$image_name" "$LOCAL_REGISTRY_URL"
+            docker tag "$image_name" "$LOCAL_REGISTRY_URL/$image_name"
+            docker push "$LOCAL_REGISTRY_URL/$image_name"
+        else
+            printf "No images found for architecture %s in %s\n" "$ARCH_TYPE" "$IMAGES_DIR" >&2
+            exit 1
+        fi
+    done
+    printf "All images for %s have been loaded and pushed to the local registry.\n" "$ARCH_TYPE"
 }
 
 # Function to prompt the user for Docker registry credentials and log them in
@@ -260,6 +324,11 @@ main() {
     create_cluster_in_poland
 
     printf "Docker setup complete.\n"
+
+    printf "Loading image to local registry...\n"
+    # Load and push images to the local registry
+    load_and_push_images_to_local_registry
+    printf "Image load complete.\n"
 }
 
 main
