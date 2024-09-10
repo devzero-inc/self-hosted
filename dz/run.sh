@@ -94,63 +94,64 @@ check_registry_login() {
     fi
 }
 
-# Function to download images if the images directory is empty and then load and push images based on architecture
+## Function to download images if the expected image tar files for the architecture are missing, and then load and push images
 load_and_push_images_to_local_registry() {
     if [[ ! -d "$IMAGES_DIR" ]]; then
         printf "Images directory %s not found, creating it.\n" "$IMAGES_DIR"
         mkdir -p "$IMAGES_DIR"
     fi
 
-    # Check if the IMAGES_DIR is empty
-    if [[ -z "$(ls -A "$IMAGES_DIR")" ]]; then
-        printf "Images directory is empty. Downloading images...\n"
+    # Define expected tar file names based on architecture
+    ARM64_TAR="devzero-devbox-base_base-2024-09-10--10-35--c174d3c4a878-dirty_arm64.tar"
+    AMD64_TAR="devzero-devbox-base_base-2024-09-10--10-38--c174d3c4a878-dirty_amd64.tar"
 
-        # Define URLs for arm64 and amd64 images
-        ARM64_URL="https://self-hosted.devzero.io/devzero-devbox-base_base-2024-09-10--10-35--c174d3c4a878-dirty_arm64.tar"
-        AMD64_URL="https://self-hosted.devzero.io/devzero-devbox-base_base-2024-09-10--10-38--c174d3c4a878-dirty_amd64.tar"
+    # Set the expected tar file and download URL based on architecture
+    if [[ "$ARCH_TYPE" == "arm64" ]]; then
+        expected_image_tar="$IMAGES_DIR/$ARM64_TAR"
+        IMAGE_URL="https://self-hosted.devzero.io/$ARM64_TAR"
+    elif [[ "$ARCH_TYPE" == "amd64" ]]; then
+        expected_image_tar="$IMAGES_DIR/$AMD64_TAR"
+        IMAGE_URL="https://self-hosted.devzero.io/$AMD64_TAR"
+    else
+        printf "Unsupported architecture: %s\n" "$ARCH_TYPE" >&2
+        exit 1
+    fi
 
-        # Download appropriate image based on architecture
-        if [[ "$ARCH_TYPE" == "arm64" ]]; then
-            printf "Downloading arm64 image...\n"
-            curl -L "$ARM64_URL" -o "$IMAGES_DIR/devzero-devbox-base_base_arm64.tar"
-        elif [[ "$ARCH_TYPE" == "amd64" ]]; then
-            printf "Downloading amd64 image...\n"
-            curl -L "$AMD64_URL" -o "$IMAGES_DIR/devzero-devbox-base_base_amd64.tar"
-        else
-            printf "Unsupported architecture: %s\n" "$ARCH_TYPE" >&2
+    # Check if the expected image tar file exists, if not, download it
+    if [[ ! -f "$expected_image_tar" ]]; then
+        printf "Expected image tar file %s not found. Downloading...\n" "$expected_image_tar"
+        curl -L "$IMAGE_URL" -o "$expected_image_tar"
+        if [[ $? -ne 0 ]]; then
+            printf "Failed to download image tar file from %s\n" "$IMAGE_URL" >&2
             exit 1
         fi
-        printf "Image download complete.\n"
+        printf "Downloaded image tar file for architecture %s.\n" "$ARCH_TYPE"
+    else
+        printf "Image tar file %s already exists. Skipping download.\n" "$expected_image_tar"
     fi
 
     # Continue with loading and pushing images
-    for image_tar in "$IMAGES_DIR"/*_"$ARCH_TYPE".tar; do
-        if [[ -f "$image_tar" ]]; then
-            printf "Loading image from %s\n" "$image_tar"
+    printf "Loading image from %s\n" "$expected_image_tar"
 
-            # Optionally, remove any existing images for this tag to ensure a clean load
-            docker image prune -a --force
+    # Optionally, remove any existing images for this tag to ensure a clean load
+    docker image prune -a --force
 
-            # Load image from tar file
-            docker load -i "$image_tar"
-            
-            # Extract image name from the loaded image
-            image_name=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep "$ARCH_TYPE" | head -n 1)
+    # Load image from tar file
+    docker load -i "$expected_image_tar"
+    
+    # Extract image name from the loaded image
+    image_name=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep "$ARCH_TYPE" | head -n 1)
 
-            if [[ -z "$image_name" ]]; then
-                printf "No matching image found for architecture %s.\n" "$ARCH_TYPE" >&2
-                exit 1
-            fi
+    if [[ -z "$image_name" ]]; then
+        printf "No matching image found for architecture %s.\n" "$ARCH_TYPE" >&2
+        exit 1
+    fi
 
-            # Tag and push the image to the local registry
-            printf "Tagging and pushing %s to local registry %s\n" "$image_name" "$LOCAL_REGISTRY_URL"
-            docker tag "$image_name" "$LOCAL_REGISTRY_URL/$image_name"
-            docker push "$LOCAL_REGISTRY_URL/$image_name"
-        else
-            printf "No images found for architecture %s in %s\n" "$ARCH_TYPE" "$IMAGES_DIR" >&2
-            exit 1
-        fi
-    done
+    # Tag and push the image to the local registry
+    printf "Tagging and pushing %s to local registry %s\n" "$image_name" "$LOCAL_REGISTRY_URL"
+    docker tag "$image_name" "$LOCAL_REGISTRY_URL/$image_name"
+    docker push "$LOCAL_REGISTRY_URL/$image_name"
+
     printf "All images for %s have been loaded and pushed to the local registry.\n" "$ARCH_TYPE"
 }
 
