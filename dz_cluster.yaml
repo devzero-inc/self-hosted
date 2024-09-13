@@ -21,6 +21,7 @@ provision:
       sudo -i -u devzero bash <<'EOF'
       minikube start --driver=none --container-runtime=cri-o --kubernetes-version=v1.29.0 --cni=bridge --embed-certs
       sudo systemctl start sysbox || true
+      sudo sed -i '/host.lima.internal/ s/$/ hydra.selfzero.net/' /etc/hosts
       EOF
 probes:
   - script: |
