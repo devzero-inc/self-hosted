@@ -10,5 +10,3 @@ kubeconfig:
 .PHONY: sa-token
 sa-token:
 	kubectl get secret devzero-sa0-token -n default -o jsonpath='{.data.token}' | base64 -d > sa-token
-
-

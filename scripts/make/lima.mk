@@ -24,4 +24,9 @@ image: commit
 
 .PHONY: logs
 logs:
+	cat ~/.lima/$(VM_NAME)/serial.log
 	nc -U ~/.lima/$(VM_NAME)/serial.sock
+
+.PHONY: prune
+prune:
+	limactl prune
