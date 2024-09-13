@@ -72,6 +72,7 @@ provision:
       sudo -i -u devzero bash <<'EOS'
       sudo chmod 666 /etc/kubernetes/admin.conf
       sudo chmod 666 /etc/kubernetes/kubelet.conf
+      sudo sed -i '/host.lima.internal/ s/$/ hydra.selfzero.net/' /etc/hosts
       minikube start --kubernetes-version=1.29 --driver=none --container-runtime=containerd --cni=bridge --embed-certs
 
       # Allow any user to modify kubeconfig
