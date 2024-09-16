@@ -18,6 +18,7 @@ LOCAL_REGISTRY_URL="localhost:5959"
 TEMP_TOKEN_FILE="./docker.txt"
 KUBECONFIG_FILE="../kubeconfig"
 IMAGES_DIR="./images"
+HOSTS_ENTRY="127.0.0.1 hydra.selfzero.net"
 
 # Parse arguments for reload flag
 while [[ "$#" -gt 0 ]]; do
@@ -294,6 +295,16 @@ except IntegrityError:
 "
 }
 
+# Function to inject entry into /etc/hosts if it does not already exist
+inject_into_hosts() {
+    if ! grep -q "$HOSTS_ENTRY" /etc/hosts; then
+        printf "Injecting %s into /etc/hosts...\n" "$HOSTS_ENTRY"
+        printf "%s\n" "$HOSTS_ENTRY" | sudo tee -a /etc/hosts > /dev/null
+    else
+        printf "%s is already present in /etc/hosts. Skipping.\n" "$HOSTS_ENTRY"
+    fi
+}
+
 # Main execution logic
 main() {
     # Check if the user is logged into the Docker registry
@@ -323,6 +334,10 @@ main() {
     # Create the cluster in Poland
     printf "Creating the cluster in Poland...\n"
     create_cluster_in_poland
+
+    # Inject the host entry
+    printf "Injecting hydra into hosts...\n"
+    inject_into_hosts
 
     printf "Docker setup complete.\n"
 

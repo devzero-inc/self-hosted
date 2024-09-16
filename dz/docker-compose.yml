@@ -200,8 +200,9 @@ services:
     command: "--port 9990 --redis-addr=backend-redis:6379"
 
   backend:
-    #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-base-2024-09-05--12-40--dd252f14ff3c-dirty
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-base-2024-09-09--23-43--c174d3c4a878-dirty
+    #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-base-2024-09-09--23-43--c174d3c4a878-dirty
+      #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-base-2024-09-13--11-44--959638a6b270-dirty
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-base-2024-09-13--14-18--959638a6b270-dirty
     container_name: backend
     depends_on:
       backend-redis:
@@ -220,7 +221,7 @@ services:
       REDIS_URL: redis://backend-redis:6379
       DEFAULT_DZ_BASE_IMAGE_TAG: ${DEVBOX_IMAGE_TAG}
       CONTROL_PLANE_URL: http://host.lima.internal:8831
-      HYDRA_URL: http://hydra:8181
+      HYDRA_URL: https://hydra.selfzero.net:8181
       HYDRA_API_KEY: ${HYDRA_API_KEY}
       LICENSE_KEY: ${LICENSE_KEY}
       SELF_HOSTED: true
@@ -337,9 +338,11 @@ services:
 
   hydra:
     image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/hydra:self-hosted-base-2024-09-05--09-25--1e367a8a8682-dirty
+    #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/hydra:self-hosted-base-2024-09-13--12-24--42ff39f7abfb-dirty
     container_name: hydra
     ports:
       - "8181:8181"
+      - "3478:3478"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8181/health"]
       interval: 30s
@@ -349,7 +352,8 @@ services:
     depends_on:
       - hydra-db
     environment:
-      - HEADSCALE_DERP_SERVER_ENABLED=true
+      - HEADSCALE_SERVER_URL=https://hydra.selfzero.net:8181
+      - HEADSCALE_LISTEN_ADDR=0.0.0.0:8181
       - HEADSCALE_DATABASE_TYPE=postgres
       - HEADSCALE_DATABASE_POSTGRES_SSL=true
       - HEADSCALE_DATABASE_POSTGRES_HOST=hydra-db
@@ -359,9 +363,19 @@ services:
       - HEADSCALE_DATABASE_POSTGRES_PASS=hydra
       - HEADSCALE_DATABASE_REDIS_URL=redis://default:@redis:6379/0
       - HEADSCALE_CONFIG=/etc/headscale/development.yaml
+      - HEADSCALE_DERP_SERVER_ENABLED=true
+      - HEADSCALE_DERP_SERVER_AUTOMATICALLY_ADD_EMBEDDED_DERP_REGION=true
+      - HEADSCALE_DERP_URLS=""
+      - HEADSCALE_TLS_CERT_PATH=/etc/ssl/certs/fullchain.pem
+      - HEADSCALE_TLS_KEY_PATH=/etc/ssl/private/privkey.pem
+    volumes:
+      - ./hydra/fullchain.pem:/etc/ssl/certs/fullchain.pem
+      - ./hydra/privkey.pem:/etc/ssl/private/privkey.pem
     networks:
-      - backend
-      - hydra
+      backend:
+        aliases: 
+          - hydra.selfzero.net
+      hydra:
 
   vault:
     image: vault:1.13.3

@@ -11,6 +11,10 @@ mounts: []
 portForwards:
   - guestPort: 8443
     hostIP: "0.0.0.0"
+hostResolver:
+  enabled: true
+  hosts:
+    hydra.selfzero.net: host.lima.internal
 provision:
   - mode: user
     script: |
