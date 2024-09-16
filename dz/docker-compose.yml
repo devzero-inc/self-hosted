@@ -391,7 +391,7 @@ services:
       - VAULT_ADDRESS=http://0.0.0.0:8200
     cap_add:
       - IPC_LOCK
-    command: ["vault", "server", "-dev", "-dev-listen-address=0.0.0.0:8200", "-dev-root-token-id=root"]
+    command: /bin/sh -c "vault server -dev -dev-listen-address=0.0.0.0:8200 -dev-root-token-id=root & /vault/config/init.sh && wait"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:8200/v1/sys/health"]
       interval: 10s
