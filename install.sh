@@ -88,3 +88,5 @@ cd "$SCRIPT_DIR/dz"
 
 # Execute the run.sh script
 /bin/bash ./run.sh
+
+echo "Visit this in your browser: localhost:3000/dashboard"
