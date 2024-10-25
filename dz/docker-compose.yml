@@ -360,6 +360,8 @@ services:
     environment:
       - HEADSCALE_SERVER_URL=https://hydra.selfzero.net:8181
       - HEADSCALE_LISTEN_ADDR=0.0.0.0:8181
+      - HEADSCALE_SELF_HOSTED=true
+      - HEADSCALE_NOISE_PRIVATE_KEY=${HYDRA_PRIVATE_KEY}
       - HEADSCALE_DATABASE_TYPE=postgres
       - HEADSCALE_DATABASE_POSTGRES_SSL=true
       - HEADSCALE_DATABASE_POSTGRES_HOST=hydra-db
@@ -370,6 +372,7 @@ services:
       - HEADSCALE_DATABASE_REDIS_URL=redis://default:@redis:6379/0
       - HEADSCALE_CONFIG=/etc/headscale/development.yaml
       - HEADSCALE_DERP_SERVER_ENABLED=true
+      - HEADSCALE_DERP_SERVER_PRIVATE_KEY=${HYDRA_PRIVATE_KEY}
       - HEADSCALE_DERP_SERVER_AUTOMATICALLY_ADD_EMBEDDED_DERP_REGION=true
       - HEADSCALE_DERP_URLS=""
       - HEADSCALE_TLS_CERT_PATH=/etc/ssl/certs/fullchain.pem
