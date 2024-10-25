@@ -156,6 +156,70 @@ load_and_push_images_to_local_registry() {
     printf "All images for %s have been loaded and pushed to the local registry.\n" "$ARCH_TYPE"
 }
 
+## Function to download images if the expected image tar files for the architecture are missing, and then load and push images
+load_and_push_images_to_local_registry_okta() {
+    if [[ ! -d "$IMAGES_DIR" ]]; then
+        printf "Images directory %s not found, creating it.\n" "$IMAGES_DIR"
+        mkdir -p "$IMAGES_DIR"
+    fi
+
+    # Define expected tar file names based on architecture
+    ARM64_TAR="devzero-devbox-base_base-2024-10-25--17-17--de6afcba3798-al23_arm64.tar"
+
+    TAG=""
+
+    # Set the expected tar file and download URL based on architecture
+    if [[ "$ARCH_TYPE" == "arm64" ]]; then
+        expected_image_tar="$IMAGES_DIR/$ARM64_TAR"
+        IMAGE_URL="https://self-hosted.devzero.io/$ARM64_TAR"
+    else
+        printf "Unsupported architecture: %s\n" "$ARCH_TYPE" >&2
+        exit 1
+    fi
+
+    # Check if the expected image tar file exists, if not, download it
+    if [[ ! -f "$expected_image_tar" ]]; then
+        printf "Expected image tar file %s not found. Downloading...\n" "$expected_image_tar"
+        curl -L "$IMAGE_URL" -o "$expected_image_tar"
+        if [[ $? -ne 0 ]]; then
+            printf "Failed to download image tar file from %s\n" "$IMAGE_URL" >&2
+            exit 1
+        fi
+        printf "Downloaded image tar file for architecture %s.\n" "$ARCH_TYPE"
+    else
+        printf "Image tar file %s already exists. Skipping download.\n" "$expected_image_tar"
+    fi
+
+    # Continue with loading and pushing images
+    printf "Loading image for okta from %s\n" "$expected_image_tar"
+
+    printf "Pruning image....\n"
+    # Optionally, remove any existing images for this tag to ensure a clean load
+    docker image prune -a --force
+
+    printf "Loading image....\n"
+    # Load image from tar file
+    docker load -i "$expected_image_tar"
+    
+    printf "Creating name....\n"
+    # Extract image name from the loaded image
+    image_id=$(docker images -q --filter "dangling=true" | head -n 1)
+    image_name="devzero-devbox-base:arm64-base-2024-10-25--17-17--de6afcba3798-al23"
+
+    printf "Checking mage name %s\n" "$image_name"
+    if [[ -z "$image_name" ]]; then
+        printf "No matching image found for architecture %s.\n" "$ARCH_TYPE" >&2
+        exit 1
+    fi
+
+    # Tag and push the image to the local registry
+    printf "Tagging and pushing %s to local okta registry %s\n" "$image_name" "$LOCAL_REGISTRY_URL"
+    docker tag "$image_id" "$LOCAL_REGISTRY_URL/$image_name"
+    docker push "$LOCAL_REGISTRY_URL/$image_name"
+
+    printf "All images for %s have been loaded and pushed to the local registry.\n" "$ARCH_TYPE"
+}
+
 # Function to prompt the user for Docker registry credentials and log them in
 prompt_for_registry_login() {
     # If docker.txt exists and has content, use it directly
@@ -344,6 +408,7 @@ main() {
     printf "Loading image to local registry...\n"
     # Load and push images to the local registry
     load_and_push_images_to_local_registry
+    load_and_push_images_to_local_registry_okta
     printf "Image load complete.\n"
 }
 
