@@ -139,6 +139,50 @@ services:
     networks:
       - polland-internal
 
+  polland-celeryworker-2:
+    <<: *polland
+    container_name: polland_celeryworker_2
+    stdin_open: true # for ipdb
+    tty: true # for ipdb
+    depends_on:
+      - polland-redis
+      - polland-mysql
+    environment:
+      LOGSRV_DEFAULT_QUEUE: http://elasticmq:9324/queue/logsrv.fifo
+      LOGSRV_DEFAULT_REGION: elasticmq
+      VAULT_ENDPOINT: "http://vault:8200/"
+      VAULT_AUTH_METHOD: "token"
+      VAULT_TOKEN: "root"
+      DOCKER_REGISTRY: "registry-server:5000"
+      SELF_HOSTED: True
+      ARCH: ${ARCH}
+    ports: []
+    command: /start-celeryworker
+    networks:
+      - polland-internal
+
+  polland-celeryworker-3:
+    <<: *polland
+    container_name: polland_celeryworker_3
+    stdin_open: true # for ipdb
+    tty: true # for ipdb
+    depends_on:
+      - polland-redis
+      - polland-mysql
+    environment:
+      LOGSRV_DEFAULT_QUEUE: http://elasticmq:9324/queue/logsrv.fifo
+      LOGSRV_DEFAULT_REGION: elasticmq
+      VAULT_ENDPOINT: "http://vault:8200/"
+      VAULT_AUTH_METHOD: "token"
+      VAULT_TOKEN: "root"
+      DOCKER_REGISTRY: "registry-server:5000"
+      SELF_HOSTED: True
+      ARCH: ${ARCH}
+    ports: []
+    command: /start-celeryworker
+    networks:
+      - polland-internal
+
   polland-celerybeat:
     <<: *polland
     container_name: polland_celerybeat
@@ -236,7 +280,9 @@ services:
   buildqd:
     #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/buildqd:self-hosted-base-2024-09-05--09-00--b3f4b47bdd67-dirty
     #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/buildqd:self-hosted-base-2024-10-25--09-26--67de09ff4fb0-dirty
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/buildqd:self-hosted-base-2024-10-26--09-36--67de09ff4fb0-dirty
+    #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/buildqd:self-hosted-base-2024-10-26--09-36--67de09ff4fb0-dirty
+    #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/buildqd:self-hosted-base-2024-10-26--09-36--67de09ff4fb0-dirty
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/buildqd:self-hosted-base-2024-10-26--11-53--612b4aa95403
     container_name: buildqd
     environment:
       BACKEND_ADDRESS: http://backend:8444/internal/
@@ -275,7 +321,8 @@ services:
 
   logsrv:
     #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/logsrv:self-hosted-base-2024-09-05--08-57--b3f4b47bdd67-dirty
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/logsrv:self-hosted-base-2024-10-25--09-33--67de09ff4fb0-dirty
+    #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/logsrv:self-hosted-base-2024-10-25--09-33--67de09ff4fb0-dirty
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/logsrv:self-hosted-base-2024-10-26--12-31--612b4aa95403-dirty
     container_name: logsrv
     depends_on:
       - logsrv-postgres
@@ -314,7 +361,8 @@ services:
 
   devzero-website:
     #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/devzero-website:self-hosted-base-2024-09-05--10-25--ea407c8248bd-dirty
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/devzero-website:self-hosted-base-2024-10-25--12-33--34c7498a4146-dirty
+    #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/devzero-website:self-hosted-base-2024-10-25--12-33--34c7498a4146-dirty
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/devzero-website:self-hosted-base-2024-10-26--12-56--e39605f3075d-dirty
     container_name: devzero-website
     environment:
       NEXT_AUTH_JWT_SIGNING_PRIV_KEY: ${PRIVATE_KEY}
