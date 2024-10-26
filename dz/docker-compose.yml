@@ -202,7 +202,7 @@ services:
 
   backend:
     #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-base-2024-09-13--14-18--959638a6b270-dirty
-    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-base-2024-10-25--13-07--67de09ff4fb0-dirty
+    image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/backend:self-hosted-base-2024-10-26--01-24--67de09ff4fb0-dirty
     container_name: backend
     depends_on:
       backend-redis:
