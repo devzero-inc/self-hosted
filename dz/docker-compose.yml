@@ -342,6 +342,13 @@ services:
     networks:
       - hydra
 
+  hydra-redis:
+    image: redis:6
+    ports:
+      - "6371:6379"
+    networks:
+      - hydra
+
   hydra:
     #image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/hydra:self-hosted-base-2024-09-05--09-25--1e367a8a8682-dirty
     image: 056855531191.dkr.ecr.us-west-2.amazonaws.com/hydra:self-hosted-base-2024-10-25--10-05--d59b0806d5b4
@@ -369,7 +376,7 @@ services:
       - HEADSCALE_DATABASE_POSTGRES_NAME=hydra
       - HEADSCALE_DATABASE_POSTGRES_USER=hydra
       - HEADSCALE_DATABASE_POSTGRES_PASS=hydra
-      - HEADSCALE_DATABASE_REDIS_URL=redis://default:@redis:6379/0
+      - HEADSCALE_DATABASE_REDIS_URL=redis://default:@hydra-redis:6379/0
       - HEADSCALE_CONFIG=/etc/headscale/development.yaml
       - HEADSCALE_DERP_SERVER_ENABLED=true
       - HEADSCALE_DERP_SERVER_PRIVATE_KEY=${HYDRA_PRIVATE_KEY}
