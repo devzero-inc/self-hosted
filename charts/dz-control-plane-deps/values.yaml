@@ -1,11 +1,3 @@
-# Cert Manager external dependencies
-cert-manager:
-  fullnameOverride: devzero-cert-manager
-  enabled: true
-  crds:
-    enabled: true
-    keep: true
-
 # Vault external dependencies
 vault:
   fullnameOverride: devzero-vault
