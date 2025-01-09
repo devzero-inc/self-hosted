@@ -100,27 +100,6 @@ postgres-hydra:
 
   architecture: "standalone"
 
-
-
-mysql-pulse:
-  fullnameOverride: devzero-mysql-pulse
-  commonAnnotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "0"
-  auth:
-    username: "pulse"
-    database: "pulse"
-    password: "pulse"
-    rootPassword: "pulse"
-
-mysql-vault:
-  fullnameOverride: devzero-mysql-vault
-  auth:
-    username: "vault"
-    database: "vault"
-    password: "vault"
-    rootPassword: "vault"
-
 # MongoDB external dependencies
 mongodb:
   fullnameOverride: devzero-mongodb

@@ -10,16 +10,6 @@ dependencies:
   - name: vault
     version: 0.28.1
     repository: https://helm.releases.hashicorp.com
-  - name: mysql
-    alias: mysql-pulse
-    version: 11.1.19
-    repository: https://charts.bitnami.com/bitnami
-    condition: mysql.enabled
-  - name: mysql
-    alias: mysql-vault
-    version: 11.1.19
-    repository: https://charts.bitnami.com/bitnami
-    condition: mysql.enabled
   - name: mongodb
     version: 16.0.3
     repository: https://charts.bitnami.com/bitnami

@@ -64,3 +64,30 @@ install-mysql-polland:
 delete-mysql-polland:
 	helm delete mysql-polland -n devzero --ignore-not-found
 
+.PHONY: install-mysql-pulse
+install-mysql-pulse:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=mysql-pulse \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=mysql \
+		VERSION=11.1.19 \
+		NAMESPACE=devzero
+
+.PHONY: delete-mysql-pulse
+delete-mysql-pulse:
+	helm delete mysql-pulse -n devzero --ignore-not-found
+
+.PHONY: install-mysql-vault
+install-mysql-vault:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=mysql-vault \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=mysql \
+		VERSION=11.1.19 \
+		NAMESPACE=devzero
+
+.PHONY: delete-mysql-vault
+delete-mysql-vault:
+	helm delete mysql-vault -n devzero --ignore-not-found
