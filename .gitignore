@@ -8,6 +8,9 @@
 *.tfstate*
 .terraform
 
+# Downloaded helm charts
+**/charts/**.tgz
+
 .idea
 .vscode
 
