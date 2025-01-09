@@ -9,7 +9,6 @@ cert-manager:
 # Vault external dependencies
 vault:
   fullnameOverride: devzero-vault
-  job: true
 
   global:
     enabled: true

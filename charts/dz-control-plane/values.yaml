@@ -918,6 +918,9 @@ web:
             pathType: Prefix
 
 
+vault:
+  job: true
+
 # Cluster issuer for cert manager
 issuer:
   enabled: true
