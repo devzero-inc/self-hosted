@@ -2,6 +2,11 @@
 install:
 	helm upgrade --install dz-self-hosted-deps -n devzero --create-namespace -f values.yaml .
 
+.PHONY: delete
+delete:
+	helm delete dz-self-hosted-deps -n devzero
+
+
 .PHONY: _install-helm-chart
 _install-helm-chart:
 	@helm repo add $(REPO_NAME) $(REPO_URL)
@@ -22,6 +27,13 @@ install-cert-manager:
 		VERSION=v1.16.2 \
 		NAMESPACE=cert-manager
 
+.PHONY: delete-cert-manager
+delete-cert-manager:
+	kubectl get crds -o name | grep 'cert-manager.io' | xargs kubectl delete
+	helm delete cert-manager -n cert-manager --ignore-not-found
+	kubectl delete namespace cert-manager
+
+
 .PHONY: install-ingress-nginx
 install-ingress-nginx:
 	@$(MAKE) _install-helm-chart \
@@ -32,17 +44,23 @@ install-ingress-nginx:
 		VERSION=4.11.3 \
 		NAMESPACE=ingress-nginx
 
-.PHONY: delete
-delete:
-	helm delete dz-self-hosted-deps -n devzero
-
-.PHONY: delete-cert-manager
-delete-cert-manager:
-	kubectl get crds -o name | grep 'cert-manager.io' | xargs kubectl delete
-	helm delete cert-manager -n cert-manager
-	kubectl delete namespace cert-manager
-
 .PHONY: delete-ingress-nginx
 delete-ingress-nginx:
-	helm delete ingress-nginx -n ingress-nginx
+	helm delete ingress-nginx -n ingress-nginx  --ignore-not-found
 	kubectl delete namespace ingress-nginx
+
+
+.PHONY: install-mysql-polland
+install-mysql-polland:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=mysql-polland \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=mysql \
+		VERSION=11.1.19 \
+		NAMESPACE=devzero
+
+.PHONY: delete-mysql-polland
+delete-mysql-polland:
+	helm delete mysql-polland -n devzero --ignore-not-found
+

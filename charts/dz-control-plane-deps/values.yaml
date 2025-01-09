@@ -100,17 +100,7 @@ postgres-hydra:
 
   architecture: "standalone"
 
-# Mysql external dependencies
-mysql-polland:
-  fullnameOverride: devzero-mysql-polland
-  commonAnnotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "-6"
-  auth:
-    username: "polland"
-    database: "polland"
-    password: "polland"
-    rootPassword: "polland"
+
 
 mysql-pulse:
   fullnameOverride: devzero-mysql-pulse
