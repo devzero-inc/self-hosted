@@ -13,3 +13,8 @@
 
 # generated policy.json file
 policy.json
+
+# Ignore config file
+dz_config.json
+
+**/__pycache__/**

@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+
+import collections
+
+import click
+
+from dz_installer.dz_config import DZConfig
+from dz_installer.helpers import get_provider
+
+# Version constant
+VERSION = "1.0.0"
+
+class OrderedGroup(click.Group):
+    def __init__(self, name=None, commands=None, **attrs):
+        super(OrderedGroup, self).__init__(name, commands, **attrs)
+        #: the registered subcommands by their exported names.
+        self.commands = commands or collections.OrderedDict()
+
+    def list_commands(self, ctx):
+        return self.commands
+
+
+@click.group()
+@click.version_option(VERSION)
+def cli():
+    """DevZero Kubernetes Cluster Installation Tool"""
+    pass
+
+
+# Global configuration commands
+@cli.group()
+def global_config():
+    """Defines global configuration for various commands"""
+    pass
+
+
+@global_config.command("cloud-provider")
+@click.argument(
+    "provider", type=click.Choice(["aws", "gcp", "azure"], case_sensitive=False)
+)
+def set_cloud_provider(provider):
+    """Set the cloud provider for DevZero installation"""
+    click.echo(f"Setting cloud provider to: {provider}")
+    cfg = DZConfig()
+    cfg.globals.provider = provider
+    cfg.save()
+
+
+# Check commands
+@cli.group(name="check")
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
+def check(force):
+    """Checks for various required resources"""
+    pass
+
+
+@check.command("all")
+def check_all():
+    """Runs all checks"""
+    click.echo("Running all checks...")
+
+
+# Control plane commands
+@check.group("control-plane", cls=OrderedGroup)
+def control_plane():
+    """Runs control plane checks for the current cloud provider"""
+    pass
+
+
+@control_plane.command("all")
+def control_plane_all():
+    """Runs all control-plane checks"""
+    click.echo("Running all control plane checks...")
+
+
+@control_plane.command("permissions")
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
+def control_plane_permissions(force):
+    """Runs permission checks for the current cloud provider"""
+    get_provider().control_plane_permissions(force)
+
+
+@control_plane.command("network")
+def control_plane_network():
+    """Runs network checks for the current cloud provider"""
+    click.echo("Checking control plane network...")
+
+
+@control_plane.command("cluster")
+def control_plane_cluster():
+    """Runs cluster existence checks for the current cloud provider"""
+    click.echo("Checking control plane cluster...")
+
+
+@control_plane.command("ingress")
+def control_plane_ingress():
+    """Runs cluster existence checks kubernetes ingresses"""
+    click.echo("Checking control plane ingress...")
+
+
+# Control plane Helm chart checks
+@control_plane.command("backend")
+def helm_check_backend():
+    """Helm chart: backend"""
+    click.echo("Checking helm chart: backend")
+
+
+@control_plane.command("api-gateway")
+def helm_check_api_gateway():
+    """Helm chart: api-gateway"""
+    click.echo("Checking helm chart: api-gateway")
+
+
+@control_plane.command("buildqd")
+def helm_check_buildqd():
+    """Helm chart: buildqd"""
+    click.echo("Checking helm chart: buildqd")
+
+
+@control_plane.command("cert-issuer")
+def helm_check_cert_issuer():
+    """Helm chart: cert-issuer"""
+    click.echo("Checking helm chart: cert-issuer")
+
+
+@control_plane.command("extra")
+def helm_check_extra():
+    """Helm chart: extra"""
+    click.echo("Checking helm chart: extra")
+
+
+@control_plane.command("hydra")
+def helm_check_hydra():
+    """Helm chart: hydra"""
+    click.echo("Checking helm chart: hydra")
+
+
+@control_plane.command("logsrv")
+def helm_check_logsrv():
+    """Helm chart: logsrv"""
+    click.echo("Checking helm chart: logsrv")
+
+
+@control_plane.command("polland")
+def helm_check_polland():
+    """Helm chart: polland"""
+    click.echo("Checking helm chart: polland")
+
+
+@control_plane.command("pulse")
+def helm_check_pulse():
+    """Helm chart: pulse"""
+    click.echo("Checking helm chart: pulse")
+
+
+@control_plane.command("web")
+def helm_check_web():
+    """Helm chart: web"""
+    click.echo("Checking helm chart: web")
+
+
+# Data plane commands
+@check.group("data-plane", cls=OrderedGroup)
+def data_plane():
+    """Runs data plane checks for the current cloud provider"""
+    pass
+
+
+@data_plane.command("all")
+def data_plane_all():
+    """Runs all data-plane checks"""
+    click.echo("Running all data plane checks...")
+
+
+@data_plane.command("permissions")
+def data_plane_permissions():
+    """Runs permission checks for the current cloud provider"""
+    click.echo("Checking data plane permissions...")
+
+
+@data_plane.command("network")
+def data_plane_network():
+    """Runs network checks for the current cloud provider"""
+    click.echo("Checking data plane network...")
+
+
+@data_plane.command("cluster")
+def data_plane_cluster():
+    """Runs cluster existence checks for the current cloud provider"""
+    click.echo("Checking data plane cluster...")
+
+
+@data_plane.command("ingress")
+def data_plane_ingress():
+    """Runs cluster existence checks kubernetes ingresses"""
+    click.echo("Checking data plane ingress...")
+
+
+# Data plane Helm chart checks
+@data_plane.command("rook-ceph")
+def helm_check_rook_ceph():
+    """Helm chart: rook-ceph"""
+    click.echo("Checking helm chart: rook-ceph")
+
+
+@data_plane.command("rook-ceph-cluster")
+def helm_check_rook_ceph_cluster():
+    """Helm chart: rook-ceph-cluster"""
+    click.echo("Checking helm chart: rook-ceph-cluster")
+
+
+@data_plane.command("ingress-nginx")
+def helm_check_ingress_nginx():
+    """Helm chart: ingress-nginx"""
+    click.echo("Checking helm chart: ingress-nginx")
+
+
+@data_plane.command("cert-manager")
+def helm_check_cert_manager():
+    """Helm chart: cert-manager"""
+    click.echo("Checking helm chart: cert-manager")
+
+
+@data_plane.command("cedana")
+def helm_check_cedana():
+    """Helm chart: cedana"""
+    click.echo("Checking helm chart: cedana")
+
+
+@data_plane.command("metacontroller")
+def helm_check_metacontroller():
+    """Helm chart: metacontroller"""
+    click.echo("Checking helm chart: metacontroller")
+
+
+@data_plane.command("prometheus")
+def helm_check_prometheus():
+    """Helm chart: prometheus"""
+    click.echo("Checking helm chart: prometheus")
+
+
+if __name__ == "__main__":
+    cli()
