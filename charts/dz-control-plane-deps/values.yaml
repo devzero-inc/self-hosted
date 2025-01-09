@@ -1,0 +1,447 @@
+# Cert Manager external dependencies
+cert-manager:
+  enabled: true
+  installCRDs: true
+  crds:
+    enabled: true
+    keep: true
+
+# Vault external dependencies
+vault:
+  job: true
+
+  global:
+    enabled: true
+
+  injector:
+    enabled: false
+    metrics:
+      enabled: true
+  ui:
+    enabled: true
+
+  server:
+    enabled: true
+    ingress:
+      enabled: false
+    auditStorage:
+      enabled: true
+    dataStorage:
+      enabled: true
+    ha:
+      enabled: true
+      replicas: 3
+      config: |
+        disable_mlock = true
+        ui = true
+        
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+        
+        service_registration "kubernetes" {}
+
+        storage "mysql" {
+          ha_enabled = true
+          address    = "dz-control-plane-mysql-vault-headless"
+          username   = "vault"
+          password   = "vault"
+          database   = "vault"
+        }
+
+  ingress:
+    # -- Specify if the Vault Ingress is enabled
+    enabled: true
+    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ingressClassName: "nginx"
+    # -- Annotations
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # -- TLS
+    tls:
+      - secretName: devzero-vault-tls
+        hosts:
+          - "vault.{{ .Values.domain }}"
+    # -- Hosts
+    hosts:
+      - host: "vault.{{ .Values.domain }}"
+        paths:
+          - path: /
+            pathType: Prefix
+
+# Postgres external dependencies
+postgres-logsrv:
+  metrics:
+    enabled: true
+
+  primary:
+    persistence:
+      size: "50Gi"
+
+  auth:
+    database: "logsrv"
+    username: "logsrv"
+    password: "logsrv"
+
+  architecture: "standalone"
+
+postgres-hydra:
+  commonAnnotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-6"
+
+  metrics:
+    enabled: true
+
+  primary:
+    persistence:
+      size: "50Gi"
+
+  auth:
+    database: "postgres"
+    username: "hydra"
+    password: "hydra"
+
+  architecture: "standalone"
+
+# Mysql external dependencies
+mysql-polland:
+  fullnameOverride: mysql-poalland
+  commonAnnotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-6"
+  auth:
+    username: "polland"
+    database: "polland"
+    password: "polland"
+    rootPassword: "polland"
+
+mysql-pulse:
+  commonAnnotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+  auth:
+    username: "pulse"
+    database: "pulse"
+    password: "pulse"
+    rootPassword: "pulse"
+
+mysql-vault:
+  auth:
+    username: "vault"
+    database: "vault"
+    password: "vault"
+    rootPassword: "vault"
+
+# MongoDB external dependencies
+mongodb:
+  metrics:
+    enabled: true
+    containerPort: 9090
+
+  persistence:
+    size: "50Gi"
+
+  architecture: "replicaset"
+
+  auth:
+    rootPassword: "devzero"
+    replicaSetKey: "devzero"
+
+    usernames:
+      - "devzero"
+    databases:
+      - "backend"
+    passwords:
+      - "backend"
+
+# Redis external dependencies
+redis-backend:
+  architecture: "standalone"
+
+  master:
+    persistence:
+      enabled: true
+    serviceAccount:
+      create: false
+
+  serviceAccount:
+    create: false
+
+  auth:
+    enabled: false
+
+  replica:
+    replicaCount: 0
+
+redis-hydra:
+  commonAnnotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-6"
+
+  architecture: "standalone"
+
+  master:
+    persistence:
+      enabled: true
+    serviceAccount:
+      create: false
+
+  serviceAccount:
+    create: false
+
+  auth:
+    enabled: false
+
+  replica:
+    replicaCount: 0
+
+redis-polland:
+  architecture: "standalone"
+
+  commonAnnotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+
+  master:
+    persistence:
+      enabled: true
+    serviceAccount:
+      create: false
+
+  serviceAccount:
+    create: false
+
+  auth:
+    enabled: false
+
+  replica:
+    replicaCount: 0
+
+# TimescaleDB external dependencies
+timescaledb-single:
+  replicaCount: 1
+  secrets:
+    credentials:
+      PATRONI_SUPERUSER_PASSWORD: "pulse"
+      PATRONI_REPLICATION_PASSWORD: "pulse"
+      PATRONI_admin_PASSWORD: "pulse"
+
+# Elasticmq external dependencies
+elasticmq:
+  service:
+    type: ClusterIP
+    port: 9324
+
+  elasticmq:
+    port: 9324
+    config: |
+      include classpath("application.conf")
+      
+      node-address {
+          protocol = http
+          host = {{ template "elasticmq.fullname" . }}
+          port = {{ .Values.elasticmq.port }}
+          context-path = ""
+      }
+      
+      rest-sqs {
+          enabled = true
+          bind-port = {{ .Values.elasticmq.port }}
+          bind-hostname = "0.0.0.0"
+          // Possible values: relaxed, strict
+          sqs-limits = relaxed
+      }
+
+      queues {
+        "logsrv.fifo" {
+          fifo = true
+          contentBasedDeduplication = true
+        }
+      }
+
+# Minio external dependencies
+minio:
+  replicas: 5
+
+  resources:
+    requests:
+      memory: 2Gi
+
+# Docker registry external dependencies
+registry:
+  ingress:
+    # -- Specify if the Docker registry Ingress is enabled
+    enabled: true
+    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ingressClassName: "nginx"
+    # -- Annotations
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/proxy-body-size: "200g"
+    # -- TLS
+    tls:
+      - secretName: devzero-registry-tls
+        hosts:
+          - "registry.{{ .Values.domain }}"
+    # -- Hosts
+    hosts:
+      - host: "registry.{{ .Values.domain }}"
+        paths:
+          - path: /
+            pathType: Prefix
+
+grafana:
+  ingress:
+    # -- Specify if the Grafana Ingress is enabled
+    enabled: true
+    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ingressClassName: "nginx"
+    # -- Annotations
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # -- TLS
+    tls:
+      - secretName: devzero-grafana-tls
+        hosts:
+          - "grafana.{{ .Values.domain }}"
+    # -- Hosts
+    hosts:
+      - host: "grafana.{{ .Values.domain }}"
+        paths:
+          - path: /
+            pathType: Prefix
+
+mimir:
+  ingress:
+    # -- Specify if the Mimir Ingress is enabled
+    enabled: true
+    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ingressClassName: "nginx"
+    # -- Annotations
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # -- TLS
+    tls:
+      - secretName: devzero-mimir-tls
+        hosts:
+          - "mimir.{{ .Values.domain }}"
+    # -- Hosts
+    hosts:
+      - host: "mimir.{{ .Values.domain }}"
+        paths:
+          - path: /
+            pathType: Prefix
+
+
+kube-prometheus-stack:
+  grafana:
+    grafana.ini:
+      auth.jwt:
+        enabled: true
+        username_claim: "sub"
+        enable_login_token: true
+        header_name: "X-JWT-Assertion"
+        auto_sign_up: true
+        url_login: true
+        jwk_set_url: "https://devinfra.us.auth0.com/.well-known/jwks.json"
+        skip_org_role_sync: true
+      auth.anonymous:
+        enabled: true
+        org_name: "Main Org."
+        org_role: "Viewer"
+      security:
+        allow_embedding: true
+        cookie_samesite: "disabled"
+      public_dashboards:
+        enabled: true
+    defaultDashboardsEnabled: false
+    persistence:
+      enabled: true
+      type: "sts"
+      accessModes:
+        - "ReadWriteOnce"
+      size: "10Gi"
+      finalizers:
+        - "kubernetes.io/pvc-protection"
+    additionalDataSources:
+      - name: mimir
+        access: proxy
+        orgId: 1
+        version: 1
+        type: prometheus
+        uid: "mimir"
+        url: https://{{ printf "%s-mimir-nginx.svc" .Release.Name }}:80
+      - name: pulse
+        access: proxy
+        orgId: 1
+        version: 1
+        uid: "pulse"
+        type: mysql
+        url: https://{{ printf "%s-mysql-pulse.svc" .Release.Name }}:3306
+        user: "pulse"
+        secureJsonData:
+          password: "pulse"
+        jsonData:
+          database: "pulse"
+      - name: timescale
+        access: proxy
+        orgId: 1
+        version: 1
+        uid: "timescale"
+        type: "postgres"
+        url: https://{{ printf "%s-0.svc" .Release.Name }}:5432
+        user: "tsdbadmin"
+        secureJsonData:
+          password: "pulse"
+        jsonData:
+          database: "tsdb"
+
+mimir-distributed:
+  mimir:
+    structuredConfig:
+      limits:
+        max_global_series_per_user: 10000000
+        request_rate: 0
+        request_burst_size: 0
+        ingestion_rate: 1000000
+        ingestion_burst_size: 100000000
+
+      querier:
+        max_concurrent: 512
+
+      query_scheduler:
+        max_outstanding_requests_per_tenant: 4096
+
+  ingester:
+    persistentVolume:
+      size: "100Gi"
+
+  compactor:
+    persistentVolume:
+      size: "100Gi"
+
+  store_gateway:
+    persistentVolume:
+      size: "100Gi"
+
+  alertmanager:
+    enabled: false
+
+  ruler:
+    enabled: false
+
+  overrides_exporter:
+    enabled: false
+
+  query_scheduler:
+    enabled: false
+
+  minio:
+    enabled: true
