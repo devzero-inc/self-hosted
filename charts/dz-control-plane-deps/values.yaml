@@ -45,7 +45,7 @@ vault:
 
         storage "mysql" {
           ha_enabled = true
-          address    = "dz-control-plane-mysql-vault-headless"
+          address    = "devzero-mysql-vault-headless"
           username   = "vault"
           password   = "vault"
           database   = "vault"
@@ -141,7 +141,7 @@ mysql-vault:
 
 # MongoDB external dependencies
 mongodb:
-  fullnameOverride: mongodb-mysql-vault
+  fullnameOverride: devzero-mongodb
   metrics:
     enabled: true
     containerPort: 9090
