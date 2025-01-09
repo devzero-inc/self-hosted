@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}-beat
+  labels:
+    app.kubernetes.io/name: polland-beat
+  annotations:
+    {{- toYaml .Values.polland.annotations | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: {{ .Values.polland.beat.replicas }}
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: polland-beat
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: polland-beat
+      annotations:
+        {{- include "devzero.podAnnotations" (dict "ctx" . "component" "polland") | nindent 8 }}
+    spec:
+      {{- with .Values.polland.schedulerName }}
+      schedulerName: {{ . | quote }}
+      {{- end }}
+      {{- if .Values.polland.priorityClassName }}
+      priorityClassName: {{ .Values.polland.priorityClassName }}
+      {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.polland.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.polland.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.polland.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}-beat
+          image: "{{ .Values.image.repository }}/{{ .Values.polland.imageName}}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /entrypoint
+            - /start-celerybeat
+          resources:
+            {{ toYaml .Values.polland.resources | nindent 12 }}
+          env:
+            - name: ENVIRONMENT
+              value: "self_hosted"
+          envFrom:
+            - configMapRef:
+                name: {{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}

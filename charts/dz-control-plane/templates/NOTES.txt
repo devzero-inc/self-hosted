@@ -1,0 +1,6 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Configure your DZ CLI to use this control plane:
+  $ curl -fsSL https://get.devzero.io | sh
+  $ sudo dz cli set-context --control-plane-url https://api.{{.Values.domain}} --network-login-server-url https://hydra.{{.Values.domain}}
+

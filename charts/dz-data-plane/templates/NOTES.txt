@@ -1,0 +1,5 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Add this control plane in DevZero:
+{{/*  $ dz platform add-region*/}}
+

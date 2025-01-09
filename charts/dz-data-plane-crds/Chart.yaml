@@ -1,0 +1,8 @@
+apiVersion: v2
+name: dz-data-plane-crds
+description: DevZero Self Hosted CRDs
+type: application
+version: 0.1.2
+appVersion: "v0.1.2"
+home: https://docs.devzero.io/docs/self-hosted
+icon: https://avatars.githubusercontent.com/u/71745520?s=400&u=10cb3d6fb9e509873fc2591ca11220573399a5de&v=4 # TODO: maybe host this image in devzero.io/static/...

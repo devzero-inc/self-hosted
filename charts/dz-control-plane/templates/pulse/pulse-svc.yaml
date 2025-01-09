@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "pulse") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "pulse") | nindent 4 }}
+    {{- with .Values.pulse.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml .Values.pulse.service.annotations | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  type: {{ .Values.pulse.service.type }}
+  ports:
+    - port: {{ .Values.pulse.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: {{ .Values.pulse.service.metricsPort }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "devzero.selectorLabels" (dict "ctx" . "component" "pulse") | nindent 4 }}

@@ -1,0 +1,1126 @@
+# -- Overrides the chart's name.
+nameOverride: null
+
+# -- Overrides the chart's computed fullname.
+fullnameOverride: null
+
+domain: "domain.example"
+
+image:
+  # -- Devzero container image repository'
+  repository: images.devzero.io/proxy/devzero-control-plane/056855531191.dkr.ecr.us-west-2.amazonaws.com
+  # -- Devzero container image tag'
+  tag: "dsh-v1.0.0"
+  # -- Container pull policy
+  pullPolicy: IfNotPresent 
+  # -- Optionally specify an array of imagePullSecrets
+  pullSecrets:
+    - replicated-pull-secret
+
+workspace:
+  image: public.ecr.aws/v1i4e1r2/devzero-devbox-base
+  localTag: base-latest
+
+global:
+  podAnnotations: {}
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: false
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use
+  name: "devzero"
+
+auth:
+  # -- Base64 encoded public key for JWT verification
+  publicKey: "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFyTmlpTnFxS0dpTVE0V0I2OHF6YwppRVBnK1dOaFpoMjdabjVRNU8rbVhCMlNnNjBCc1F3YmZYZ3lQYnhyRTVWVkYwdnpLNnhkWUZuVHFlcDZrS1dVCkRuYUJuczljN2R1T0huVTByaGxOTGt0d0ZDb2twcko0VXBRQ1ZkNjNqMG9nSUFTOEcrMmtUV0xLT2svMEpRV1QKTlY0Umx1cHdMMFFWd0ZteWxuSFBaU1IraVBZd2w4RkpyWUpZVitnNndFdjFCK3hFV0d6TW1TUXpCUkpEVkk2OAphS1dGdVJCZ1UvWTVHTDFHQ21sRXZna3RFc29WMWFlWmpwTEh2YlRJWjhOTWtVQ0EwN2F4bVFBQmh5RGZMU0FpClg4S3k0VjZ3UmRMN2NNQitIQm8yTktMQjRzMG9kQWhtS3QvTEFOMFU4NFZ1eC9ldldIMEVrZ1ZOOVptV0tvYngKRHdJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t"
+  # -- Base64 encoded private key for JWT verification
+  privateKey: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBck5paU5xcUtHaU1RNFdCNjhxemNpRVBnK1dOaFpoMjdabjVRNU8rbVhCMlNnNjBCCnNRd2JmWGd5UGJ4ckU1VlZGMHZ6SzZ4ZFlGblRxZXA2a0tXVURuYUJuczljN2R1T0huVTByaGxOTGt0d0ZDb2sKcHJKNFVwUUNWZDYzajBvZ0lBUzhHKzJrVFdMS09rLzBKUVdUTlY0Umx1cHdMMFFWd0ZteWxuSFBaU1IraVBZdwpsOEZKcllKWVYrZzZ3RXYxQit4RVdHek1tU1F6QlJKRFZJNjhhS1dGdVJCZ1UvWTVHTDFHQ21sRXZna3RFc29WCjFhZVpqcExIdmJUSVo4Tk1rVUNBMDdheG1RQUJoeURmTFNBaVg4S3k0VjZ3UmRMN2NNQitIQm8yTktMQjRzMG8KZEFobUt0L0xBTjBVODRWdXgvZXZXSDBFa2dWTjlabVdLb2J4RHdJREFRQUJBb0lCQVFDU3hwTlpJSkNOaVdGNApRVm1tWWF3VCtyQThsbXZMTDB4SHlOUWcxSERNb0VBZW1QZHF4UUZERnFKelVtRUxEREJwekJEKzhTdUorajJICmVKb0Q0dGRMUU03cGNPVlZCckEwcFFyTEhLa3h1dFcrQ2R0OXd1ZnlGOFd6N2FDcWlTT21qTjdBU0pqUkxpYlUKUmJqcEIwYnVkcWN4Skh1SFo2V2c1WXFGdnJlREJvaG4weG5FVkd5c2lwVGREc3hoUWZ3Yk5sdkMxc1JrbHlBMQpjVGdoMS84UE5TQytIU0FpVjE4aWhQVDh2UjQ0V2NXQ3k0QmFCZkJqbkloRGZFL2J3Z2NSUGg4Y0lGR1B0VFNMCkJsMWtPeUc4R2pPTG5jMHpFRmVGSVF5VmZtdDYvTXB6enRtMVFqOXpkMnh3Y1ExSkNDZExESDdmWEFmRzFGTzkKdGZsZVprY2hBb0dCQU9FbU9DKytjbE9nQUQ5bW5KRGlRejRDeExMTG9HMVZncHRNQWw2SDhaeG93b0NheFFRMQpBQStkM2ZPVXJ3TzFsU2IwUDFQNDBBL252QVIxZ2IwRVJSNlE0d0tBVnovQWp2REh1QUM0SjU0enZncHlhTzBDCmhQUllhdzVnYmFSYk4rQWx4SDNmWXhiaUx0dUNFTitoOFluOE5lbmJwU0J2WVFxVzBSSDR6RGlGQW9HQkFNU0gKdW9TMHo2RE5CUGgzMXAwNTZiM0pMV3lydDVvY1MwcnYxUjNoYkhQam11Ulo4Rk1OV3VDTlJhRHlYQi9IQVJhdApQNHF4T1NoRmY1Vjc5TU5vUktxZzNRcUJZQ2VRZDJBZjNpWW1abTNmNWI5Wi93T2tCdHpnNlA4OTZnN29jdmlnCkZhWlpIeXVHVmlacmkxdkltZDlNU0VSYlVzNjVEOGdCdzFtbXo0R0RBb0dCQUozNDhnMVZ3K08yN05XUFNxVkIKakVxVEtLNEd2NTVYRkJlZ2dqMFBoMC9tRlNxazdUMWhicFNHZ0xlcWlBM0ROMDZvcTFKZ3pxT0tSZHFmRkJPcQpUbEQrK2JqRWtmTXlTVmpaMk5ud1hDUGRUQ2NLVldLT2xQalluT3p1YlorWFBTSXhmYWVQdUhmUzVXdXcyK1A5ClBYdENraFZ1dm5KK2s0a1pmc0hzWG1YOUFvR0FOMVBHckttQ2NsQ0ZmN1d0RTZKRUxZdS9ZQUtQczdFWGVVYy8KaGlQNk5qM3pVeW9Hd0RyWVJMTkEwT2lxQ3NBcGpFckZ3clBWMVlLTFFuZ2RGZzM2bHRhbW85aDhTMmNlVkU5awphUFVTalFnbFU5TndPWVFwOG5EVzUxUjAyakdTZkhBRTZFbmF2cFFaR01QWi9jTGhucjJJOHNXSzhHdWxCN2VICldXdmVxeVVDZ1lFQXAwY0JBcUpEQzVPTFRYZHRUYkJYaW8zaHhnSktuTmIxVnROZzFpcXY2Q1lYVlBtQjFaT3cKUHB6bm5GSE5UVDhtLzhXbVBHMEkyZi84Ni9WWUUzTlYrdDZpZFRDK2g0S1NUQVlrUG55YmdKc1BLcjNyVFZ2UwpWK0dXWHhjb1VLZWZCaGkzTDN4SEcrNmxDbW5ldkNTdW03NjRhSEJkc2JTdTZBUWtldEpuNFN3PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ=="
+
+gateway:
+  # -- Number of replicas for Api Gateway
+  replicas: 3
+
+  imageName: "api-gateway"
+
+  # -- Optionally set the scheduler for pods
+  schedulerName: ""
+
+  # -- Optionally set the name of the PriorityClass for pods
+  priorityClassName: null
+
+  # -- NodeSelector to pin pods to certain set of nodes
+  nodeSelector: { }
+
+  # -- Pod affinity settings
+  affinity: { }
+
+  # -- Pod tolerations
+  tolerations: []
+
+  # -- Pod labels
+  podLabels: {}
+
+  # -- Pod annotations
+  podAnnotations: {}
+
+  # -- Annotations
+  annotations: {}
+
+
+  # Api Gateway autoscaling configuration
+  autoscaling:
+    # -- Enable autoscaling for Api Gateway
+    enabled: false
+    # -- Minimum autoscaling replicas for Api Gateway
+    minReplicas: 1
+    # -- Maximum autoscaling replicas for Api Gateway
+    maxReplicas: 3
+    # -- Target CPU utilisation percentage for Api Gateway
+    targetCPUUtilizationPercentage: 60
+    # -- Target memory utilisation percentage for Api Gateway
+    targetMemoryUtilizationPercentage: 80
+
+  resources:
+    # -- Resource limits for Api Gateway
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    # -- Resource requests for Api Gateway
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  # Api Gateway service configuration
+  service:
+    # -- Port of the Api Gateway service
+    port: 8443
+    # -- Port of the Api Gateway Metrics service
+    metricsPort: 9090
+    # -- Type of the Api Gateway service
+    type: ClusterIP
+    # -- Annotations for the Api Gateway service
+    annotations: {}
+    # -- Labels for the Api Gateway service
+    labels: {}
+
+  # Api Gateway ingress configuration
+  ingress:
+    # -- Specify if the Api Gateway Ingress is enabled
+    enabled: enable
+    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ingressClassName: "nginx"
+
+backend:
+  # -- Number of replicas for Backend
+  replicas: 1
+
+  imageName: "backend"
+
+  # -- Optionally set the scheduler for pods
+  schedulerName: ""
+
+  # -- Optionally set the name of the PriorityClass for pods
+  priorityClassName: null
+
+  # -- NodeSelector to pin pods to certain set of nodes
+  nodeSelector: { }
+
+  # -- Pod affinity settings
+  affinity: { }
+
+  # -- Pod tolerations
+  tolerations: []
+
+  # -- Pod labels
+  podLabels: {}
+
+  # -- Pod annotations
+  podAnnotations: {}
+
+  # -- Annotations
+  annotations: {}
+
+  redis:
+    url: redis://dz-control-plane-redis-backend-master:6379
+    password: ""
+
+  mongo:
+    url: "mongodb://devzero:backend@dz-control-plane-mongodb-0.dz-control-plane-mongodb-headless:27017/backend?directConnection=true"
+
+  hydra:
+    apiKey:
+
+  logsrv:
+    queue: http://dz-control-plane-elasticmq:9324/queue/logsrv.fifo
+    region: "elasticmq"
+
+  github:
+    appId: 
+    appPrivateKey: ""
+
+  mimir:
+    url: http://mimir:8080/prometheus
+
+  hibernation:
+    enabled: false
+
+  sendgrid:
+    apiKey: test-key
+
+  grafana:
+    enabled: false
+    datasourceId:
+    doraDatasourceId:
+    odaDatasourceId:
+    password:
+
+  storage:
+    allowedTeam: team-example-id
+    ceph:
+      clusterId: ""
+      filesystemName: cephfs
+      filesystemPath: cephfs
+      monitorAddress: /volumes/cache
+      userCredentials: ""
+      username: vuser
+
+  mainTeamId: ""
+
+  licenseKey: "selfzero:4888557666:mkqocQS1bKHpZx0cbz+NCtvFSEMWvgIht5iFZo2HQA0OWhI9fjpZI1wrc2zRRjEhLjnV1BACgKAqHi2qizu1b1AWeJMsKkmD3jwNOG8kaETZeJpx55AvuUSoaWi8tX+h1FpjM69Ls55dNIq0GlKk2Ze/cbQBLefVKPHOupPkIXf9DO7IQg12o9V0bIqZkOJP1X3Lpem4S6suwEkXbhq4sMpzrZXIK/rYcy37X7ux1AQ39/OizpK1YR9NoVgHf4Szv//V/P2+i7INXY90mPVlT7wr1rrEya7l/gYiKc1l94FQnU45FKPIUHxL3z3c0XRapTVbxk7TF5XlygzlkRkUv27A0Aggt6VYWeW+8b43iNlbSJBfR0/KvwF7RRaQx1A0qbrk0sqqNxA+IET35rK/gfhYFYAa861ac7NqTgOBhfwcgLmXRNRgInA6JQMGqyACQF0X7b5gUcetbtItYK7+hAL0v/fJagkYwaDQiJeMgxyDNK9OOQCm9kzST4TPNHhsr21/jqPsKvlYup+zFa+521jJuN8k80BLxOjbA6n0PbbvMLFyUTU7LzLOZe8wvCqMfNqBZgn3BMsVX/brpPZzmk2N6Acasm+9m/36IT1C/pRv59aWYWJcYnd7itll0BBO6mV9QBu43L0B00UUiNM32eqaU2N5pLTHlhevxT57aU8="
+
+  arch: amd64
+
+  cortex:
+    key: ""
+
+  # Backend autoscaling configuration
+  autoscaling:
+    # -- Enable autoscaling for Backend
+    enabled: false
+    # -- Minimum autoscaling replicas for Backend
+    minReplicas: 1
+    # -- Maximum autoscaling replicas for Backend
+    maxReplicas: 3
+    # -- Target CPU utilisation percentage for Backend
+    targetCPUUtilizationPercentage: 60
+    # -- Target memory utilisation percentage for Backend
+    targetMemoryUtilizationPercentage: 80
+
+  resources:
+    # -- Resource limits for Backend
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    # -- Resource requests for Backend
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  # Api Gateway service configuration
+  service:
+    # -- Port of the Backend service
+    port: 8443
+    # -- Port of the Backend Metrics service
+    metricsPort: 9090
+    # -- Type of the Backend service
+    type: ClusterIP
+    # -- Annotations for the Backend service
+    annotations: {}
+    # -- Labels for the Backend service
+    labels: {}
+
+hydra:
+  # -- Number of replicas for Hydra
+  replicas: 1
+
+  imageName: "hydra"
+
+  # -- Optionally set the scheduler for pods
+  schedulerName: ""
+
+  # -- Optionally set the name of the PriorityClass for pods
+  priorityClassName: null
+
+  # -- NodeSelector to pin pods to certain set of nodes
+  nodeSelector: { }
+
+  # -- Pod affinity settings
+  affinity: { }
+
+  # -- Pod tolerations
+  tolerations: []
+
+  # -- Pod labels
+  podLabels: {}
+
+  # -- Pod annotations
+  podAnnotations: {}
+
+  # -- Annotations
+  annotations: {}
+
+  postgres:
+    host: "dz-control-plane-postgres-hydra"
+    port: 5432
+    name: "postgres"
+    user: "hydra"
+    password: "hydra"
+
+  redis:
+    url: redis://default:@dz-control-plane-redis-hydra-master:6379/0
+
+  cidr:
+    v6: fd7a:115c:a1e0::/48
+    v4: 100.64.0.0/10
+
+  noise:
+    privateKey: "privkey:906164421b0dfba2b60415a4be9cf52ecba838fdbea5299662106d004ba92b4e"
+
+  derp:
+    server:
+      enabled: false
+      regionId: 999
+      regionCode: "headscale"
+      regionName: "Headscale Embedded DERP"
+      stunListenAddr: "0.0.0.0:3478"
+      privateKey: "privkey:088ef479678f5790a988278b8656a35c6ec68a1f4efa6108baff47d908a0596f"
+    urls:
+      - "https://controlplane.tailscale.com/derpmap/default"
+    paths: []
+    autoUpdateEnabled: true
+    updateFrequency: "24h"
+
+  # Hydra autoscaling configuration
+  autoscaling:
+    # -- Enable autoscaling for Hydra
+    enabled: false
+    # -- Minimum autoscaling replicas for Hydra
+    minReplicas: 1
+    # -- Maximum autoscaling replicas for Hydra
+    maxReplicas: 3
+    # -- Target CPU utilisation percentage for Hydra
+    targetCPUUtilizationPercentage: 60
+    # -- Target memory utilisation percentage for Hydra
+    targetMemoryUtilizationPercentage: 80
+
+  resources:
+    # -- Resource limits for Hydra
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    # -- Resource requests for Hydra
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  # Hydra service configuration
+  service:
+    # -- Port of the Hydra service
+    port: 8443
+    # -- Port of the Hydra Metrics service
+    metricsPort: 9090
+    # -- Type of the Hydra service
+    type: ClusterIP
+    # -- Annotations for the Hydra service
+    annotations: {}
+    # -- Labels for the Hydra service
+    labels: {}
+
+  # Hydra ingress configuration
+  ingress:
+    # -- Specify if the Hydra Ingress is enabled
+    enabled: true
+    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ingressClassName: "nginx"
+
+logsrv:
+  # -- Number of replicas for Logsrv
+  replicas: 1
+
+  imageName: "logsrv"
+
+  # -- Optionally set the scheduler for pods
+  schedulerName: ""
+
+  # -- Optionally set the name of the PriorityClass for pods
+  priorityClassName: null
+
+  # -- NodeSelector to pin pods to certain set of nodes
+  nodeSelector: { }
+
+  # -- Pod affinity settings
+  affinity: { }
+
+  # -- Pod tolerations
+  tolerations: []
+
+  # -- Pod labels
+  podLabels: {}
+
+  # -- Pod annotations
+  podAnnotations: {}
+
+  # -- Annotations
+  annotations: {}
+
+  queue:
+    url: http://dz-control-plane-elasticmq:9324/queue/logsrv.fifo
+
+  postgres:
+    url: postgresql://logsrv:logsrv@dz-control-plane-postgres-logsrv:5432/logsrv
+    password: logsrv
+
+  refreshJwksTimer: 3600
+
+  # Logsrv autoscaling configuration
+  autoscaling:
+    # -- Enable autoscaling for Logsrv
+    enabled: false
+    # -- Minimum autoscaling replicas for Logsrv
+    minReplicas: 1
+    # -- Maximum autoscaling replicas for Logsrv
+    maxReplicas: 3
+    # -- Target CPU utilisation percentage for Logsrv
+    targetCPUUtilizationPercentage: 60
+    # -- Target memory utilisation percentage for Logsrv
+    targetMemoryUtilizationPercentage: 80
+
+  resources:
+    # -- Resource limits for Logsrv
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    # -- Resource requests for Logsrv
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  # Logsrv service configuration
+  service:
+    # -- Port of the Logsrv service
+    port: 8443
+    # -- Port of the Logsrv Metrics service
+    metricsPort: 9090
+    # -- Type of the Logsrv service
+    type: ClusterIP
+    # -- Annotations for the Logsrv service
+    annotations: {}
+    # -- Labels for the Logsrv service
+    labels: {}
+
+  # Logsrv ingress configuration
+  ingress:
+    # -- Specify if the Logsrv Ingress is enabled
+    enabled: true
+    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ingressClassName: "nginx"
+
+polland:
+  worker:
+    # -- Number of replicas for Polland Worker
+    replicas: 3
+
+    # 1 hour of termination grace to allow stacks to finishing tasks
+    terminationGracePeriodSeconds: 3600
+
+    # Available queues created from worker
+    queues:
+      - name: fast
+        replicaCount: 1
+        autoscaling:
+          enabled: false 
+          minReplicas: 3
+          maxReplicas: 5
+      - name: build
+        replicaCount: 1
+        autoscaling:
+          enabled: false 
+          minReplicas: 3
+          maxReplicas: 5
+      - name: workload
+        replicaCount: 1
+        autoscaling:
+          enabled: false 
+          minReplicas: 3
+          maxReplicas: 5
+      - name: cluster
+        replicaCount: 1
+        autoscaling:
+          enabled: false 
+          minReplicas: 3
+          maxReplicas: 5
+      - name: hibernation
+        replicaCount: 1
+        autoscaling:
+          enabled: false
+          minReplicas: 1
+          maxReplicas: 1
+
+  beat:
+    # -- Number of replicas for Polland Beat
+    replicas: 1
+
+  flower:
+    # -- Number of replicas for Polland Flower
+    replicas: 1
+    service:
+      # -- Port of the Flower service
+      port: 5555
+      # -- Type of the Flower service
+      type: ClusterIP
+
+  celeryExporter:
+    # -- Number of replicas for Polland Celery Exporter
+    replicas: 1
+
+  # -- Number of replicas for Polland
+  replicas: 1
+
+  imageName: "polland"
+
+  # -- Optionally set the scheduler for pods
+  schedulerName: ""
+
+  # -- Optionally set the name of the PriorityClass for pods
+  priorityClassName: null
+
+  # -- NodeSelector to pin pods to certain set of nodes
+  nodeSelector: { }
+
+  # -- Pod affinity settings
+  affinity: { }
+
+  # -- Pod tolerations
+  tolerations: []
+
+  # -- Pod labels
+  podLabels: {}
+
+  # -- Pod annotations
+  podAnnotations: {}
+
+  # -- Annotations
+  annotations: {}
+
+  redis:
+    host: dz-control-plane-redis-polland-master
+    port: 6379
+
+  # -- Env configuration for polland configmap
+  env: 
+    MYSQL_PORT: "3306"
+    MYSQL_DATABASE: "polland"
+    MYSQL_USER: "polland"
+    MYSQL_PASSWORD: "polland"
+    MYSQL_HOST: "dz-control-plane-mysql-polland-headless"
+    MYSQL_ROOT_PASSWORD: "polland"
+    REDIS_URL: "redis://dz-control-plane-redis-polland-master:6379/0"
+
+    USE_DOCKER: "yes"
+    # Disable connection pooling in preprod because we are running a small container and we don't want to keep connections open.
+    CONN_MAX_AGE: "60"
+    DJANGO_ALLOWED_HOSTS: "*"
+    DJANGO_SETTINGS_MODULE: "config.settings.production"
+    # This is supposed to be a secret, but since it is only used to encrypt sessions and we don't use sessions, it can be defined plaintext.
+    DJANGO_SECRET_KEY: "super_secret_key"
+    CELERY_FLOWER_USER: "devzero"
+    CELERY_FLOWER_PASSWORD: "devzero"
+
+    SELF_HOSTED: "True"
+
+    USE_INSECURE_REGISTRY: "True"
+    USE_ECR_REGISTRY: "False"
+    USE_LOCAL_LOGSRV: "True"
+
+    VAULT_AUTH_METHOD: "kubernetes"
+    VAULT_SECRETS_MOUNT_POINT: "vault-csi-production-writer"
+    LOGSRV_DEFAULT_QUEUE: "http://dz-control-plane-elasticmq:9324/queue/logsrv.fifo"
+    LOGSRV_DEFAULT_REGION: "elasticmq"
+
+  # Polland autoscaling configuration
+  autoscaling:
+    # -- Enable autoscaling for Polland
+    enabled: false
+    # -- Minimum autoscaling replicas for Polland
+    minReplicas: 1
+    # -- Maximum autoscaling replicas for Polland
+    maxReplicas: 3
+    # -- Target CPU utilisation percentage for Polland
+    targetCPUUtilizationPercentage: 60
+    # -- Target memory utilisation percentage for Polland
+    targetMemoryUtilizationPercentage: 80
+
+  resources:
+    # -- Resource limits for Polland
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    # -- Resource requests for Polland
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  # Polland service configuration
+  service:
+    # -- Port of the Polland service
+    port: 8000
+    # -- Port of the Polland Metrics service
+    metricsPort: 9090
+    # -- Type of the Polland service
+    type: ClusterIP
+    # -- Annotations for the Polland service
+    annotations: {}
+    # -- Labels for the Polland service
+    labels: {}
+
+pulse:
+  # -- Number of replicas for Pulse
+  replicas: 1
+
+  imageName: "pulse"
+
+  # -- Optionally set the scheduler for pods
+  schedulerName: ""
+
+  # -- Optionally set the name of the PriorityClass for pods
+  priorityClassName: null
+
+  # -- NodeSelector to pin pods to certain set of nodes
+  nodeSelector: { }
+
+  # -- Pod affinity settings
+  affinity: { }
+
+  # -- Pod tolerations
+  tolerations: []
+
+  # -- Pod labels
+  podLabels: {}
+
+  # -- Pod annotations
+  podAnnotations: {}
+
+  # -- Annotations
+  annotations: {}
+
+  postgres:
+    password: pulse
+    user: postgres
+    host: dz-control-plane
+    port: 5432
+    database: postgres
+    ssl: allow 
+
+  mysql:
+    user: pulse
+    password: pulse
+    host: dz-control-plane-mysql-pulse-headless
+    port: 3306
+    database: pulse
+
+  devlake:
+    secret: "VAZOCUQLBAZAXRBLVNPFYCLEERMAKQWUISBXSNWDQTHAJSXDEQRNFZVIVMBDZGIASTGSXNEXAOQJKXKNOSECEPILRMBPEAPRBEODNASRWQVYXUDVRNJFLLTXBPNNDZBG"
+
+  openApi:
+    token: ""
+
+  # Pulse autoscaling configuration
+  autoscaling:
+    # -- Enable autoscaling for Pulse
+    enabled: false
+    # -- Minimum autoscaling replicas for Pulse
+    minReplicas: 1
+    # -- Maximum autoscaling replicas for Pulse
+    maxReplicas: 3
+    # -- Target CPU utilisation percentage for Pulse
+    targetCPUUtilizationPercentage: 60
+    # -- Target memory utilisation percentage for Pulse
+    targetMemoryUtilizationPercentage: 80
+
+  resources:
+    # -- Resource limits for Pulse
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    # -- Resource requests for Pulse
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  # Pulse service configuration
+  service:
+    # -- Port of the Pulse service
+    port: 8443
+    # -- Port of the Pulse Metrics service
+    metricsPort: 9090
+    # -- Type of the Pulse service
+    type: ClusterIP
+    # -- Annotations for the Pulse service
+    annotations: {}
+    # -- Labels for the Pulse service
+    labels: {}
+
+  # Pulse ingress configuration
+  ingress:
+    # -- Specify if the Pulse Ingress is enabled
+    enabled: false
+    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ingressClassName: "nginx"
+
+buildqd:
+  # -- Number of replicas for Buildqd
+  replicas: 1
+
+  imageName: "buildqd"
+
+  # -- Optionally set the scheduler for pods
+  schedulerName: ""
+
+  # -- Optionally set the name of the PriorityClass for pods
+  priorityClassName: null
+
+  # -- NodeSelector to pin pods to certain set of nodes
+  nodeSelector: { }
+
+  # -- Pod affinity settings
+  affinity: { }
+
+  # -- Pod tolerations
+  tolerations: []
+
+  logsrv:
+    queue: http://dz-control-plane-elasticmq:9324/queue/logsrv.fifo
+    region: elasticmq
+
+  redis:
+    url: redis://dz-control-plane-redis-polland-master:6379
+
+  # Buildqd autoscaling configuration
+  autoscaling:
+    # -- Enable autoscaling for Buildqd
+    enabled: false
+    # -- Minimum autoscaling replicas for Buildqd
+    minReplicas: 1
+    # -- Maximum autoscaling replicas for Buildqd
+    maxReplicas: 3
+    # -- Target CPU utilisation percentage for Buildqd
+    targetCPUUtilizationPercentage: 60
+    # -- Target memory utilisation percentage for Buildqd
+    targetMemoryUtilizationPercentage: 80
+
+  resources:
+    # -- Resource limits for Buildqd
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    # -- Resource requests for Buildqd
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  # Buildqd service configuration
+  service:
+    # -- Port of the Buildqd service
+    port: 8443
+    # -- Port of the Buildqd Metrics service
+    metricsPort: 9090
+    # -- Type of the Buildqd service
+    type: ClusterIP
+    # -- Annotations for the Buildqd service
+    annotations: {}
+    # -- Labels for the Buildqd service
+    labels: {}
+
+  buildkit:
+    image:
+      # Buildkit repository
+      repository: docker.io/moby/buildkit
+      # Buildkit image policy
+      pullPolicy: IfNotPresent
+      # Buildkit image tag
+      tag: "v0.15.1"
+
+    # Buildkit container security context
+    securityContext:
+      privileged: true
+
+    # Buildkit command
+    command: buildkitd
+
+    # Buildkit args
+    args:
+      - --addr
+      - unix:///run/buildkit/buildkitd.sock
+      - --addr
+      - tcp://0.0.0.0:1234
+  
+    resources:
+      # -- Resource limits for Buildqd
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      # -- Resource requests for Buildqd
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+    # Buildkit persistant volume size for shared cache
+    persistentVolumeClaim:
+      storageSize: 100Gi
+
+web:
+  # -- Number of replicas for Web
+  replicas: 1
+
+  imageName: "web"
+
+  # -- Optionally set the scheduler for pods
+  schedulerName: ""
+
+  # -- Optionally set the name of the PriorityClass for pods
+  priorityClassName: null
+
+  # -- NodeSelector to pin pods to certain set of nodes
+  nodeSelector: { }
+
+  # -- Pod affinity settings
+  affinity: { }
+
+  # -- Pod tolerations
+  tolerations: []
+
+  # -- Pod labels
+  podLabels: {}
+
+  # -- Pod annotations
+  podAnnotations: {}
+
+  # -- Annotations
+  annotations: {}
+
+  # Web autoscaling configuration
+  autoscaling:
+    # -- Enable autoscaling for Web
+    enabled: false
+    # -- Minimum autoscaling replicas for Web
+    minReplicas: 1
+    # -- Maximum autoscaling replicas for Web
+    maxReplicas: 3
+    # -- Target CPU utilisation percentage for Web
+    targetCPUUtilizationPercentage: 60
+    # -- Target memory utilisation percentage for Web
+    targetMemoryUtilizationPercentage: 80
+
+  # -- Env configuration for web configmap
+  env: 
+    NEXT_AUTH_ENABLE_CREDENTIALS_PROVIDER: "true"
+    NEXT_PUBLIC_BYPASS_AUTH0_FLOW: "true"
+    NEXT_PUBLIC_SELF_HOSTED: "true"
+    NEXT_AUTH_JWT_SIGNING_PRIV_KEY: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBck5paU5xcUtHaU1RNFdCNjhxemNpRVBnK1dOaFpoMjdabjVRNU8rbVhCMlNnNjBCCnNRd2JmWGd5UGJ4ckU1VlZGMHZ6SzZ4ZFlGblRxZXA2a0tXVURuYUJuczljN2R1T0huVTByaGxOTGt0d0ZDb2sKcHJKNFVwUUNWZDYzajBvZ0lBUzhHKzJrVFdMS09rLzBKUVdUTlY0Umx1cHdMMFFWd0ZteWxuSFBaU1IraVBZdwpsOEZKcllKWVYrZzZ3RXYxQit4RVdHek1tU1F6QlJKRFZJNjhhS1dGdVJCZ1UvWTVHTDFHQ21sRXZna3RFc29WCjFhZVpqcExIdmJUSVo4Tk1rVUNBMDdheG1RQUJoeURmTFNBaVg4S3k0VjZ3UmRMN2NNQitIQm8yTktMQjRzMG8KZEFobUt0L0xBTjBVODRWdXgvZXZXSDBFa2dWTjlabVdLb2J4RHdJREFRQUJBb0lCQVFDU3hwTlpJSkNOaVdGNApRVm1tWWF3VCtyQThsbXZMTDB4SHlOUWcxSERNb0VBZW1QZHF4UUZERnFKelVtRUxEREJwekJEKzhTdUorajJICmVKb0Q0dGRMUU03cGNPVlZCckEwcFFyTEhLa3h1dFcrQ2R0OXd1ZnlGOFd6N2FDcWlTT21qTjdBU0pqUkxpYlUKUmJqcEIwYnVkcWN4Skh1SFo2V2c1WXFGdnJlREJvaG4weG5FVkd5c2lwVGREc3hoUWZ3Yk5sdkMxc1JrbHlBMQpjVGdoMS84UE5TQytIU0FpVjE4aWhQVDh2UjQ0V2NXQ3k0QmFCZkJqbkloRGZFL2J3Z2NSUGg4Y0lGR1B0VFNMCkJsMWtPeUc4R2pPTG5jMHpFRmVGSVF5VmZtdDYvTXB6enRtMVFqOXpkMnh3Y1ExSkNDZExESDdmWEFmRzFGTzkKdGZsZVprY2hBb0dCQU9FbU9DKytjbE9nQUQ5bW5KRGlRejRDeExMTG9HMVZncHRNQWw2SDhaeG93b0NheFFRMQpBQStkM2ZPVXJ3TzFsU2IwUDFQNDBBL252QVIxZ2IwRVJSNlE0d0tBVnovQWp2REh1QUM0SjU0enZncHlhTzBDCmhQUllhdzVnYmFSYk4rQWx4SDNmWXhiaUx0dUNFTitoOFluOE5lbmJwU0J2WVFxVzBSSDR6RGlGQW9HQkFNU0gKdW9TMHo2RE5CUGgzMXAwNTZiM0pMV3lydDVvY1MwcnYxUjNoYkhQam11Ulo4Rk1OV3VDTlJhRHlYQi9IQVJhdApQNHF4T1NoRmY1Vjc5TU5vUktxZzNRcUJZQ2VRZDJBZjNpWW1abTNmNWI5Wi93T2tCdHpnNlA4OTZnN29jdmlnCkZhWlpIeXVHVmlacmkxdkltZDlNU0VSYlVzNjVEOGdCdzFtbXo0R0RBb0dCQUozNDhnMVZ3K08yN05XUFNxVkIKakVxVEtLNEd2NTVYRkJlZ2dqMFBoMC9tRlNxazdUMWhicFNHZ0xlcWlBM0ROMDZvcTFKZ3pxT0tSZHFmRkJPcQpUbEQrK2JqRWtmTXlTVmpaMk5ud1hDUGRUQ2NLVldLT2xQalluT3p1YlorWFBTSXhmYWVQdUhmUzVXdXcyK1A5ClBYdENraFZ1dm5KK2s0a1pmc0hzWG1YOUFvR0FOMVBHckttQ2NsQ0ZmN1d0RTZKRUxZdS9ZQUtQczdFWGVVYy8KaGlQNk5qM3pVeW9Hd0RyWVJMTkEwT2lxQ3NBcGpFckZ3clBWMVlLTFFuZ2RGZzM2bHRhbW85aDhTMmNlVkU5awphUFVTalFnbFU5TndPWVFwOG5EVzUxUjAyakdTZkhBRTZFbmF2cFFaR01QWi9jTGhucjJJOHNXSzhHdWxCN2VICldXdmVxeVVDZ1lFQXAwY0JBcUpEQzVPTFRYZHRUYkJYaW8zaHhnSktuTmIxVnROZzFpcXY2Q1lYVlBtQjFaT3cKUHB6bm5GSE5UVDhtLzhXbVBHMEkyZi84Ni9WWUUzTlYrdDZpZFRDK2g0S1NUQVlrUG55YmdKc1BLcjNyVFZ2UwpWK0dXWHhjb1VLZWZCaGkzTDN4SEcrNmxDbW5ldkNTdW03NjRhSEJkc2JTdTZBUWtldEpuNFN3PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ=="
+
+  resources:
+    # -- Resource limits for Web
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+    # -- Resource requests for Web
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+
+  # Web service configuration
+  service:
+    # -- Port of the Web service
+    port: 3000
+    # -- Type of the Web service
+    type: ClusterIP
+    # -- Annotations for the Web service
+    annotations: {}
+    # -- Labels for the Web service
+    labels: {}
+
+  # Web ingress configuration
+  ingress:
+    # -- Specify if the Web Ingress is enabled
+    enabled: true
+    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ingressClassName: "nginx"
+
+#### External dependencies ####
+
+# Cluster issuer for cert manager
+issuer:
+  enabled: true
+
+  # ACME server URL
+  acme: https://acme-v02.api.letsencrypt.org/directory 
+  # Email address used for ACME registration
+  email: email@selfzero.net
+
+# Vault external dependencies
+vault:
+  global:
+    enabled: true
+
+  injector:
+    enabled: false
+    metrics:
+      enabled: true
+  ui:
+    enabled: true
+
+  server:
+    extraEnvironmentVars:
+      GOOGLE_REGION: global
+      GOOGLE_PROJECT: devzero-kubernetes-sandbox
+      GOOGLE_APPLICATION_CREDENTIALS: /vault/userconfig/kms-creds/sa-credentials.json #/vault/userconfig/kms-creds/sa-credentials.json
+    extraVolumes:
+    - type: 'secret'
+      name: 'kms-creds'  #kms-creds
+    enabled: true
+    ingress:
+      enabled: false
+    auditStorage:
+      enabled: true
+    dataStorage:
+      enabled: true
+    ha:
+      enabled: true
+      replicas: 3
+      config: |
+        disable_mlock = true
+        ui = true
+        
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+        
+        service_registration "kubernetes" {}
+
+        storage "mysql" {
+          ha_enabled = true
+          address    = "dz-control-plane-mysql-vault-headless"
+          username   = "vault"
+          password   = "vault"
+          database   = "vault"
+        }
+        
+        seal "gcpckms" {
+          project     = "devzero-kubernetes-sandbox"
+          region = "global"
+          key_ring    = "vault-key-ring-2"
+          crypto_key  = "vault-auto-unseal-2"
+        }
+
+  ingress:
+    # -- Specify if the Vault Ingress is enabled
+    enabled: true
+    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ingressClassName: "nginx"
+
+# Postgres external dependencies
+postgres-logsrv:
+  metrics:
+    enabled: true
+  
+  primary:
+    persistence:
+      size: "50Gi"
+  
+  auth:
+    database: "logsrv"
+    username: "logsrv"
+    password: "logsrv"
+  
+  architecture: "standalone"
+
+postgres-hydra:
+  commonAnnotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-6"
+
+  metrics:
+    enabled: true
+  
+  primary:
+    persistence:
+      size: "50Gi"
+  
+  auth:
+    database: "postgres"
+    username: "hydra"
+    password: "hydra"
+
+  architecture: "standalone"
+
+# Mysql external dependencies
+mysql-polland:
+  commonAnnotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-6"
+  auth:
+    username: "polland"
+    database: "polland"
+    password: "polland"
+    rootPassword: "polland"
+
+mysql-pulse:
+  commonAnnotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+  auth:
+    username: "pulse"
+    database: "pulse"
+    password: "pulse"
+    rootPassword: "pulse"
+
+mysql-vault:
+  auth:
+    username: "vault"
+    database: "vault"
+    password: "vault"
+    rootPassword: "vault"
+
+# MongoDB external dependencies
+mongodb:
+  metrics:
+    enabled: true
+    containerPort: 9090
+  
+  persistence:
+    size: "50Gi"
+  
+  architecture: "replicaset"
+  
+  auth:
+    usernames:
+      - "devzero"
+    databases:
+      - "backend"
+    passwords:
+      - "backend"
+
+# Redis external dependencies
+redis-backend:
+  architecture: "standalone"
+  
+  master:
+    persistence:
+      enabled: true
+    serviceAccount:
+      create: false
+  
+  serviceAccount:
+    create: false
+  
+  auth:
+    enabled: false
+  
+  replica:
+    replicaCount: 0
+
+redis-hydra:
+  commonAnnotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-6"
+
+  architecture: "standalone"
+  
+  master:
+    persistence:
+      enabled: true
+    serviceAccount:
+      create: false
+  
+  serviceAccount:
+    create: false
+  
+  auth:
+    enabled: false
+  
+  replica:
+    replicaCount: 0
+
+redis-polland:
+  architecture: "standalone"
+
+  commonAnnotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+  
+  master:
+    persistence:
+      enabled: true
+    serviceAccount:
+      create: false
+  
+  serviceAccount:
+    create: false
+  
+  auth:
+    enabled: false
+  
+  replica:
+    replicaCount: 0
+
+# TimescaleDB external dependencies
+timescaledb-single:
+  replicaCount: 1
+  secrets:
+    credentials:
+      PATRONI_SUPERUSER_PASSWORD: "pulse"
+      PATRONI_REPLICATION_PASSWORD: "pulse"
+      PATRONI_admin_PASSWORD: "pulse"
+
+# Elasticmq external dependencies
+elasticmq:
+  service:
+    type: ClusterIP
+    port: 9324
+  
+  elasticmq:
+    port: 9324
+    config: |
+      include classpath("application.conf")
+      
+      node-address {
+          protocol = http
+          host = {{ template "elasticmq.fullname" . }}
+          port = {{ .Values.elasticmq.port }}
+          context-path = ""
+      }
+      
+      rest-sqs {
+          enabled = true
+          bind-port = {{ .Values.elasticmq.port }}
+          bind-hostname = "0.0.0.0"
+          // Possible values: relaxed, strict
+          sqs-limits = relaxed
+      }
+
+      queues {
+        "logsrv.fifo" {
+          fifo = true
+          contentBasedDeduplication = true
+        }
+      }
+
+# Minio external dependencies
+minio:
+  replicas: 5
+
+  resources:
+    requests:
+      memory: 2Gi
+
+# Docker registry external dependencies
+registry:
+  ingress:
+    # -- Specify if the Docker registry Ingress is enabled
+    enabled: true
+    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ingressClassName: "nginx"

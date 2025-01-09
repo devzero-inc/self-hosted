@@ -1,0 +1,79 @@
+{{- $root := . -}}
+{{- range $queue := $root.Values.polland.worker.queues }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" $root "component" "polland") }}-worker-{{ $queue.name }}
+  labels:
+    app.kubernetes.io/name: polland-worker-{{ $queue.name }}
+  namespace: {{ $root.Release.Namespace | quote }}
+spec:
+  replicas: {{ $queue.replicaCount }}
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: polland-worker-{{ $queue.name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: polland-worker-{{ $queue.name }}
+      annotations:
+        {{- include "devzero.podAnnotations" (dict "ctx" $root "component" "polland") | nindent 8 }}
+    spec:
+      terminationGracePeriodSeconds: {{ $root.Values.polland.worker.terminationGracePeriodSeconds }}
+      initContainers:
+        - name: wait-for-redis
+          image: busybox:1.36
+          command:
+            - /bin/sh
+            - -c
+            - |
+              until nc -z {{ $root.Values.polland.redis.host }} {{ $root.Values.polland.redis.port }}; do
+                echo "Waiting for Redis...";
+                sleep 2;
+              done
+              echo "Redis is up!"
+      containers:
+        - name: {{ printf "%s-worker-%s" $root.Chart.Name $queue.name }}
+          image: "{{ $root.Values.image.repository }}/{{ $root.Values.polland.imageName }}:{{ $root.Values.image.tag | default $root.Chart.AppVersion }}"
+          imagePullPolicy: {{ $root.Values.image.pullPolicy }}
+          command:
+            - /entrypoint
+            - /start-celeryworker
+          ports:
+            - name: metrics-port 
+              containerPort: {{ $root.Values.polland.service.metricsPort }}
+              protocol: TCP
+          env:
+            - name: QUEUE
+              value: {{ $queue.name }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "devzero.resourceName" (dict "ctx" $root "component" "polland") }}
+          resources:
+            {{- toYaml $root.Values.polland.resources | nindent 12 }}
+      {{- with $root.Values.polland.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if $root.Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range $root.Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      {{- with $root.Values.polland.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $root.Values.polland.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

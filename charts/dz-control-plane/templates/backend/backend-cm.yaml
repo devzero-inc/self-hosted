@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "backend") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "backend") | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  self_hosted.yaml: |
+    prometheus_port: {{ .Values.backend.service.metricsPort }}
+    healthcheck_port: 8080
+    listener_endpoint: "0.0.0.0:{{ .Values.backend.service.port }}"
+    redis_url: {{ .Values.backend.redis.url }}
+    mongodb_url: {{ .Values.backend.mongo.url }}
+    pulse_host: "http://{{ include "devzero.resourceName" (dict "ctx" . "component" "pulse") }}"
+    pulse_port: {{ .Values.pulse.service.port }}
+    log:
+      filepath:
+        - stdout
+      level: debug
+    sendgrid_api_key: {{ .Values.backend.sendgrid.apiKey }}
+    auth0_client_id: ""
+    auth0_api_client_id: "" 
+    auth0_api_client_secret: "" 
+    polland_url: "http://{{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}:{{ .Values.polland.service.port }}"
+    default_cli_version: latest
+    default_cli_install_dir: /usr/local/bin
+    hydra_url: https://hydra.{{ .Values.domain }}
+    control_plane_url: https://api.{{ .Values.domain }}
+    hydra_api_key: {{ .Values.backend.hydra.apiKey }}
+    download_cli_script_url: "https://get.devzero.io"
+    default_subnet_selector:
+      ap-south-1: subnet-0fec74fdb733b93f7
+      us-west-1: subnet-0b566588698169939
+      eu-west-1: subnet-0c6d09e1d8ed15aee
+    production: true
+    default_team_type: "FREE"
+    posthog:
+      use-fake: true
+    shared_storage:
+      allowed_team: {{ .Values.backend.storage.allowedTeam }}
+      ceph_cluster_id: {{ .Values.backend.storage.ceph.clusterId }}
+      ceph_filesystem_name: {{ .Values.backend.storage.ceph.filesystemName }}
+      ceph_filesystem_path: {{ .Values.backend.storage.ceph.filesystemPath }}
+      ceph_monitor_address: {{ .Values.backend.storage.ceph.monitorAddress }}
+      ceph_user_credentials: {{ .Values.backend.storage.ceph.userCredentials }}
+      ceph_username: {{ .Values.backend.storage.ceph.username }}
+    environment: self-hosted 
+    devzero_team_id: {{ .Values.backend.mainTeamId }}
+    logsrv_default_queue: {{ .Values.backend.logsrv.queue }}
+    logsrv_default_region: {{ .Values.backend.logsrv.region }}
+    github_app_id: {{ .Values.backend.github.appId }}
+    github_app_private_key: {{ .Values.backend.github.appPrivateKey }}
+    stripe:
+      api_key: ""
+      webhook_signing_secret: ""
+      auto_create_subscriptions: false
+    global_features:
+      grafana:
+        enabled: {{ .Values.backend.grafana.enabled }}
+        url: https://grafana.{{ .Values.domain }}
+        datasource_id: {{ .Values.backend.grafana.datasourceId }}
+        dora_datasource_id: {{ .Values.backend.grafana.doraDatasourceId }}
+        oda_datasource_id: {{ .Values.backend.grafana.odaDatasourceId }}
+        password: {{ .Values.backend.grafana.password }}
+        user: "admin"
+      dxi:
+        enabled: {{ .Values.backend.grafana.enabled }}
+    self_hosted: true
+    license_key: {{ .Values.backend.licenseKey }}
+    arch: {{ .Values.backend.arch }}
+    docker_registry: "registry.{{.Values.domain}}/devzero-devbox-base"
+    service_keys:
+      cortex: {{ .Values.backend.cortex.key }}
+    vaulted_auth_private_key: ""
+    jwt_private_key: ""
+    cli_session_url_template: https://{{ .Values.domain }}/dashboard/settings/user-settings?cli-session-id=%s
+    auto_hibernation_enabled: {{ .Values.backend.hibernation.enabled }}
+    cost_prometheus_url: {{ .Values.backend.mimir.url }}
+    default_dz_base_image_tag: base-latest
+    vault_endpoint: "https://vault-internal-customers.devzero.dev/"
+    vault_auth_method: "k8s"
+    vault_token: ""
+    vault_store_mount_point: ""
+    vault_auth_secret_mount_point: ""
+    vault_auth_role: "customer-secret-writer"
+    github_app_install_url: ""
+    github_app_client_id: ""
+    github_app_client_secret: ""
+    github_webhook_secret: ""
+    nats_endpoint: ""
+    nats_token: ""
+
+
+

@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devzero-scheduler
+  namespace: kube-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: devzero-scheduler
+  template:
+    metadata:
+      annotations:
+        "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
+      labels:
+        component: scheduler
+        name: devzero-scheduler
+        tier: control-plane
+    spec:
+      priorityClassName: system-cluster-critical
+      containers:
+        - command:
+            - /usr/local/bin/kube-scheduler
+            - --config=/etc/kubernetes/scheduler-config.yaml
+            - -v=5
+          image: registry.k8s.io/kube-scheduler:v1.25.12
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              memory: 256Mi
+          livenessProbe:
+            timeoutSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 10259
+              scheme: HTTPS
+          name: devzero-scheduler
+          readinessProbe:
+            timeoutSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 10259
+              scheme: HTTPS
+          volumeMounts:
+            - mountPath: /etc/kubernetes/scheduler-config.yaml
+              name: devzero-scheduler-config
+              subPath: devzero-scheduler-config.yaml
+      serviceAccountName: devzero-scheduler
+      volumes:
+        - configMap:
+            name: devzero-scheduler-config
+          name: devzero-scheduler-config

@@ -1,0 +1,26 @@
+apiVersion: v2
+name: dz-data-plane
+description: DevZero Self Hosted Data Plane
+type: application
+version: 0.1.4
+appVersion: "v0.1.4"
+home: https://docs.devzero.io/docs/self-hosted
+icon: https://avatars.githubusercontent.com/u/71745520?s=400&u=10cb3d6fb9e509873fc2591ca11220573399a5de&v=4 # TODO: maybe host this image in devzero.io/static/...
+dependencies:
+  - name: rook-ceph
+    version: 1.14.9
+    repository: https://charts.rook.io/release
+  - name: external-secrets
+    version: 0.10.5
+    repository: https://charts.external-secrets.io
+  - name: rook-ceph-cluster
+    version: 1.14.9
+    repository: https://charts.rook.io/release
+  - name: metacontroller-helm
+    version: 4.11.19
+    repository: oci://ghcr.io/metacontroller
+  - name: kube-prometheus-stack
+    version: 62.4.0
+    repository: https://prometheus-community.github.io/helm-charts
+
+

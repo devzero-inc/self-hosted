@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "web") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "web") | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.web.annotations | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: {{ .Values.web.replicas }}
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "devzero.selectorLabels" (dict "ctx" . "component" "web") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "devzero.podLabels" (dict "ctx" . "component" "web") | nindent 8 }}
+      annotations:
+        {{- include "devzero.podAnnotations" (dict "ctx" . "component" "web") | nindent 8 }}
+    spec:
+      {{- with .Values.web.schedulerName }}
+      schedulerName: {{ . | quote }}
+      {{- end }}
+      {{- if .Values.web.priorityClassName }}
+      priorityClassName: {{ .Values.web.priorityClassName }}
+      {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.web.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.web.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.web.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "devzero.resourceName" (dict "ctx" . "component" "web") }}
+          image: "{{ .Values.image.repository }}/{{ .Values.web.imageName}}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.web.service.port }}
+              protocol: TCP
+          resources:
+            {{ toYaml .Values.web.resources | nindent 12 }}
+          env:
+            - name: "NEXTAUTH_SECRET"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "web") }}
+                  key: next-auth-secret
+            - name: "NEXT_AUTH_JWT_SIGNING_PRIV_KEY"
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secret
+                  key: private.key
+          envFrom:
+            - configMapRef:
+                name: {{ include "devzero.resourceName" (dict "ctx" . "component" "web") }}

@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: generic-device-plugin
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: generic-device-plugin
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: generic-device-plugin
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: generic-device-plugin
+    spec:
+      priorityClassName: system-node-critical
+      nodeSelector:
+        node-role.kubernetes.io/devpod-node: "1" 
+      tolerations:
+      - operator: "Exists"
+        effect: "NoExecute"
+      - operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+      - image: ghcr.io/squat/generic-device-plugin:36bfc606bba2064de6ede0ff2764cbb52edff70d@sha256:975795cb4d4d7e026d0bb177f735cc0f43f5a690d8d979ec355adad590619ec2
+        args:
+        - --device
+        - |
+          name: tuntap
+          groups:
+            - count: 999
+              paths:
+                - path: /dev/net/tun
+        name: generic-device-plugin
+        resources:
+          requests:
+            cpu: 50m
+            memory: 10Mi
+          limits:
+            cpu: 50m
+            memory: 20Mi
+        ports:
+        - containerPort: 8080
+          name: http
+        volumeMounts:
+        - name: device-plugin
+          mountPath: /var/lib/kubelet/device-plugins
+        - name: dev
+          mountPath: /dev
+      volumes:
+      - name: device-plugin
+        hostPath:
+          path: /var/lib/kubelet/device-plugins
+      - name: dev
+        hostPath:
+          path: /dev
+  updateStrategy:
+    type: RollingUpdate

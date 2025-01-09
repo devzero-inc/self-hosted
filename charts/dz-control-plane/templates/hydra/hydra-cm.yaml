@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "hydra") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "hydra") | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+data:
+  self_hosted.yaml: |
+    server_url: https://hydra.{{ .Values.domain }}
+    
+    listen_addr: "0.0.0.0:{{ .Values.hydra.service.port }}"
+    metrics_listen_addr: "0.0.0.0:{{ .Values.hydra.service.metricsPort }}"
+    grpc_listen_addr: 127.0.0.1:50443
+    grpc_allow_insecure: false
+    
+    prefixes:
+      v6: {{ .Values.hydra.cidr.v6 }}
+      v4: {{ .Values.hydra.cidr.v4 }}
+    
+    derp:
+      server:
+        enabled: {{ .Values.hydra.derp.server.enabled }}
+        region_id: {{ .Values.hydra.derp.server.regionId }}
+        region_code: {{ .Values.hydra.derp.server.regionCode }}
+        region_name: {{ .Values.hydra.derp.server.regionName }}
+        stun_listen_addr: {{ .Values.hydra.derp.server.stunListenAddr }}
+        private_key: {{ .Values.hydra.derp.server.privateKey }}
+    
+      urls:
+        {{- range .Values.hydra.derp.urls }}
+          - {{ . | quote }}
+        {{- end }}
+      {{- if .Values.hydra.derp.paths }}
+      paths:
+      {{- range .Values.hydra.derp.paths }}
+        - {{ . | quote }}
+      {{- end }}
+      {{- end }}
+      auto_update_enabled: {{ .Values.hydra.derp.autoUpdateEnabled | quote }}
+      update_frequency: {{ .Values.hydra.derp.updateFrequency | quote }}
+    
+    disable_check_updates: false
+    ephemeral_node_inactivity_timeout: 30m
+    node_update_check_interval: 10s
+    
+    database:
+      type: postgres
+      postgres:
+        host: {{ .Values.hydra.postgres.host | quote }}
+        port: {{ .Values.hydra.postgres.port }}
+        name: {{ .Values.hydra.postgres.name | quote }}
+        user: {{ .Values.hydra.postgres.user | quote }}
+        pass: {{ .Values.hydra.postgres.password | quote }}
+      redis:
+        url: {{ .Values.hydra.redis.url | quote }}
+    
+    log:
+      format: text
+      level: debug
+    
+    acl_policy_path: /etc/headscale/acl.json
+    
+    dns_config:
+     override_local_dns: false
+     nameservers:
+       - 1.1.1.1
+       - 1.0.0.1
+     domains: []
+     magic_dns: true
+     base_domain: dv0.io
+    
+    unix_socket: /var/run/headscale/headscale.sock
+    unix_socket_permission: "0770"
+    
+    #oidc:
+    #  only_start_if_oidc_is_available: true
+    #  issuer: "https://devinfra.us.auth0.com/"
+    #  client_id: ""
+    #  strip_email_domain: true
+    #  allowed_domains:
+    #    - devzero.example
+    
+    logtail:
+      enabled: false
+    
+    randomize_client_port: false
+    
+    otel_host: ""
+    otel_port: 4317
+    environment: "self-hosted"

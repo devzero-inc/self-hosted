@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "pulse") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "pulse") | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  self_hosted.yaml: |
+    server_grpc_host: 0.0.0.0
+    server_grpc_port: {{ .Values.pulse.service.port }}
+    environment: production 
+    metrics_address: 0.0.0.0:{{ .Values.pulse.service.metricsPort }}
+    sentry_debug: false
+    use_timescale: true
+    postgres_password: {{ .Values.pulse.postgres.password | quote }}
+    postgres_user: {{ .Values.pulse.postgres.user | quote }}
+    postgres_host: {{ .Values.pulse.postgres.host | quote }}
+    postgres_port: {{ .Values.pulse.postgres.port }}
+    postgres_database: {{ .Values.pulse.postgres.database | quote }}
+    postgres_ssl: {{ .Values.pulse.postgres.ssl }}
+    mysql_user: {{ .Values.pulse.mysql.user | quote }}
+    mysql_password: {{ .Values.pulse.mysql.password | quote }}
+    mysql_host: {{ .Values.pulse.mysql.host | quote }}
+    mysql_port: {{ .Values.pulse.mysql.port }}
+    mysql_database: {{ .Values.pulse.mysql.database | quote }}
+    open_api_token: {{ .Values.pulse.openApi.token | quote }}

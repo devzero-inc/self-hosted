@@ -1,0 +1,110 @@
+{{- if .Values.hydra.job -}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hydra-job-sa
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: hydra-job-role
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: hydra-job-rolebinding
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: hydra-job-role
+subjects:
+  - kind: ServiceAccount
+    name: hydra-job-sa
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "hydra") }}-generate-api-key
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-4"
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "hydra") | nindent 4 }}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        {{- include "devzero.podLabels" (dict "ctx" . "component" "hydra") | nindent 8 }}
+    spec:
+      serviceAccountName: hydra-job-sa
+      restartPolicy: Never
+      containers:
+        - name: api-key-generator
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              echo "Checking if Hydra API key secret exists..."
+
+              # Check if the secret exists
+              if kubectl get secret hydra-api-key -n {{ .Release.Namespace }} >/dev/null 2>&1; then
+                echo "Secret hydra-api-key already exists. Skipping creation."
+                exit 0
+              fi
+
+              echo "Waiting for Hydra Pod to be ready..."
+              
+              # Wait until the pod is ready
+              for i in {1..30}; do
+                POD_NAME=$(kubectl get pods -l app.kubernetes.io/component=hydra -n {{ .Release.Namespace }} -o jsonpath="{.items[0].metadata.name}" 2>/dev/null || echo "")
+                if [ -n "$POD_NAME" ] && kubectl get pod $POD_NAME -n {{ .Release.Namespace }} -o jsonpath='{.status.containerStatuses[0].ready}' | grep -q true; then
+                  echo "Hydra Pod is ready: $POD_NAME"
+                  break
+                fi
+                echo "Waiting for Hydra Pod..."
+                sleep 10
+              done
+              
+              if [ -z "$POD_NAME" ]; then
+                echo "Hydra Pod not found after waiting. Exiting..."
+                exit 1
+              fi
+
+              echo "Executing API key creation in Pod: $POD_NAME"
+              
+              # Retrieve the container name
+              CONTAINER_NAME=$(kubectl get pod $POD_NAME -n {{ .Release.Namespace }} -o jsonpath='{.spec.containers[0].name}')
+              
+              # Execute the command to generate the API key
+              API_KEY=$(kubectl exec -n {{ .Release.Namespace }} $POD_NAME -c $CONTAINER_NAME -- /headscale apikeys create | awk NF | tail -n 1)
+              if [[ -z "$API_KEY" ]]; then
+                echo "Failed to extract API key."
+                exit 1
+              fi
+              echo "API Key Generated: $API_KEY"
+              # Save the API key in a secret
+              kubectl create secret generic hydra-api-key --from-literal=api-key="$API_KEY" -n {{ .Release.Namespace }} --dry-run=client -o yaml | kubectl apply -f -
+{{- end }}

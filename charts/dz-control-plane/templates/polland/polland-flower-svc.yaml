@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}-flower
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "polland") | nindent 4 }}
+    {{- with .Values.polland.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml .Values.polland.service.annotations | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  type: {{ .Values.polland.flower.service.type }}
+  ports:
+    - port: {{ .Values.polland.flower.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "devzero.selectorLabels" (dict "ctx" . "component" "polland") | nindent 4 }}

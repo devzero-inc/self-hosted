@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "backend") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "backend") | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.backend.annotations | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "devzero.selectorLabels" (dict "ctx" . "component" "backend") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "devzero.podLabels" (dict "ctx" . "component" "backend") | nindent 8 }}
+      annotations:
+        {{- include "devzero.podAnnotations" (dict "ctx" . "component" "backend") | nindent 8 }}
+    spec:
+      {{- with .Values.backend.schedulerName }}
+      schedulerName: {{ . | quote }}
+      {{- end }}
+      {{- if .Values.backend.priorityClassName }}
+      priorityClassName: {{ .Values.backend.priorityClassName }}
+      {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.backend.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "devzero.resourceName" (dict "ctx" . "component" "backend") }}
+          image: "{{ .Values.image.repository }}/{{ .Values.backend.imageName}}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.service.port }}
+              protocol: TCP
+            - name: metrics-port
+              containerPort: {{ .Values.backend.service.metricsPort }}
+              protocol: TCP
+            - containerPort: 8080
+              name: health
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: health
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ready
+              port: health
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            {{ toYaml .Values.backend.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /config/self_hosted.yaml
+              name: config
+              subPath: self_hosted.yaml
+          env:
+            - name: CONFIG_FILENAME
+              value: "self_hosted"
+            - name: HYDRA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hydra-api-key
+                  key: api-key
+            - name: VAULTED_AUTH_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secret
+                  key: private.key
+            - name: JWT_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secret
+                  key: private.key
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "devzero.resourceName" (dict "ctx" . "component" "backend") }}

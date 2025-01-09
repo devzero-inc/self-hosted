@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "hydra") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "hydra") | nindent 4 }}
+    {{- with .Values.hydra.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    {{- if .Values.hydra.service.annotations }}
+    {{- toYaml .Values.hydra.service.annotations | nindent 4 }}
+    {{- end }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  type: {{ .Values.hydra.service.type }}
+  ports:
+    - port: {{ .Values.hydra.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: {{ .Values.hydra.service.metricsPort }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "devzero.selectorLabels" (dict "ctx" . "component" "hydra") | nindent 4 }}

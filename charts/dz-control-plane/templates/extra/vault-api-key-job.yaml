@@ -1,0 +1,113 @@
+{{- $svcPort := 8200 -}}
+{{- $svcName := include "devzero.resourceName" (dict "ctx" . "component" "vault") }}
+{{- if .Values.vault.job -}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-job-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: vault-job-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: vault-job-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: vault-job-role
+subjects:
+  - kind: ServiceAccount
+    name: vault-job-sa
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "vault") }}-unseal
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "vault") | nindent 4 }}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        {{- include "devzero.podLabels" (dict "ctx" . "component" "vault") | nindent 8 }}
+    spec:
+      serviceAccountName: vault-job-sa
+      restartPolicy: OnFailure
+      containers:
+        - name: vault-unseal
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              # Set Vault address
+              export VAULT_ADDR=http://{{$svcName}}:{{$svcPort}}
+
+              VAULT_SECRET_KEYS_NAME="vault-unseal-keys"
+
+              # Check if Vault is initialized
+              if ! vault status | grep -q 'Initialized.*true'; then
+                echo "Vault is not initialized. Initializing now..."
+
+                # Initialize Vault with 5 Shamir keys and 3 required to unseal
+                vault operator init -key-shares=5 -key-threshold=3 > init_output.txt
+
+                # Extract keys and root token
+                unseal_keys=$(grep 'Unseal Key' init_output.txt | awk '{print $4}')
+                #echo "Unseal keys: $unseal_keys"
+                root_token=$(grep 'Initial Root Token' init_output.txt | awk '{print $4}')
+                #echo "Root token: $root_token"
+
+                # Check if secret exists and update or create accordingly
+                if kubectl get secret "$VAULT_SECRET_KEYS_NAME" &>/dev/null; then
+                  echo "Deleting existing Kubernetes secret for new keys..."
+                  kubectl delete secret "$VAULT_SECRET_KEYS_NAME"
+                fi
+
+                echo "Creating new Kubernetes secret..."
+                kubectl create secret generic "$VAULT_SECRET_KEYS_NAME" --from-literal=keys="$unseal_keys" --from-literal=root-token="$root_token"
+
+                echo "Vault initialized and keys stored in Kubernetes secret."
+              fi
+
+              echo "Vault is already initialized."
+
+              # Check if Vault is sealed
+              if vault status | grep -q 'Sealed.*true'; then
+                echo "Vault is sealed. Unsealing now..."
+
+                # Retrieve keys from Kubernetes secret
+                unseal_keys=$(kubectl get secret "$VAULT_SECRET_KEYS_NAME" -o jsonpath='{.data.keys}' | base64 --decode)
+                # echo "Unseal keys: $unseal_keys"
+
+                # Read keys line by line and unseal until successful
+                while IFS= read -r key; do
+                  # echo "Passing unseal key to Vault: $key"
+                  vault operator unseal "$key" | grep 'Unseal Progress'
+
+                  # Check if vault is still sealed
+                  if ! vault status | grep -q 'Sealed.*true'; then
+                    echo "Vault successfully unsealed!"
+                    break
+                  fi
+                done <<< "$unseal_keys"
+              else
+                echo "Vault is already unsealed."
+              fi
+{{- end }}

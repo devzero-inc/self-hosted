@@ -1,0 +1,36 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: devzero-scheduler-config
+  namespace: kube-system
+data:
+  devzero-scheduler-config.yaml: |
+    apiVersion: kubescheduler.config.k8s.io/v1
+    kind: KubeSchedulerConfiguration
+    leaderElection:
+       leaderElect: true
+       leaseDuration: 15s
+       renewDeadline: 10s
+       retryPeriod: 2s
+       resourceLock: "leases"
+       resourceName: "devzero-scheduler"
+    profiles:
+       - schedulerName: devzero-scheduler
+         pluginConfig:
+           - name: NodeResourcesFit
+             args:
+               apiVersion: kubescheduler.config.k8s.io/v1
+               kind: NodeResourcesFitArgs
+               scoringStrategy:
+                   type: MostAllocated
+                   resources:
+                       - name: cpu
+                         weight: 1
+                       - name: memory
+                         weight: 1
+         plugins:
+           score:
+               enabled:
+                   - name: NodeResourcesFit
+                     weight: 99

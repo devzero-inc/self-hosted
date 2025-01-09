@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "logsrv") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "logsrv") | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.logsrv.annotations | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: {{ .Values.logsrv.replicas }}
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "devzero.selectorLabels" (dict "ctx" . "component" "logsrv") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "devzero.podLabels" (dict "ctx" . "component" "logsrv") | nindent 8 }}
+      annotations:
+        {{- include "devzero.podAnnotations" (dict "ctx" . "component" "logsrv") | nindent 8 }}
+    spec:
+      {{- with .Values.logsrv.schedulerName }}
+      schedulerName: {{ . | quote }}
+      {{- end }}
+      {{- if .Values.logsrv.priorityClassName }}
+      priorityClassName: {{ .Values.logsrv.priorityClassName }}
+      {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.logsrv.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.logsrv.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.logsrv.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "devzero.resourceName" (dict "ctx" . "component" "logsrv") }}
+          image: "{{ .Values.image.repository }}/{{ .Values.logsrv.imageName}}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.logsrv.service.port }}
+              protocol: TCP
+            - name: metrics-port
+              containerPort: {{ .Values.logsrv.service.metricsPort }}
+              protocol: TCP
+            - containerPort: 9999
+              name: health
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: health
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ready
+              port: health
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            {{ toYaml .Values.logsrv.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /config/self_hosted.yaml
+              name: config
+              subPath: self_hosted.yaml
+          env:
+            - name: CONFIG_FILENAME
+              value: "self_hosted"
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "devzero.resourceName" (dict "ctx" . "component" "logsrv") }}

@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "logsrv") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "logsrv") | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  self_hosted.yaml: |
+    service_port: {{ .Values.logsrv.service.port }}
+    health_probe_port: 9999
+    log_level: debug
+    
+    postgres_url: {{ .Values.logsrv.postgres.url }}
+    pgpassword: {{ .Values.logsrv.postgres.password }}
+    queue_url: {{ .Values.logsrv.queue.url }}
+    num_consumers: 20
+    
+    self_hosted: true
+
+    allowed_cors_origins:
+      - https://{{ .Values.domain }}
+    auth0_domains:
+      - auth.{{ .Values.domain }}
+    auth0_audience:
+      - https://{{ .Values.domain }}/webapi
+      - https://{{ .Values.domain }}/api/v2/
+    refresh_jwks_timer: {{ .Values.logsrv.refreshJwksTimer }}

@@ -1,0 +1,206 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "buildqd") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "buildqd") | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  self_hosted.yaml: |
+    use_sentry: false
+    redis_address: {{ .Values.buildqd.redis.url }}
+    metrics_address: 0.0.0.0:{{ .Values.buildqd.service.metricsPort }}
+    polland_address: http://dz-control-plane-polland:{{ .Values.polland.service.port }}
+    buildkit_address: localhost:1234 
+    backend_address: http://dz-control-plane-backend:{{ .Values.backend.service.port }}/internal/
+    logsrv_default_queue: {{ .Values.buildqd.logsrv.queue }}
+    logsrv_default_region: {{ .Values.buildqd.logsrv.region }}
+    max_workers: 1
+    sentry_debug: false
+    max_task_attempts: 1
+    self_hosted: true
+    log:
+      filepath:
+        - stderr
+      level: debug
+      format: json
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "buildqd") }}-buildkit
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "buildqd") | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  buildkitd.toml: |
+    # debug enables additional debug logging
+    debug = true
+    # trace enables additional trace logging (very verbose, with potential performance impacts)
+    trace = false
+    # root is where all buildkit state is stored.
+    root = "/var/lib/buildkit"
+    # insecure-entitlements allows insecure entitlements, disabled by default.
+    #insecure-entitlements = ["network.host", "security.insecure"]
+
+    [log]
+    # log formatter: json or text
+    format = "json"
+
+    #[dns]
+    #nameservers = ["1.1.1.1", "8.8.8.8"]
+    #options = ["edns0"]
+    #searchDomains = ["example.com"]
+
+    #[grpc]
+    #address = ["tcp://0.0.0.0:1234"]
+    # debugAddress is address for attaching go profiles and debuggers.
+    #debugAddress = "0.0.0.0:6060"
+    #uid = 0
+    #gid = 0
+    #[grpc.tls]
+    #cert = "/etc/buildkit/tls.crt"
+    #key = "/etc/buildkit/tls.key"
+    #ca = "/etc/buildkit/tlsca.crt"
+
+    #[otel]
+    # OTEL collector trace socket path
+    #socketPath = "/run/buildkit/otel-grpc.sock"
+
+    # config for build history API that stores information about completed build commands
+    #[history]
+    # maxAge is the maximum age of history entries to keep, in seconds.
+    #maxAge = 172800
+    # maxEntries is the maximum number of history entries to keep.
+    #maxEntries = 50
+
+    [worker.oci]
+    enabled = true
+    # platforms is manually configure platforms, detected automatically if unset.
+    #platforms = ["linux/amd64", "linux/arm64"]
+    platforms = ["linux/amd64"]
+    snapshotter = "auto" # overlayfs or native, default value is "auto".
+    #rootless = false # see docs/rootless.md for the details on rootless mode.
+    # Whether run subprocesses in main pid namespace or not, this is useful for
+    # running rootless buildkit inside a container.
+    #noProcessSandbox = false
+    gc = true
+    # gckeepstorage can be an integer number of bytes (e.g. 512000000), a string
+    # with a unit (e.g. "512MB"), or a string percentage of the total disk
+    # space (e.g. "10%")
+    gckeepstorage = "90%"
+    # alternate OCI worker binary name(example 'crun'), by default either
+    # buildkit-runc or runc binary is used
+    binary = ""
+    # name of the apparmor profile that should be used to constrain build containers.
+    # the profile should already be loaded (by a higher level system) before creating a worker.
+    apparmor-profile = ""
+    # limit the number of parallel build steps that can run at the same time
+    # m5.2xlarge vms has 8 vCPUs, so 8 is a good number since buildkit is very io bound
+    # and we can have 4 pods on each node (~2vCPU each)
+    max-parallelism = 8
+    # maintain a pool of reusable CNI network namespaces to amortize the overhead
+    # of allocating and releasing the namespaces
+    cniPoolSize = 16
+
+    #[worker.oci.labels]
+    #"foo" = "bar"
+
+    # Based on this recommendation
+    # https://github.com/moby/buildkit/issues/1385#issuecomment-1699410201
+    [[worker.oci.gcpolicy]]
+    keepBytes = "80%"
+    keepDuration="72h"
+    filters = ["type==source.local","type==exec.cachemount","type==source.git.checkout"]
+
+    [[worker.oci.gcpolicy]]
+    # 60 days
+    keepDuration="1440h"
+    keepBytes = "90%"
+
+    [[worker.oci.gcpolicy]]
+    keepBytes = "90%"
+
+    [[worker.oci.gcpolicy]]
+    all = true
+    keepBytes = "90%"
+
+    #[[worker.oci.gcpolicy]]
+    # keepBytes can be an integer number of bytes (e.g. 512000000), a string
+    # with a unit (e.g. "512MB"), or a string percentage of the total disk
+    # space (e.g. "10%")
+    #keepBytes = "95%"
+    # keepDuration can be an integer number of seconds (e.g. 172800), or a
+    # string duration (e.g. "48h")
+    #keepDuration = "480h"
+    #filters = ["type==source.local", "type==exec.cachemount", "type==source.git.checkout"]
+    #[[worker.oci.gcpolicy]]
+    #all = true
+    #keepBytes = 1024000000
+
+    #[worker.containerd]
+    #address = "/run/containerd/containerd.sock"
+    #enabled = true
+    #platforms = ["linux/amd64", "linux/arm64"]
+    #namespace = "buildkit"
+    #gc = true
+    # gckeepstorage sets storage limit for default gc profile, in bytes.
+    #gckeepstorage = 9000
+    # maintain a pool of reusable CNI network namespaces to amortize the overhead
+    # of allocating and releasing the namespaces
+    #cniPoolSize = 16
+
+    #[worker.containerd.labels]
+    #"foo" = "bar"
+
+    # configure the containerd runtime
+    #[worker.containerd.runtime]
+    #name = "io.containerd.runc.v2"
+    #path = "/path/to/containerd/runc/shim"
+    #options = { BinaryName = "runc" }
+
+    #[[worker.containerd.gcpolicy]]
+    #keepBytes = 512000000
+    #keepDuration = 172800
+    #filters = ["type==source.local", "type==exec.cachemount", "type==source.git.checkout"]
+    #[[worker.containerd.gcpolicy]]
+    #all = true
+    #keepBytes = 1024000000
+
+    # registry configures a new Docker register used for cache import or output.
+    #[registry."docker.io"]
+    # mirror configuration to handle path in case a mirror registry requires a /project path rather than just a host:port
+    #mirrors = ["yourmirror.local:5000", "core.harbor.domain/proxy.docker.io"]
+    #http = true
+    #insecure = true
+    #ca = ["/etc/config/myca.pem"]
+    #[[registry."docker.io".keypair]]
+    #key = "/etc/config/key.pem"
+    #cert = "/etc/config/cert.pem"
+
+    # optionally mirror configuration can be done by defining it as a registry.
+    #[registry."yourmirror.local:5000"]
+    #http = true
+    
+    [registry."dz-control-plane-docker-registry:5000"]
+    http = true
+
+    # Frontend control
+    [frontend."dockerfile.v0"]
+    enabled = false
+
+    [frontend."gateway.v0"]
+    enabled = false
+
+    # If allowedRepositories is empty, all gateway sources are allowed.
+    # Otherwise, only the listed repositories are allowed as a gateway source.
+    #
+    # NOTE: Only the repository name (without tag) is compared.
+    #
+    # Example:
+    # allowedRepositories = [ "docker-registry.wikimedia.org/repos/releng/blubber/buildkit" ]
+    #allowedRepositories = []
+
+    #[system]
+    # how often buildkit scans for changes in the supported emulated platforms
+    #platformsCacheMaxAge = "1h"

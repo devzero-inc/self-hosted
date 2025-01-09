@@ -1,0 +1,6 @@
+cert-manager:
+  enabled: true
+  installCRDs: true
+  crds:
+    enabled: true
+    keep: true

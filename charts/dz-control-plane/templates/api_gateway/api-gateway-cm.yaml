@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "gateway") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "gateway") | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  self_hosted.yaml: |
+    auth0:
+      domains:
+        - auth.{{ .Values.domain }}
+      audience:
+        - https://{{ .Values.domain }}/webapi
+        - https://{{ .Values.domain }}/api/v2/
+    cors:
+      allowedOrigins:
+        - https://{{ .Values.domain }}
+    listener_endpoint: "0.0.0.0:{{ .Values.gateway.service.port }}"
+    listener_tls: false
+    prometheus_port: {{ .Values.gateway.service.metricsPort }}
+    healthcheck_port: 8081
+    refresh_jwks_timer: 3600
+    log:
+      filepath:
+        - stdout
+    vaulted_auth_public_key: ""
+    backend_url: "http://{{ include "devzero.resourceName" (dict "ctx" . "component" "backend") }}:{{ .Values.backend.service.port }}"

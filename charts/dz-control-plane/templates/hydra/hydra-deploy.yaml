@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "hydra") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "hydra") | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    {{- if .Values.hydra.annotations }}
+    {{- toYaml .Values.hydra.annotations | nindent 4 }}
+    {{- end }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: {{ .Values.hydra.replicas }}
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "devzero.selectorLabels" (dict "ctx" . "component" "hydra") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "devzero.podLabels" (dict "ctx" . "component" "hydra") | nindent 8 }}
+      annotations:
+        {{- include "devzero.podAnnotations" (dict "ctx" . "component" "hydra") | nindent 8 }}
+    spec:
+      {{- with .Values.hydra.schedulerName }}
+      schedulerName: {{ . | quote }}
+      {{- end }}
+      {{- if .Values.hydra.priorityClassName }}
+      priorityClassName: {{ .Values.hydra.priorityClassName }}
+      {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.hydra.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.hydra.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.hydra.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "devzero.resourceName" (dict "ctx" . "component" "hydra") }}
+          image: "{{ .Values.image.repository }}/{{ .Values.hydra.imageName}}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command:
+            - /headscale
+            - serve
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.hydra.service.port }}
+              protocol: TCP
+            - name: metrics
+              containerPort: {{ .Values.hydra.service.metricsPort }}
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 2
+          resources:
+            {{ toYaml .Values.hydra.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /etc/headscale/self_hosted.yaml
+              name: config
+              subPath: self_hosted.yaml
+          env:
+            - name: HEADSCALE_CONFIG
+              value: "/etc/headscale/self_hosted.yaml"
+          envFrom:
+            - secretRef:
+                name: {{ include "devzero.resourceName" (dict "ctx" . "component" "hydra") }}-secret
+
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "devzero.resourceName" (dict "ctx" . "component" "hydra") }}

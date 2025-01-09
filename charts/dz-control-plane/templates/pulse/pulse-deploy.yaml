@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "pulse") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "pulse") | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.pulse.annotations | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: {{ .Values.pulse.replicas }}
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "devzero.selectorLabels" (dict "ctx" . "component" "pulse") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "devzero.podLabels" (dict "ctx" . "component" "pulse") | nindent 8 }}
+      annotations:
+        {{- include "devzero.podAnnotations" (dict "ctx" . "component" "pulse") | nindent 8 }}
+    spec:
+      {{- with .Values.pulse.schedulerName }}
+      schedulerName: {{ . | quote }}
+      {{- end }}
+      {{- if .Values.pulse.priorityClassName }}
+      priorityClassName: {{ .Values.pulse.priorityClassName }}
+      {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.pulse.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.pulse.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.pulse.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "devzero.resourceName" (dict "ctx" . "component" "pulse") }}
+          image: "{{ .Values.image.repository }}/{{ .Values.pulse.imageName}}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.pulse.service.port }}
+              protocol: TCP
+            - name: metrics-port
+              containerPort: {{ .Values.pulse.service.metricsPort }}
+              protocol: TCP
+            - containerPort: 8081
+              name: health
+              protocol: TCP
+          resources:
+            {{ toYaml .Values.pulse.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /root/config/self_hosted.yaml
+              name: config
+              subPath: self_hosted.yaml
+          env:
+            - name: CONFIG_FILENAME
+              value: "self_hosted"
+          envFrom:
+            - secretRef:
+                name: {{ include "devzero.resourceName" (dict "ctx" . "component" "pulse") }}-secret
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "devzero.resourceName" (dict "ctx" . "component" "pulse") }}

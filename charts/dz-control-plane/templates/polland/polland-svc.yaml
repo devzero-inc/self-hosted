@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "polland") | nindent 4 }}
+    {{- with .Values.polland.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- toYaml .Values.polland.service.annotations | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  type: {{ .Values.polland.service.type }}
+  ports:
+    - port: {{ .Values.polland.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: {{ .Values.polland.service.metricsPort }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "devzero.selectorLabels" (dict "ctx" . "component" "polland") | nindent 4 }}

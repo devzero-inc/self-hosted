@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}-migrate
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "polland") | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "devzero.podLabels" (dict "ctx" . "component" "polland") | nindent 8 }}
+      annotations:
+        {{- include "devzero.podAnnotations" (dict "ctx" . "component" "polland") | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: pre-install-job-migrate
+        image: "{{ .Values.image.repository }}/{{ .Values.polland.imageName}}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        command:
+         - "/entrypoint"
+         - python
+         - manage.py
+         - migrate
+        env:
+          - name: ENVIRONMENT
+            value: "self_hosted"
+        envFrom:
+          - configMapRef:
+              name: {{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}

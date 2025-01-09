@@ -1,0 +1,46 @@
+{{- $svcPort := .Values.hydra.service.port -}}
+{{- $svcName := include "devzero.resourceName" (dict "ctx" . "component" "hydra") }}
+{{- if .Values.hydra.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "hydra") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "hydra") | nindent 4 }}
+  annotations:
+  {{- with .Values.hydra.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  {{- if .Values.hydra.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.hydra.ingress.ingressClassName }}
+  {{- end }}
+  {{- if .Values.hydra.ingress.tls }}
+  tls:
+    {{- range .Values.hydra.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ tpl . $ | quote }}
+        {{- end }}
+      secretName: {{ tpl .secretName $ | quote }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.hydra.ingress.hosts }}
+    - host: {{ tpl .host $ | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ .path }}
+            {{- if .pathType }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              service:
+                name: {{ $svcName }}
+                port:
+                  number: {{ $svcPort }}
+        {{- end }}
+    {{- end }}
+{{- end }}

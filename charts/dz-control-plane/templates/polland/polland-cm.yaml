@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "polland") | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-6"
+data:
+  BASE_POLLAND_URL: "http://0.0.0.0:{{ .Values.polland.service.port }}"
+  VAULT_ENDPOINT: "https://vault.{{ .Values.domain }}/"
+  DOCKER_REGISTRY: "registry.{{ .Values.domain }}"
+  VCLUSTER_DOMAIN: "{{.Values.domain}}"
+  SELF_HOSTED: "true"
+  {{- $ctx := . -}}
+  {{- range $key, $val := index .Values.polland.env }}
+  {{ $key }}: {{ tpl $val $ctx | quote }}
+  {{- end}}

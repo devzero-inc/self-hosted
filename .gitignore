@@ -1,0 +1,15 @@
+**/charts/charts/**
+**/Chart.lock
+
+.idea
+.vscode
+.codebuddy
+
+*.tfstate*
+.terraform
+
+.idea
+.vscode
+
+# generated policy.json file
+policy.json

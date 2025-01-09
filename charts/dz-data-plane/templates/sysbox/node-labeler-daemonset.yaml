@@ -1,0 +1,43 @@
+{{ if .Values.nodeLabeler.enabled -}}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-labeler
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: node-labeler
+  template:
+    metadata:
+      labels:
+        app: node-labeler
+    spec:
+      serviceAccountName: sysbox-label-node
+      containers:
+        - name: node-labeler
+          image: docker.io/bitnami/kubectl:latest
+          imagePullPolicy: Always
+          command:
+            - /bin/sh
+            - -c
+            - |
+              while true; do
+                kubectl label nodes --all  sysbox-install="yes" "node-role.kubernetes.io/devpod-node"=1 "node-role.kubernetes.io/vcluster-node"=1 "node-role.kubernetes.io/rook-node"=1 --overwrite
+                sleep 3600
+              done
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: kubeconfig
+              mountPath: /root/.kube
+      volumes:
+        - name: kubeconfig
+          hostPath:
+            path: /etc/kubernetes
+  {{- end }}

@@ -1,0 +1,12 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: sysbox-label-node-rb
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: sysbox-node-labeler
+subjects:
+  - kind: ServiceAccount
+    name: sysbox-label-node
+    namespace: {{ .Release.Namespace }}

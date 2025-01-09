@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-mirror-image
+  annotations:
+    "helm.sh/hook": post-install, post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      containers:
+        - name: image-mirror
+          image: docker:24.0-dind
+          securityContext:
+            privileged: true
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "Starting Docker daemon..."
+              dockerd --insecure-registry dz-control-plane-docker-registry:5000 &
+
+              echo "Waiting for Docker daemon to be ready..."
+              while ! docker info >/dev/null 2>&1; do
+                sleep 1
+              done
+
+              echo "Pulling image {{ .Values.workspace.image }}..."
+              docker pull {{ .Values.workspace.image }}:base-latest
+
+              echo "Tagging image for local registry..."
+              docker tag {{ .Values.workspace.image }}:base-latest dz-control-plane-docker-registry:5000/devzero-devbox-base:{{ .Values.workspace.localTag }}
+
+              echo "Pushing image to local registry..."
+              docker push dz-control-plane-docker-registry:5000/devzero-devbox-base:{{ .Values.workspace.localTag }}
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: ""
+          volumeMounts:
+            - name: dind-storage
+              mountPath: /var/lib/docker
+      restartPolicy: Never
+      volumes:
+        - name: dind-storage
+          emptyDir: {}

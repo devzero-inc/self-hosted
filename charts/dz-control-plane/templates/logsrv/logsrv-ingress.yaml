@@ -1,0 +1,46 @@
+{{- $svcPort := .Values.logsrv.service.port -}}
+{{- $svcName := include "devzero.resourceName" (dict "ctx" . "component" "logsrv") }}
+{{- if .Values.logsrv.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "logsrv") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "logsrv") | nindent 4 }}
+  annotations:
+  {{- with .Values.logsrv.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  {{- if .Values.logsrv.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.logsrv.ingress.ingressClassName }}
+  {{- end }}
+  {{- if .Values.logsrv.ingress.tls }}
+  tls:
+    {{- range .Values.logsrv.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ tpl . $ | quote }}
+        {{- end }}
+      secretName: {{ tpl .secretName $ | quote }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.logsrv.ingress.hosts }}
+    - host: {{ tpl .host $ | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ .path }}
+            {{- if .pathType }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              service:
+                name: {{ $svcName }}
+                port:
+                  number: {{ $svcPort }}
+        {{- end }}
+    {{- end }}
+{{- end }}

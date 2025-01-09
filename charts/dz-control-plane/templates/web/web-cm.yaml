@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "web") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "web") | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  API_BASE_URL: "https://api.{{ .Values.domain }}/api/v0"
+  API_BASE_URL_V2: "https://api.{{ .Values.domain }}/backend/v0"
+  NEXT_PUBLIC_API_LOGS_URL: "https://logs.{{ .Values.domain }}"
+  NEXT_PUBLIC_GRAFANA_URL: "https://grafana.{{ .Values.domain }}"
+  NEXT_PUBLIC_HYDRA_URL: "https://hydra.{{ .Values.domain }}"
+  AUTH0_BASE_URL: "https://{{ .Values.domain }}"
+  NEXTAUTH_URL: "https://{{ .Values.domain }}/api/auth"
+  {{- $ctx := . -}}
+  {{- range $key, $val := index .Values.web.env }}
+  {{ $key }}: {{ tpl $val $ctx | quote }}
+  {{- end}}
