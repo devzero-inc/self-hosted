@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: guest-vmlinux
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: guest-vmlinux
+  template:
+    metadata:
+      labels:
+        name: guest-vmlinux
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/kata-devpod-node
+                operator: In
+                values:
+                - "1"
+      tolerations:
+      - operator: Exists
+      containers:
+      - command:
+        - /bin/sh
+        - -c
+        - cp /guest-vmlinux /host/opt/kata/share/kata-containers/vmlinux-6.7-pvm && sleep infinity
+        image: ghcr.io/devzero-inc/guest-pvm-linux:latest
+        imagePullPolicy: Always
+        name: vmlinux
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /host
+          name: host-root
+      dnsPolicy: ClusterFirst
+      hostIPC: true
+      hostNetwork: true
+      hostPID: true
+      schedulerName: default-scheduler
+      volumes:
+      - hostPath:
+          path: /
+          type: ""
+        name: host-root
