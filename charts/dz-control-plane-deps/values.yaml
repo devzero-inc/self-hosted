@@ -1,13 +1,14 @@
 # Cert Manager external dependencies
 cert-manager:
+  fullnameOverride: devzero-cert-manager
   enabled: true
-  installCRDs: true
   crds:
     enabled: true
     keep: true
 
 # Vault external dependencies
 vault:
+  fullnameOverride: devzero-vault
   job: true
 
   global:
@@ -74,6 +75,7 @@ vault:
 
 # Postgres external dependencies
 postgres-logsrv:
+  fullnameOverride: devzero-postgres-logsrv
   metrics:
     enabled: true
 
@@ -109,7 +111,7 @@ postgres-hydra:
 
 # Mysql external dependencies
 mysql-polland:
-  fullnameOverride: mysql-poalland
+  fullnameOverride: devzero-mysql-polland
   commonAnnotations:
     "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-6"
@@ -120,6 +122,7 @@ mysql-polland:
     rootPassword: "polland"
 
 mysql-pulse:
+  fullnameOverride: devzero-mysql-pulse
   commonAnnotations:
     "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "0"
@@ -130,6 +133,7 @@ mysql-pulse:
     rootPassword: "pulse"
 
 mysql-vault:
+  fullnameOverride: devzero-mysql-vault
   auth:
     username: "vault"
     database: "vault"
@@ -138,6 +142,7 @@ mysql-vault:
 
 # MongoDB external dependencies
 mongodb:
+  fullnameOverride: mongodb-mysql-vault
   metrics:
     enabled: true
     containerPort: 9090
@@ -160,6 +165,7 @@ mongodb:
 
 # Redis external dependencies
 redis-backend:
+  fullnameOverride: devzero-redis-backend
   architecture: "standalone"
 
   master:
@@ -178,6 +184,7 @@ redis-backend:
     replicaCount: 0
 
 redis-hydra:
+  fullnameOverride: devzero-redis-hydra
   commonAnnotations:
     "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-6"
@@ -200,6 +207,7 @@ redis-hydra:
     replicaCount: 0
 
 redis-polland:
+  fullnameOverride: devzero-redis-polland
   architecture: "standalone"
 
   commonAnnotations:
@@ -223,6 +231,7 @@ redis-polland:
 
 # TimescaleDB external dependencies
 timescaledb-single:
+  fullnameOverride: devzero-timescaledb-single
   replicaCount: 1
   secrets:
     credentials:
@@ -232,6 +241,7 @@ timescaledb-single:
 
 # Elasticmq external dependencies
 elasticmq:
+  fullnameOverride: devzero-elasticmq
   service:
     type: ClusterIP
     port: 9324
@@ -265,6 +275,7 @@ elasticmq:
 
 # Minio external dependencies
 minio:
+  fullnameOverride: devzero-minio
   replicas: 5
 
   resources:
@@ -273,6 +284,7 @@ minio:
 
 # Docker registry external dependencies
 registry:
+  fullnameOverride: devzero-registry
   ingress:
     # -- Specify if the Docker registry Ingress is enabled
     enabled: true
@@ -296,6 +308,7 @@ registry:
             pathType: Prefix
 
 grafana:
+  fullnameOverride: devzero-grafana
   ingress:
     # -- Specify if the Grafana Ingress is enabled
     enabled: true
@@ -318,6 +331,7 @@ grafana:
             pathType: Prefix
 
 mimir:
+  fullnameOverride: devzero-mimir
   ingress:
     # -- Specify if the Mimir Ingress is enabled
     enabled: true
@@ -341,6 +355,7 @@ mimir:
 
 
 kube-prometheus-stack:
+  fullnameOverride: devzero-kube-prometheus-stack
   grafana:
     grafana.ini:
       auth.jwt:
@@ -404,6 +419,7 @@ kube-prometheus-stack:
           database: "tsdb"
 
 mimir-distributed:
+  fullnameOverride: devzero-mimir-distributed
   mimir:
     structuredConfig:
       limits:
