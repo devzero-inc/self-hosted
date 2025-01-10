@@ -2,9 +2,6 @@ dependencies:
 - name: vault
   repository: https://helm.releases.hashicorp.com
   version: 0.28.1
-- name: timescaledb-single
-  repository: https://charts.timescale.com
-  version: 0.33.1
 - name: elasticmq
   repository: https://chatwork.github.io/charts
   version: 0.2.0
@@ -17,5 +14,5 @@ dependencies:
 - name: mimir-distributed
   repository: https://grafana.github.io/helm-charts
   version: 5.6.0-weekly.321
-digest: sha256:8d211b4e94ace44658281004d61a3b6975f89c9f8b2e01fbc1a70c8e6c7c7ee5
-generated: "2025-01-09T21:15:26.84214-03:00"
+digest: sha256:7f95871e7d14d589822c865e26a791f5c6d6b608fd69176e488be7690dee18a9
+generated: "2025-01-09T21:24:03.427712-03:00"

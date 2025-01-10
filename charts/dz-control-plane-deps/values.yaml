@@ -64,15 +64,6 @@ vault:
           - path: /
             pathType: Prefix
 
-# TimescaleDB external dependencies
-timescaledb-single:
-  fullnameOverride: devzero-timescaledb-single
-  replicaCount: 1
-  secrets:
-    credentials:
-      PATRONI_SUPERUSER_PASSWORD: "pulse"
-      PATRONI_REPLICATION_PASSWORD: "pulse"
-      PATRONI_admin_PASSWORD: "pulse"
 
 # Elasticmq external dependencies
 elasticmq:

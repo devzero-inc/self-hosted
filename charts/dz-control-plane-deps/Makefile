@@ -176,3 +176,17 @@ install-postgres-hydra:
 .PHONY: delete-postgres-hydra
 delete-postgres-hydra:
 	helm delete postgres-hydra -n devzero --ignore-not-found
+
+.PHONY: install-timescaledb-single
+install-timescaledb-single:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=timescaledb-single \
+		REPO_NAME=timescale \
+		REPO_URL=https://charts.timescale.com \
+		REPO_APP_NAME=timescaledb-single \
+		VERSION=0.33.1 \
+		NAMESPACE=devzero
+
+.PHONY: delete-timescaledb-single
+delete-timescaledb-single:
+	helm delete timescaledb-single -n devzero --ignore-not-found
