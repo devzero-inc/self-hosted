@@ -2,8 +2,5 @@ dependencies:
 - name: vault
   repository: https://helm.releases.hashicorp.com
   version: 0.28.1
-- name: mimir-distributed
-  repository: https://grafana.github.io/helm-charts
-  version: 5.6.0-weekly.321
-digest: sha256:fe13aa13e67c2eaa6434a71168e5e9abb60e32e65c7b2a6c66f1d93a53e2115f
-generated: "2025-01-09T21:51:43.140589-03:00"
+digest: sha256:5789ab752e5effe73466a92bea06c1ab3b0728a563943dd12593f9a81194eab4
+generated: "2025-01-09T21:57:43.807656-03:00"

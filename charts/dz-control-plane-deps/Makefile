@@ -232,3 +232,17 @@ install-kube-prometheus-stack:
 .PHONY: delete-kube-prometheus-stack
 delete-kube-prometheus-stack:
 	helm delete kube-prometheus-stack -n devzero --ignore-not-found
+
+.PHONY: install-mimir-distributed
+install-mimir-distributed:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=mimir-distributed \
+		REPO_NAME=grafana \
+		REPO_URL=https://grafana.github.io/helm-charts \
+		REPO_APP_NAME=mimir-distributed \
+		VERSION=5.6.0-weekly.321 \
+		NAMESPACE=devzero
+
+.PHONY: delete-mimir-distributed
+delete-mimir-distributed:
+	helm delete mimir-distributed -n devzero --ignore-not-found
