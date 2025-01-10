@@ -8,12 +8,12 @@ install-rook-ceph:
 		REPO_URL=https://charts.rook.io/release \
 		REPO_APP_NAME=rook-ceph \
 		VERSION=v1.14.9 \
-		NAMESPACE=devzero
+		NAMESPACE=devzero-rook
 
 .PHONY: delete-rook-ceph
 delete-rook-ceph:
-	helm delete rook-ceph -n devzero --ignore-not-found
-	#kubectl get crds -o name | grep 'ceph.rook.io' | xargs kubectl delete
+	helm delete rook-ceph -n devzero-rook --ignore-not-found
+	kubectl get crds -o name | grep 'ceph.rook.io' | xargs kubectl delete
 	#kubectl get clusterrole -o custom-columns=NAME:.metadata.name,ANNOTATION:.metadata.annotations.meta\\.helm\\.sh/release-name --no-headers | grep rook-ceph | xargs kubectl delete clusterrole
 	#kubectl get clusterrolebinding -o custom-columns=NAME:.metadata.name,ANNOTATION:.metadata.annotations.meta\\.helm\\.sh/release-name --no-headers | grep rook-ceph | xargs kubectl delete clusterrolebinding
 	#kubectl get clusterroles -l app.kubernetes.io/part-of=rook-ceph-operator -o name  | xargs kubectl delete
@@ -28,8 +28,8 @@ install-rook-ceph-cluster:
 		REPO_URL=https://charts.rook.io/release \
 		REPO_APP_NAME=rook-ceph-cluster \
 		VERSION=v1.14.9 \
-		NAMESPACE=dezvero
+		NAMESPACE=dezvero-rook
 
 .PHONY: delete-rook-ceph-cluster
 delete-rook-ceph-cluster:
-	helm delete rook-ceph-cluster -n dezvero --ignore-not-found
+	helm delete rook-ceph-cluster -n dezvero-rook --ignore-not-found
