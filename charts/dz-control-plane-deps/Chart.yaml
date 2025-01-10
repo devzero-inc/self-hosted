@@ -10,10 +10,6 @@ dependencies:
   - name: vault
     version: 0.28.1
     repository: https://helm.releases.hashicorp.com
-  - name: mongodb
-    version: 16.0.3
-    repository: https://charts.bitnami.com/bitnami
-    condition: mongodb.enabled
   - name: redis
     alias: redis-backend
     version: 20.2.1

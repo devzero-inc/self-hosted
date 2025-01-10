@@ -91,3 +91,17 @@ install-mysql-vault:
 .PHONY: delete-mysql-vault
 delete-mysql-vault:
 	helm delete mysql-vault -n devzero --ignore-not-found
+
+.PHONY: install-mongodb
+install-mongodb:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=mongodb \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=mongodb \
+		VERSION=16.4.0 \
+		NAMESPACE=devzero
+
+.PHONY: delete-mongodb
+delete-mongodb:
+	helm delete mongodb -n devzero --ignore-not-found

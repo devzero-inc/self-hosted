@@ -2,9 +2,6 @@ dependencies:
 - name: vault
   repository: https://helm.releases.hashicorp.com
   version: 0.28.1
-- name: mongodb
-  repository: https://charts.bitnami.com/bitnami
-  version: 16.0.3
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 20.2.1
@@ -35,5 +32,5 @@ dependencies:
 - name: mimir-distributed
   repository: https://grafana.github.io/helm-charts
   version: 5.6.0-weekly.321
-digest: sha256:6f033408b58531b901455272a19c5c591b9d282115aeb3ac3cc75fb98b8c90b3
-generated: "2025-01-09T20:58:17.111361-03:00"
+digest: sha256:cfed47b437f236bdfdb713115666d8fce37af5aa6099de14cf59aca42e5950e5
+generated: "2025-01-09T21:03:20.041139-03:00"
