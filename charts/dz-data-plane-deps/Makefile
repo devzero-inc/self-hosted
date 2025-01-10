@@ -1,5 +1,15 @@
 include ../Makefile.common
 
+.PHONY: install
+install:
+	@$(MAKE) install-rook-ceph
+	@$(MAKE) install-rook-ceph-cluster
+
+.PHONY: delete
+delete:
+	@$(MAKE) delete-rook-ceph-cluster
+	@$(MAKE) delete-rook-ceph
+
 .PHONY: install-rook-ceph
 install-rook-ceph:
 	@$(MAKE) _install-helm-chart \
