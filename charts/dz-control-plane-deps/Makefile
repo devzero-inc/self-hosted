@@ -1,11 +1,48 @@
+.PHONY: old-install
+old-install:
+	helm upgrade --install dz-self-hosted-deps -n devzero --create-namespace -f values.yaml .
+
+.PHONY: old-delete
+old-delete:
+	helm delete dz-self-hosted-deps -n devzero
+
 .PHONY: install
 install:
-	helm upgrade --install dz-self-hosted-deps -n devzero --create-namespace -f values.yaml .
+	@$(MAKE) install-cert-manager
+	@$(MAKE) install-ingress-nginx
+	@$(MAKE) install-mysql-polland
+	@$(MAKE) install-mysql-pulse
+	@$(MAKE) install-mysql-vault
+	@$(MAKE) install-mongodb
+	@$(MAKE) install-redis-backend
+	@$(MAKE) install-redis-hydra
+	@$(MAKE) install-redis-polland
+	@$(MAKE) install-postgres-logsrv
+	@$(MAKE) install-postgres-hydra
+	@$(MAKE) install-timescaledb-single
+	@$(MAKE) install-elasticmq
+	@$(MAKE) install-docker-registry
+	@$(MAKE) install-kube-prometheus-stack
+	@$(MAKE) install-mimir-distributed
 
 .PHONY: delete
 delete:
-	helm delete dz-self-hosted-deps -n devzero
-
+	@$(MAKE) delete-cert-manager
+	@$(MAKE) delete-ingress-nginx
+	@$(MAKE) delete-mysql-polland
+	@$(MAKE) delete-mysql-pulse
+	@$(MAKE) delete-mysql-vault
+	@$(MAKE) delete-mongodb
+	@$(MAKE) delete-redis-backend
+	@$(MAKE) delete-redis-hydra
+	@$(MAKE) delete-redis-polland
+	@$(MAKE) delete-postgres-logsrv
+	@$(MAKE) delete-postgres-hydra
+	@$(MAKE) delete-timescaledb-single
+	@$(MAKE) delete-elasticmq
+	@$(MAKE) delete-docker-registry
+	@$(MAKE) delete-kube-prometheus-stack
+	@$(MAKE) delete-mimir-distributed
 
 .PHONY: _install-helm-chart
 _install-helm-chart:
