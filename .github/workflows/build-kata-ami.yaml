@@ -38,5 +38,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }} # Pass GitHub Token securely
         run: |
-          chmod +x ./build-ami.sh
-          ./build-ami.sh
+          chmod +x ./kata/packer/build-ami.sh
+          ./kata/packer/build-ami.sh
