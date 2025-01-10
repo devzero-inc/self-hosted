@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bitnami/charts/refs/tags/mongodb/16.4.0/bitnami/mongodb/values.schema.json
+
+# https://github.com/bitnami/charts/tree/mongodb/16.4.0/bitnami/mongodb
+
+metrics:
+  enabled: true
+  containerPort: 9090
+
+persistence:
+  size: "50Gi"
+
+architecture: "replicaset"
+
+auth:
+  rootPassword: "devzero"
+  replicaSetKey: "devzero"
+
+  usernames:
+    - "devzero"
+  databases:
+    - "backend"
+  passwords:
+    - "backend"

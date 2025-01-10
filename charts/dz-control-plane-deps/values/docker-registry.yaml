@@ -1,0 +1,23 @@
+# https://github.com/twuni/docker-registry.helm/tree/v2.2.3
+
+ingress:
+  # -- Specify if the Docker registry Ingress is enabled
+  enabled: false
+  # -- Ingress Class Name. May be required for k8s >= 1.18
+  ingressClassName: "nginx"
+  # -- Annotations
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "200g"
+  # -- TLS
+  tls:
+    - secretName: devzero-registry-tls
+      hosts:
+        - registry.example.com
+  # -- Hosts
+  hosts:
+    - host: registry.example.com
+      paths:
+        - path: /
+          pathType: Prefix

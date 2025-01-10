@@ -1,12 +1,12 @@
-**/charts/charts/**
-**/Chart.lock
-
 .idea
 .vscode
 .codebuddy
 
 *.tfstate*
 .terraform
+
+# Downloaded helm charts
+**/charts/**.tgz
 
 .idea
 .vscode

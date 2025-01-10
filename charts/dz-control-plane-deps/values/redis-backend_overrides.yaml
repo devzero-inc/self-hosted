@@ -1,0 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bitnami/charts/refs/tags/redis/20.6.2/bitnami/redis/values.schema.json
+
+# https://github.com/bitnami/charts/tree/redis/20.6.2/bitnami/redis
+

@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/timescale/helm-charts/refs/tags/timescaledb-single-0.33.1/charts/timescaledb-single/values.schema.json
+
+# https://github.com/timescale/helm-charts/tree/timescaledb-single-0.33.1/charts/timescaledb-single
+
+replicaCount: 1
+
+secrets:
+  credentials:
+    PATRONI_SUPERUSER_PASSWORD: "pulse"
+    PATRONI_REPLICATION_PASSWORD: "pulse"
+    PATRONI_admin_PASSWORD: "pulse"
+
+rbac:
+  create: true
