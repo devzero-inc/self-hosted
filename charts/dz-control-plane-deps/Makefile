@@ -218,3 +218,17 @@ install-docker-registry:
 .PHONY: delete-docker-registry
 delete-docker-registry:
 	helm delete docker-registry -n devzero --ignore-not-found
+
+.PHONY: install-kube-prometheus-stack
+install-kube-prometheus-stack:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=kube-prometheus-stack \
+		REPO_NAME=prometheus-community \
+		REPO_URL=https://prometheus-community.github.io/helm-charts \
+		REPO_APP_NAME=kube-prometheus-stack \
+		VERSION=67.1.0 \
+		NAMESPACE=devzero
+
+.PHONY: delete-kube-prometheus-stack
+delete-kube-prometheus-stack:
+	helm delete kube-prometheus-stack -n devzero --ignore-not-found

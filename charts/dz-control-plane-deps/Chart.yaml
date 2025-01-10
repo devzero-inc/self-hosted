@@ -10,10 +10,6 @@ dependencies:
   - name: vault
     version: 0.28.1
     repository: https://helm.releases.hashicorp.com
-  - name: kube-prometheus-stack
-    repository: https://prometheus-community.github.io/helm-charts
-    version: 67.1.0
-    condition: backend.grafana.enabled
   - name: mimir-distributed
     version: 5.6.0-weekly.321
     repository: https://grafana.github.io/helm-charts
