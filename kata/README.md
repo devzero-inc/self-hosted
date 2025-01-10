@@ -65,6 +65,20 @@ Copy the AMI of `ws-west-1` region.
 cd ../../terraform/modules/aws/eks/main.tf
 ```
 
+### 6. Paste the AMI in the EC2 launch template
+
+update the `Image_Id` in the EC2 luanch template with the copied AMI and run terraform
+
+### 7. Run the Terraform
+
+```bash
+cd ../examples/aws/control-and-data-plane
+terraform init
+terraform apply
+```
+
+
+
 
 
 
