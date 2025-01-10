@@ -1,0 +1,32 @@
+# https://github.com/rook/rook/tree/v1.14.9/deploy/charts/rook-ceph
+
+image:
+  repository: docker.io/rook/ceph
+nodeSelector:
+  node-role.kubernetes.io/rook-node: "1"
+
+tolerations:
+  - key: "rookNode"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: "node-role.kubernetes.io/rook-node"
+              operator: "Exists"
+
+csi:
+  provisionerTolerations:
+    - key: "rookNode"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+  provisionerNodeAffinity: node-role.kubernetes.io/rook-node;
+  serviceMonitor:
+    enabled: false
+
+monitoring:
+  enabled: false

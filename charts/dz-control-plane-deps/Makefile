@@ -1,3 +1,5 @@
+include ../Makefile.common
+
 .PHONY: old-install
 old-install:
 	helm upgrade --install dz-self-hosted-deps -n devzero --create-namespace -f values.yaml .
@@ -43,16 +45,6 @@ delete:
 	@$(MAKE) delete-docker-registry
 	@$(MAKE) delete-kube-prometheus-stack
 	@$(MAKE) delete-mimir-distributed
-
-.PHONY: _install-helm-chart
-_install-helm-chart:
-	@helm repo add $(REPO_NAME) $(REPO_URL)
-	@helm repo update $(REPO_NAME)
-	helm upgrade --install $(APP_NAME) $(REPO_NAME)/$(REPO_APP_NAME) --version $(VERSION) \
-		--namespace $(NAMESPACE) \
-		--create-namespace \
-		--values values/$(APP_NAME).yaml \
-		--values values/$(APP_NAME)_overrides.yaml
 
 .PHONY: install-cert-manager
 install-cert-manager:
