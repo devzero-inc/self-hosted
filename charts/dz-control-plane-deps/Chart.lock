@@ -2,9 +2,6 @@ dependencies:
 - name: vault
   repository: https://helm.releases.hashicorp.com
   version: 0.28.1
-- name: elasticmq
-  repository: https://chatwork.github.io/charts
-  version: 0.2.0
 - name: docker-registry
   repository: https://helm.twun.io
   version: 2.2.3
@@ -14,5 +11,5 @@ dependencies:
 - name: mimir-distributed
   repository: https://grafana.github.io/helm-charts
   version: 5.6.0-weekly.321
-digest: sha256:7f95871e7d14d589822c865e26a791f5c6d6b608fd69176e488be7690dee18a9
-generated: "2025-01-09T21:24:03.427712-03:00"
+digest: sha256:ff6505231f90eeb9171398a0054a6563f937ac3c17cbec43580d7f14ae6ca966
+generated: "2025-01-09T21:33:41.210014-03:00"

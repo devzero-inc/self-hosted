@@ -190,3 +190,17 @@ install-timescaledb-single:
 .PHONY: delete-timescaledb-single
 delete-timescaledb-single:
 	helm delete timescaledb-single -n devzero --ignore-not-found
+
+.PHONY: install-elasticmq
+install-elasticmq:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=elasticmq \
+		REPO_NAME=elasticmq \
+		REPO_URL=https://chatwork.github.io/charts \
+		REPO_APP_NAME=elasticmq \
+		VERSION=0.2.0 \
+		NAMESPACE=devzero
+
+.PHONY: delete-elasticmq
+delete-elasticmq:
+	helm delete elasticmq -n devzero --ignore-not-found

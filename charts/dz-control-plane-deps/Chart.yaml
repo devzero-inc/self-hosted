@@ -10,10 +10,6 @@ dependencies:
   - name: vault
     version: 0.28.1
     repository: https://helm.releases.hashicorp.com
-  - name: elasticmq
-    version: 0.2.0
-    repository: https://chatwork.github.io/charts
-    condition: elasticmq.enabled
   - name: docker-registry
     version: 2.2.3
     repository: https://helm.twun.io
