@@ -1,13 +1,5 @@
 include ../Makefile.common
 
-.PHONY: old-install
-old-install:
-	helm upgrade --install dz-self-hosted-deps -n devzero --create-namespace -f values.yaml .
-
-.PHONY: old-delete
-old-delete:
-	helm delete dz-self-hosted-deps -n devzero
-
 .PHONY: install
 install:
 	@$(MAKE) install-cert-manager
@@ -47,6 +39,7 @@ delete:
 	@$(MAKE) delete-kube-prometheus-stack
 	@$(MAKE) delete-mimir-distributed
 	@$(MAKE) delete-vault
+
 .PHONY: install-cert-manager
 install-cert-manager:
 	@$(MAKE) _install-helm-chart \
