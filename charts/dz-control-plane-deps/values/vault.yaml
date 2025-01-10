@@ -35,12 +35,11 @@ server:
       
       service_registration "kubernetes" {}
 
-      storage "mysql" {
+      storage "postgresql" {
         ha_enabled = true
-        address    = "mysql-vault-headless"
-        username   = "vault"
-        password   = "vault"
-        database   = "vault"
+        ha_table = "vault_ha_locks"
+
+        connection_url = "postgres://vault:vault@postgres-vault-postgresql-hl:5432/vault"
       }
 
 ingress:
