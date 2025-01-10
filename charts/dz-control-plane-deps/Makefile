@@ -14,13 +14,13 @@ install:
 	@$(MAKE) install-ingress-nginx
 	@$(MAKE) install-mysql-polland
 	@$(MAKE) install-mysql-pulse
-	@$(MAKE) install-mysql-vault
 	@$(MAKE) install-mongodb
 	@$(MAKE) install-redis-backend
 	@$(MAKE) install-redis-hydra
 	@$(MAKE) install-redis-polland
 	@$(MAKE) install-postgres-logsrv
 	@$(MAKE) install-postgres-hydra
+	@$(MAKE) install-postgres-vault
 	@$(MAKE) install-timescaledb-single
 	@$(MAKE) install-elasticmq
 	@$(MAKE) install-docker-registry
@@ -34,13 +34,13 @@ delete:
 	@$(MAKE) delete-ingress-nginx
 	@$(MAKE) delete-mysql-polland
 	@$(MAKE) delete-mysql-pulse
-	@$(MAKE) delete-mysql-vault
 	@$(MAKE) delete-mongodb
 	@$(MAKE) delete-redis-backend
 	@$(MAKE) delete-redis-hydra
 	@$(MAKE) delete-redis-polland
 	@$(MAKE) delete-postgres-logsrv
 	@$(MAKE) delete-postgres-hydra
+	@$(MAKE) delete-postgres-vault
 	@$(MAKE) delete-timescaledb-single
 	@$(MAKE) delete-elasticmq
 	@$(MAKE) delete-docker-registry
@@ -107,20 +107,6 @@ install-mysql-pulse:
 .PHONY: delete-mysql-pulse
 delete-mysql-pulse:
 	helm delete mysql-pulse -n devzero --ignore-not-found
-
-.PHONY: install-mysql-vault
-install-mysql-vault:
-	@$(MAKE) _install-helm-chart \
-		APP_NAME=mysql-vault \
-		REPO_NAME=bitnami \
-		REPO_URL=https://charts.bitnami.com/bitnami \
-		REPO_APP_NAME=mysql \
-		VERSION=11.1.19 \
-		NAMESPACE=devzero
-
-.PHONY: delete-mysql-vault
-delete-mysql-vault:
-	helm delete mysql-vault -n devzero --ignore-not-found
 
 .PHONY: install-mongodb
 install-mongodb:
@@ -203,9 +189,19 @@ install-postgres-hydra:
 		VERSION=16.3.5 \
 		NAMESPACE=devzero
 
-.PHONY: delete-postgres-hydra
-delete-postgres-hydra:
-	helm delete postgres-hydra -n devzero --ignore-not-found
+.PHONY: install-postgres-vault
+install-postgres-vault:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=postgres-vault \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=postgresql \
+		VERSION=16.3.5 \
+		NAMESPACE=devzero
+
+.PHONY: delete-postgres-vault
+delete-postgres-vault:
+	helm delete postgres-vault -n devzero --ignore-not-found
 
 .PHONY: install-timescaledb-single
 install-timescaledb-single:
