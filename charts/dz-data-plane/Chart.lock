@@ -1,0 +1,9 @@
+dependencies:
+- name: metacontroller-helm
+  repository: oci://ghcr.io/metacontroller
+  version: 4.11.19
+- name: kube-prometheus-stack
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 62.4.0
+digest: sha256:72b32534554ddd594700b8f224cdff2e110807f36b695e594023e37d44800a90
+generated: "2025-01-10T16:54:11.410067-03:00"

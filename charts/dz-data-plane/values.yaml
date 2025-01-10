@@ -13,25 +13,6 @@ credentials:
   password:
   email:
 
-kube-prometheus-stack:
-  prometheus:
-    prometheusSpec:
-      additionalScrapeConfigs:
-        - job_name: "cortex"
-          metrics_path: "/metrics"
-          kubernetes_sd_configs:
-            - role: "pod"
-      podMonitorSelectorNilUsesHelmValues: false
-      serviceMonitorSelectorNilUsesHelmValues: false
-      ruleSelectorNilUsesHelmValues: false
-      remoteWrite:
-        - url: "https://mimir.devzero.dev/api/v1/push"
-          headers:
-            X-Scope-OrgID: "1"
-          writeRelabelConfigs:
-            - targetLabel: "region"
-              replacement: "self-hosted"
-
 
 
 

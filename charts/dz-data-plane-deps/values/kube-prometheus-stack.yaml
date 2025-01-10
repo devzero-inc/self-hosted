@@ -1,0 +1,19 @@
+# https://github.com/prometheus-community/helm-charts/tree/kube-prometheus-stack-67.1.0/charts/kube-prometheus-stack
+
+prometheus:
+  prometheusSpec:
+    additionalScrapeConfigs:
+      - job_name: "cortex"
+        metrics_path: "/metrics"
+        kubernetes_sd_configs:
+          - role: "pod"
+    podMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    remoteWrite:
+      - url: "https://mimir.devzero.dev/api/v1/push"
+        headers:
+          X-Scope-OrgID: "1"
+        writeRelabelConfigs:
+          - targetLabel: "region"
+            replacement: "self-hosted"
