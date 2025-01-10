@@ -31,12 +31,12 @@ jobs:
       
       - name: Run Apply Stage
         run: |
-          chmod +x ./dsh-testing.sh
+          chmod +x ./terraform/dsh-testing.sh
           DOMAIN_NAME="${{ secrets.DOMAIN_NAME }}"
           EMAIL="${{ secrets.EMAIL }}"
           TF_BACKEND="S3"
           BUCKET_NAME="${{ secrets.BUCKET_NAME }}"
-          ./dsh-testing.sh apply_terraform
+          ./terraform/dsh-testing.sh apply_terraform
 
   eks-setup:
     name: EKS Setup
@@ -59,13 +59,13 @@ jobs:
 
       - name: Run EKS Setup Stage
         run: |
-          chmod +x ./dsh-testing.sh
-          ./dsh-testing.sh get_eks_info
-          ./dsh-testing.sh configure_kubeconfig
-          ./dsh-testing.sh login_to_helm_registry
-          ./dsh-testing.sh install_devzero_crds
-          ./dsh-testing.sh install_devzero_control_plane
-          ./dsh-testing.sh get_ingress_service
+          chmod +x ./terraform/dsh-testing.sh
+          ./terraform/dsh-testing.sh get_eks_info
+          ./terraform/dsh-testing.sh configure_kubeconfig
+          ./terraform/dsh-testing.sh login_to_helm_registry
+          ./terraform/dsh-testing.sh install_devzero_crds
+          ./terraform/dsh-testing.sh install_devzero_control_plane
+          ./terraform/dsh-testing.sh get_ingress_service
 
   destroy:
     name: Terraform Destroy
@@ -89,5 +89,5 @@ jobs:
 
       - name: Run Destroy Stage
         run: |
-          chmod +x ./dsh-testing.sh
-          ./dsh-testing.sh cleanup
+          chmod +x ./terraform/dsh-testing.sh
+          ./terraform/dsh-testing.sh cleanup
