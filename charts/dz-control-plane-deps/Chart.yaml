@@ -10,21 +10,6 @@ dependencies:
   - name: vault
     version: 0.28.1
     repository: https://helm.releases.hashicorp.com
-  - name: redis
-    alias: redis-backend
-    version: 20.2.1
-    repository: https://charts.bitnami.com/bitnami
-    condition: redis.enabled
-  - name: redis
-    alias: redis-hydra
-    version: 20.2.1
-    repository: https://charts.bitnami.com/bitnami
-    condition: redis.enabled
-  - name: redis
-    alias: redis-polland
-    version: 20.2.1
-    repository: https://charts.bitnami.com/bitnami
-    condition: redis.enabled
   - name: postgresql
     alias: postgres-logsrv
     version: 16.0.4

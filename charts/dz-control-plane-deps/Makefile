@@ -105,3 +105,46 @@ install-mongodb:
 .PHONY: delete-mongodb
 delete-mongodb:
 	helm delete mongodb -n devzero --ignore-not-found
+
+.PHONY: install-redis-backend
+install-redis-backend:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=redis-backend \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=redis \
+		VERSION=20.6.2 \
+		NAMESPACE=devzero
+
+.PHONY: delete-redis-backend
+delete-redis-backend:
+	helm delete redis-backend -n devzero --ignore-not-found
+
+
+.PHONY: install-redis-hydra
+install-redis-hydra:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=redis-hydra \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=redis \
+		VERSION=20.6.2 \
+		NAMESPACE=devzero
+
+.PHONY: delete-redis-hydra
+delete-redis-hydra:
+	helm delete redis-hydra -n devzero --ignore-not-found
+
+.PHONY: install-redis-polland
+install-redis-polland:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=redis-polland \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=redis \
+		VERSION=20.6.2 \
+		NAMESPACE=devzero
+
+.PHONY: delete-redis-polland
+delete-redis-polland:
+	helm delete redis-polland -n devzero --ignore-not-found
