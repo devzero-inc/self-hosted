@@ -26,6 +26,7 @@ install:
 	@$(MAKE) install-docker-registry
 	@$(MAKE) install-kube-prometheus-stack
 	@$(MAKE) install-mimir-distributed
+	@$(MAKE) install-vault
 
 .PHONY: delete
 delete:
@@ -45,7 +46,7 @@ delete:
 	@$(MAKE) delete-docker-registry
 	@$(MAKE) delete-kube-prometheus-stack
 	@$(MAKE) delete-mimir-distributed
-
+	@$(MAKE) delete-vault
 .PHONY: install-cert-manager
 install-cert-manager:
 	@$(MAKE) _install-helm-chart \
@@ -275,3 +276,17 @@ install-mimir-distributed:
 .PHONY: delete-mimir-distributed
 delete-mimir-distributed:
 	helm delete mimir-distributed -n devzero --ignore-not-found
+
+.PHONY: install-vault
+install-vault:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=vault \
+		REPO_NAME=hashicorp \
+		REPO_URL=https://helm.releases.hashicorp.com \
+		REPO_APP_NAME=vault \
+		VERSION=0.28.1 \
+		NAMESPACE=devzero
+
+.PHONY: delete-vault
+delete-vault:
+	helm delete vault -n devzero --ignore-not-found
