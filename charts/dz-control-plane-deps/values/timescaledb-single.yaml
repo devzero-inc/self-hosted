@@ -9,3 +9,6 @@ secrets:
     PATRONI_SUPERUSER_PASSWORD: "pulse"
     PATRONI_REPLICATION_PASSWORD: "pulse"
     PATRONI_admin_PASSWORD: "pulse"
+
+rbac:
+  create: true
