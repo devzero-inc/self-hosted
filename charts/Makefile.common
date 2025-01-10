@@ -7,3 +7,10 @@ _install-helm-chart:
 		--create-namespace \
 		--values values/$(APP_NAME).yaml \
 		--values values/$(APP_NAME)_overrides.yaml
+
+_install-oci-helm-chart:
+	HELM_EXPERIMENTAL_OCI=1 helm upgrade --install $(APP_NAME) $(REPO_URL)/$(REPO_NAME) --version $(VERSION) \
+		--namespace $(NAMESPACE) \
+		--create-namespace \
+		--values values/$(APP_NAME).yaml \
+		--values values/$(APP_NAME)_overrides.yaml
