@@ -918,9 +918,6 @@ web:
             pathType: Prefix
 
 
-vault:
-  job: true
-
 # Cluster issuer for cert manager
 issuer:
   enabled: true
@@ -929,3 +926,18 @@ issuer:
   acme: https://acme-v02.api.letsencrypt.org/directory
   # Email address used for ACME registration
   email: email@selfzero.net
+
+# We should remove this and use their own helm charts with the CLI
+vault:
+  job: true
+  ingress:
+    enabled: false
+mimir:
+  ingress:
+    enabled: false
+grafana:
+  ingress:
+    enabled: false
+registry:
+  ingress:
+    enabled: false
