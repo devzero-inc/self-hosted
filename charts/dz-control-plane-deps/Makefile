@@ -148,3 +148,31 @@ install-redis-polland:
 .PHONY: delete-redis-polland
 delete-redis-polland:
 	helm delete redis-polland -n devzero --ignore-not-found
+
+.PHONY: install-postgres-logsrv
+install-postgres-logsrv:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=postgres-logsrv \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=postgresql \
+		VERSION=16.3.5 \
+		NAMESPACE=devzero
+
+.PHONY: delete-postgres-logsrv
+delete-postgres-logsrv:
+	helm delete postgres-logsrv -n devzero --ignore-not-found
+
+.PHONY: install-postgres-hydra
+install-postgres-hydra:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=postgres-hydra \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=postgresql \
+		VERSION=16.3.5 \
+		NAMESPACE=devzero
+
+.PHONY: delete-postgres-hydra
+delete-postgres-hydra:
+	helm delete postgres-hydra -n devzero --ignore-not-found

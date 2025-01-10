@@ -2,12 +2,6 @@ dependencies:
 - name: vault
   repository: https://helm.releases.hashicorp.com
   version: 0.28.1
-- name: postgresql
-  repository: https://charts.bitnami.com/bitnami
-  version: 16.0.4
-- name: postgresql
-  repository: https://charts.bitnami.com/bitnami
-  version: 16.0.4
 - name: timescaledb-single
   repository: https://charts.timescale.com
   version: 0.33.1
@@ -23,5 +17,5 @@ dependencies:
 - name: mimir-distributed
   repository: https://grafana.github.io/helm-charts
   version: 5.6.0-weekly.321
-digest: sha256:73e055fbb82b83ba3d4fe36aa798119052e397b3da17b0441e55c344d87a77e1
-generated: "2025-01-09T21:10:49.223798-03:00"
+digest: sha256:8d211b4e94ace44658281004d61a3b6975f89c9f8b2e01fbc1a70c8e6c7c7ee5
+generated: "2025-01-09T21:15:26.84214-03:00"
