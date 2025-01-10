@@ -66,9 +66,9 @@ install-cert-manager:
 
 .PHONY: delete-cert-manager
 delete-cert-manager:
-	kubectl get crds -o name | grep 'cert-manager.io' | xargs kubectl delete
 	helm delete cert-manager -n cert-manager --ignore-not-found
-	kubectl delete namespace cert-manager
+	kubectl delete namespace cert-manager --ignore-not-found=true
+	kubectl get crds -o name | grep 'cert-manager.io' | xargs kubectl delete
 
 
 .PHONY: install-ingress-nginx
@@ -84,7 +84,7 @@ install-ingress-nginx:
 .PHONY: delete-ingress-nginx
 delete-ingress-nginx:
 	helm delete ingress-nginx -n ingress-nginx  --ignore-not-found
-	kubectl delete namespace ingress-nginx
+	kubectl delete namespace ingress-nginx --ignore-not-found=true
 
 
 .PHONY: install-mysql-polland
