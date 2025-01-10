@@ -1,0 +1,9 @@
+.PHONY: _install-helm-chart
+_install-helm-chart:
+	@helm repo add $(REPO_NAME) $(REPO_URL)
+	@helm repo update $(REPO_NAME)
+	helm upgrade --install $(APP_NAME) $(REPO_NAME)/$(REPO_APP_NAME) --version $(VERSION) \
+		--namespace $(NAMESPACE) \
+		--create-namespace \
+		--values values/$(APP_NAME).yaml \
+		--values values/$(APP_NAME)_overrides.yaml
