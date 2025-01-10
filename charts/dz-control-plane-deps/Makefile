@@ -204,3 +204,17 @@ install-elasticmq:
 .PHONY: delete-elasticmq
 delete-elasticmq:
 	helm delete elasticmq -n devzero --ignore-not-found
+
+.PHONY: install-docker-registry
+install-docker-registry:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=docker-registry \
+		REPO_NAME=docker-registry \
+		REPO_URL=https://helm.twun.io \
+		REPO_APP_NAME=docker-registry \
+		VERSION=2.2.3 \
+		NAMESPACE=devzero
+
+.PHONY: delete-docker-registry
+delete-docker-registry:
+	helm delete docker-registry -n devzero --ignore-not-found

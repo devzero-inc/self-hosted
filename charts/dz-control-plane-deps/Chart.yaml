@@ -10,10 +10,6 @@ dependencies:
   - name: vault
     version: 0.28.1
     repository: https://helm.releases.hashicorp.com
-  - name: docker-registry
-    version: 2.2.3
-    repository: https://helm.twun.io
-    condition: docker-registry.enabled
   - name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
     version: 67.1.0

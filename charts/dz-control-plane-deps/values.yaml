@@ -73,30 +73,6 @@ minio:
     requests:
       memory: 2Gi
 
-# Docker registry external dependencies
-registry:
-  fullnameOverride: devzero-registry
-  ingress:
-    # -- Specify if the Docker registry Ingress is enabled
-    enabled: true
-    # -- Ingress Class Name. May be required for k8s >= 1.18
-    ingressClassName: "nginx"
-    # -- Annotations
-    annotations:
-      cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-      nginx.ingress.kubernetes.io/proxy-body-size: "200g"
-    # -- TLS
-    tls:
-      - secretName: devzero-registry-tls
-        hosts:
-          - "registry.{{ .Values.domain }}"
-    # -- Hosts
-    hosts:
-      - host: "registry.{{ .Values.domain }}"
-        paths:
-          - path: /
-            pathType: Prefix
 
 grafana:
   fullnameOverride: devzero-grafana
