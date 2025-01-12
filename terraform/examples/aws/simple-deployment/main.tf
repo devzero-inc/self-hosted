@@ -97,7 +97,7 @@ data "aws_subnet" "private_subnets" {
 }
 
 data "aws_subnet" "public_subnets" {
-  for_each = var.create_vpc ? toset({}) : toset(var.public_subnet_ids)
+  for_each = var.create_vpc ? toset([]) : toset(var.public_subnet_ids)
   id       = each.value
 }
 
