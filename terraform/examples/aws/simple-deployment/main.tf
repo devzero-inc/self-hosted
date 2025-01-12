@@ -5,8 +5,14 @@ locals {
   calculated_private_subnets_ids = length(var.private_subnet_ids) > 0 ? var.private_subnet_ids : module.vpc.private_subnets
   calculated_security_group_ids = length(var.security_group_ids) > 0 ? var.security_group_ids : [module.vpc.default_security_group_id]
 
+  vpc_id = var.create_vpc ? module.vpc.vpc_id : var.vpc_id
+
   calculated_public_subnets_cidrs = [for k, v in local.azs : cidrsubnet(var.cidr, 4, k)]
   calculated_private_subnets_cidrs = [for k, v in local.azs : cidrsubnet(var.cidr, 4, k + 6)]
+
+  private_subnet_cidr_blocks = var.create_vpc ? module.vpc.private_subnets_cidr_blocks : [for subnet in data.aws_subnet.private_subnets : subnet.cidr_block]
+
+  public_subnet_cidr_blocks = var.create_vpc ? module.vpc.public_subnets_cidr_blocks : [for subnet in data.aws_subnet.public_subnets : subnet.cidr_block]
 }
 
 data "aws_availability_zones" "available" {}
@@ -85,6 +91,16 @@ resource "null_resource" "validations" {
 ################################################################################
 # VPC
 ################################################################################
+data "aws_subnet" "private_subnets" {
+  for_each = var.create_vpc ? toset([]) : toset(var.private_subnet_ids)
+  id       = each.value
+}
+
+data "aws_subnet" "public_subnets" {
+  for_each = var.create_vpc ? toset({}) : toset(var.public_subnet_ids)
+  id       = each.value
+}
+
 module "vpc" {
   depends_on = [
     null_resource.validations
@@ -157,7 +173,9 @@ module "eks" {
   cluster_name    = "${var.name}-cluster"
   cluster_version = var.cluster_version
 
-  vpc_id     = module.vpc.vpc_id
+  # Use the provided VPC ID directly if create_vpc is false
+  vpc_id = local.vpc_id
+
   subnet_ids = local.calculated_private_subnets_ids
 
   cluster_endpoint_public_access       = var.cluster_endpoint_public_access
@@ -174,7 +192,6 @@ module "eks" {
   cloudwatch_log_group_retention_in_days = 365
 
   eks_managed_node_groups = {
-
     "${var.name}-node-1-2" = {
       name           = "${var.name}-node-1-2"
       instance_types = [var.worker_instance_type]
@@ -366,7 +383,7 @@ resource "kubernetes_storage_class" "gp3_default" {
 
 module "efs" {
   depends_on = [
-    module.vpc,
+    module.eks,
   ]
   source  = "terraform-aws-modules/efs/aws"
   version = "1.6.5"
@@ -388,12 +405,12 @@ module "efs" {
 
   create_security_group      = true
   security_group_description = "EFS security group for ${module.eks.cluster_name} EKS cluster"
-  security_group_vpc_id      = module.vpc.vpc_id
+  security_group_vpc_id      = local.vpc_id
   security_group_rules = {
     vpc = {
       # relying on the defaults provided for EFS/NFS (2049/TCP + ingress)
       description = "NFS ingress from VPC private subnets"
-      cidr_blocks = module.vpc.private_subnets_cidr_blocks
+      cidr_blocks = local.private_subnet_cidr_blocks
     }
   }
 
