@@ -18,3 +18,5 @@ policy.json
 dz_config.json
 
 **/__pycache__/**
+
+.DS_Store
