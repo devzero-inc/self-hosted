@@ -182,6 +182,10 @@ install-postgres-hydra:
 		VERSION=16.3.5 \
 		NAMESPACE=devzero
 
+.PHONY: delete-postgres-hydra
+delete-postgres-hydra:
+	helm delete postgres-hydra -n devzero --ignore-not-found
+
 .PHONY: install-postgres-vault
 install-postgres-vault:
 	@$(MAKE) _install-helm-chart \
