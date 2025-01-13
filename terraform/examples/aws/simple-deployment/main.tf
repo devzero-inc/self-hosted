@@ -110,7 +110,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.17.0"
 
-  name = "${var.name}-vpc"
+  name = "${var.cluster_name}-vpc"
   cidr = var.cidr
 
   # subnets
@@ -156,21 +156,43 @@ module "vpc" {
 ################################################################################
 # EKS
 ################################################################################
-# data "aws_iam_roles" "sso_awsadministratoraccess" {
-#   name_regex = "AWSReservedSSO_AWSAdministratorAccess.*"
-# }
-
 data "aws_ami" "ubuntu-eks_1_30" {
   name_regex  = "ubuntu-eks/k8s_1.30/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
   most_recent = true
   owners      = ["099720109477"]
 }
 
+module "node_cluster_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
+  version = "5.51.0"
+
+  trusted_role_services = [
+    "ec2.amazonaws.com",
+  ]
+  trusted_role_actions = [
+    "sts:AssumeRole",
+  ]
+
+  create_role       = true
+  role_name_prefix  = "${substr(var.cluster_name,0 ,(38-length(var.node_role_suffix)))}${var.node_role_suffix}"
+  role_description  = "EKS managed node group IAM role"
+  role_requires_mfa = false
+
+  force_detach_policies = true
+
+  custom_role_policy_arns = [
+    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+  ]
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.31.6"
 
-  cluster_name    = "${var.name}-cluster"
+  cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
 
   # Use the provided VPC ID directly if create_vpc is false
@@ -186,25 +208,27 @@ module "eks" {
   ]
 
   kms_key_administrators        = var.kms_key_administrators
-  kms_key_aliases               = ["${var.name}-cluster"]
+  kms_key_aliases               = [var.cluster_name]
   kms_key_enable_default_policy = var.kms_key_enable_default_policy
 
   cloudwatch_log_group_retention_in_days = 365
 
   eks_managed_node_groups = {
-    "${var.name}-node-1-2" = {
-      name           = "${var.name}-node-1-2"
+    "${var.cluster_name}-nodes" = {
+      name           = "${var.cluster_name}-nodes"
       instance_types = [var.worker_instance_type]
       key_name       = var.nodes_key_name
 
       ami_id = data.aws_ami.ubuntu-eks_1_30.image_id
+
+      create_iam_role = false
+      iam_role_arn    = module.node_cluster_role.iam_role_arn
 
       min_size     = var.desired_node_size
       max_size     = var.max_node_size
       desired_size = var.desired_node_size
 
       enable_bootstrap_user_data = true
-      bootstrap_extra_args       = "--kubelet-extra-args '--runtime-request-timeout=\"15m\"'"
 
       block_device_mappings = {
         sda = {
@@ -246,10 +270,12 @@ module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.51.0"
 
-  role_name_prefix = "${module.eks.cluster_name}-ebs-csi-driver-"
+  # Max name_prefix is 38
+  role_name_prefix = "${substr(module.eks.cluster_name,0 ,22)}-ebs-csi-driver-"
 
   attach_ebs_csi_policy = true
   policy_name_prefix    = module.eks.cluster_name
+
 
   oidc_providers = {
     main = {

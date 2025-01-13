@@ -1,10 +1,14 @@
 ################################################################################
 # Common
 ################################################################################
-variable "name" {
+variable "cluster_name" {
   type        = string
   description = "Name prefix to be used by resources"
   default     = "devzero"
+  validation {
+    condition = length(var.cluster_name) < 39
+    error_message = "The cluster name must be less than 39 characters"
+  }
 }
 
 variable "tags" {
@@ -124,7 +128,7 @@ variable "manage_default_network_acl" {
 variable "cluster_version" {
   type        = string
   description = "Cluster version to use for EKS deployment"
-  default     = "1.31"
+  default     = "1.30"
 }
 
 variable "create_separate_data_plane_cluster" {
@@ -213,6 +217,11 @@ variable "enable_cluster_creator_admin_permissions" {
   description = "Indicates whether or not to add the cluster creator (the identity used by Terraform) as an administrator via access entry"
   type = bool
   default = true
+}
+
+variable "node_role_suffix" {
+  default = "-nodes-eks-node-group-"
+  description = "Suffix to use on the node group IAM role"
 }
 
 ################################################################################

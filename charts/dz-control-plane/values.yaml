@@ -1,5 +1,5 @@
 # -- Overrides the chart's name.
-nameOverride: null
+nameOverride: "-"
 
 # -- Overrides the chart's computed fullname.
 fullnameOverride: null

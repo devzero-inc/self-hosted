@@ -1,5 +1,5 @@
 region = "us-west-1"
-name   = "devzero"
+cluster_name = "devzero"
 
 # EKS
 worker_instance_type = "m5.4xlarge"
@@ -14,6 +14,8 @@ create_separate_data_plane_cluster = false
 create_vpc               = true
 cidr                     = "10.0.0.0/16"
 availability_zones_count = 3
+one_nat_gateway_per_az   = false
+single_nat_gateway       = true
 
 # Existing VPC
 # create_vpc = false
