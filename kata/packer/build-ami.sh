@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Variables
 REPO_URL="https://${GH_TOKEN}@github.com/devzero-inc/self-hosted.git"
 PACKER_DIR="self-hosted/kata/packer"
 
@@ -33,7 +32,6 @@ navigate_to_packer_directory() {
     cd "$PACKER_DIR" || { echo "Error: Directory $PACKER_DIR not found."; exit 1; }
 }
 
-# Function to download resources from S3
 download_resources() {
     echo "Downloading resources from S3..."
     aws s3 cp s3://dz-pvm-artifacts/ . --recursive
