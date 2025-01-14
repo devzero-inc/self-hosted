@@ -23,28 +23,35 @@ class ControlPlane:
             self.error(str(e))
 
         config = DZConfig()
+
+        if not config.globals.has_attr("control_plane"):
+            setattr(config.globals, "control_plane", {})
+
+        if not config.globals.control_plane.has_attr("domain_name") or force:
+            config.globals.control_plane_domain_name = click.prompt("Please provide a domain name for the control plane.\n Examples: example.com or subdomain.example.com", prompt_suffix="\n")
+
         # ask for provisioning databases in cluster
         provision_dbs_in_cluster = click.confirm("Do you want to provision databases in cluster?", default=True)
         if not provision_dbs_in_cluster:
             # ask for connection details for mongo, redis, postgres, sqs and s3.
 
-            if not config.globals.has_attr("postgres_url") or force:
+            if not config.globals.control_plane.has_attr("postgres_url") or force:
                 config.globals.postgres_url = click.prompt(f"Please provide the database connection string for postgresql.\nExample format: postgresql://user:password@hostname:port/database", prompt_suffix="\n")
                 config.save()
 
-            if not config.globals.has_attr("mongo_url") or force:
+            if not config.globals.control_plane.has_attr("mongo_url") or force:
                 config.globals.mongo_url = click.prompt(f"Please provide the database connection string for mongodb.\nExample format: mongodb://hostname:port", prompt_suffix="\n")
                 config.save()
 
-            if not config.globals.has_attr("redis_url") or force:
+            if not config.globals.control_plane.has_attr("redis_url") or force:
                 config.globals.redis_url = click.prompt(f"Please provide the redis connection string.\nExample format: redis://hostname:port", prompt_suffix="\n")
                 config.save()
 
-            if not config.globals.has_attr("sqs_url") or force:
+            if not config.globals.control_plane.has_attr("sqs_url") or force:
                 config.globals.sqs_url = click.prompt(f"Please provide the sqs connection string.\nExample format: https://sqs.region.amazonaws.com/account_id/queue_name", prompt_suffix="\n")
                 config.save()
 
-            if not config.globals.has_attr("s3_url") or force:
+            if not config.globals.control_plane.has_attr("s3_url") or force:
                 config.globals.s3_url = click.prompt(f"Please provide the s3 connection string.\nExample format: s3://bucket_name", prompt_suffix="\n")
                 config.save()
 
