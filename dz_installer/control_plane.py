@@ -28,7 +28,17 @@ class ControlPlane:
             setattr(config.globals, "control_plane", {})
 
         if not config.globals.control_plane.has_attr("domain_name") or force:
-            config.globals.control_plane_domain_name = click.prompt("Please provide a domain name for the control plane.\n Examples: example.com or subdomain.example.com", prompt_suffix="\n")
+            config.globals.control_plane.domain_name = click.prompt("Please provide a domain name for the control plane.\n Examples: example.com or subdomain.example.com", prompt_suffix="\n")
+            config.save()
+
+        if not config.globals.control_plane.has_attr("docker_hub") or force:
+            setattr(config.globals.control_plane, "docker_hub", {})
+            config.globals.control_plane.docker_hub.access = click.confirm("Does your cluster have configured credentials for Docker Hub?", default=False)
+            if not config.globals.control_plane.docker_hub.access:
+                config.globals.control_plane.docker_hub.username = click.prompt("Please provide your Docker Hub username")
+                config.globals.control_plane.docker_hub.password = click.prompt("Please provide your Docker Hub password", hide_input=True)
+                config.globals.control_plane.docker_hub.email = click.prompt("Please provide your Docker Hub email")
+            config.save()
 
         # ask for provisioning databases in cluster
         provision_dbs_in_cluster = click.confirm("Do you want to provision databases in cluster?", default=True)
