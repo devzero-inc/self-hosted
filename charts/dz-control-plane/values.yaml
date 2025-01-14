@@ -20,8 +20,9 @@ image:
   # -- Container pull policy
   pullPolicy: IfNotPresent
   # -- Optionally specify an array of imagePullSecrets
-  pullSecrets:
-    - pull-secret
+  # pullSecrets:
+  #   - pull-secret
+  pullSecrets: []
 
 workspace:
   image: public.ecr.aws/v1i4e1r2/devzero-devbox-base
@@ -280,7 +281,7 @@ hydra:
   job: true
 
   postgres:
-    host: "devzero-postgres-hydra"
+    host: "postgres-hydra-postgresql-hl"
     port: 5432
     name: "postgres"
     user: "hydra"
@@ -394,7 +395,7 @@ logsrv:
     url: http://devzero-elasticmq:9324/queue/logsrv.fifo
 
   postgres:
-    url: postgresql://logsrv:logsrv@devzero-postgres-logsrv:5432/logsrv
+    url: postgresql://logsrv:logsrv@postgres-logsrv-postgresql-hl:5432/logsrv
     password: logsrv
 
   refreshJwksTimer: 3600
@@ -545,7 +546,7 @@ polland:
   annotations: {}
 
   redis:
-    host: devzero-redis-polland-master
+    host: redis-polland-headless
     port: 6379
 
   # -- Env configuration for polland configmap
@@ -649,7 +650,7 @@ pulse:
   postgres:
     password: pulse
     user: postgres
-    host: dz-control-plane
+    host: timescaledb-single
     port: 5432
     database: postgres
     ssl: allow 
@@ -657,7 +658,7 @@ pulse:
   mysql:
     user: pulse
     password: pulse
-    host: devzero-mysql-pulse-headless
+    host: mysql-pulse-headless
     port: 3306
     database: pulse
 
@@ -751,7 +752,7 @@ buildqd:
     region: elasticmq
 
   redis:
-    url: redis://devzero-redis-polland-master:6379
+    url: redis://redis-polland-headless:6379
 
   # Buildqd autoscaling configuration
   autoscaling:
@@ -928,9 +929,13 @@ issuer:
   # Email address used for ACME registration
   email: email@selfzero.net
 
-# We should remove this and use their own helm charts with the CLI
 vault:
-  job: true
+  job:
+    enabled: true
+    # We can't use vault-active because there is no active vault yet
+    # Pinning to vault-0 so we use the same pod for every unsealing attempt
+    # This could be flaky if vault-0 is down for some reason
+    address: "vault:8200"
   ingress:
     enabled: false
 mimir:
