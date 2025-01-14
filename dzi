@@ -6,6 +6,7 @@ import click
 
 from dz_installer.dz_config import DZConfig
 from dz_installer.helpers import get_provider
+from dz_installer.control_plane import ControlPlane
 
 # Version constant
 VERSION = "1.0.0"
@@ -89,7 +90,6 @@ def control_plane_network():
     """Runs network checks for the current cloud provider"""
     click.echo("Checking control plane network...")
 
-
 @control_plane.command("cluster")
 def control_plane_cluster():
     """Runs cluster existence checks for the current cloud provider"""
@@ -103,65 +103,19 @@ def control_plane_ingress():
 
 
 # Control plane Helm chart checks
-@control_plane.command("backend")
-def helm_check_backend():
-    """Helm chart: backend"""
-    click.echo("Checking helm chart: backend")
-
-
-@control_plane.command("api-gateway")
-def helm_check_api_gateway():
-    """Helm chart: api-gateway"""
-    click.echo("Checking helm chart: api-gateway")
-
-
-@control_plane.command("buildqd")
-def helm_check_buildqd():
-    """Helm chart: buildqd"""
-    click.echo("Checking helm chart: buildqd")
-
+@control_plane.command("chart")
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
+def helm_check_backend(force):
+    """Helm chart: control-plane"""
+    click.echo("Checking helm chart: control-plane")
+    ControlPlane().control_plane_checks(force)
 
 @control_plane.command("cert-issuer")
 def helm_check_cert_issuer():
     """Helm chart: cert-issuer"""
     click.echo("Checking helm chart: cert-issuer")
-
-
-@control_plane.command("extra")
-def helm_check_extra():
-    """Helm chart: extra"""
-    click.echo("Checking helm chart: extra")
-
-
-@control_plane.command("hydra")
-def helm_check_hydra():
-    """Helm chart: hydra"""
-    click.echo("Checking helm chart: hydra")
-
-
-@control_plane.command("logsrv")
-def helm_check_logsrv():
-    """Helm chart: logsrv"""
-    click.echo("Checking helm chart: logsrv")
-
-
-@control_plane.command("polland")
-def helm_check_polland():
-    """Helm chart: polland"""
-    click.echo("Checking helm chart: polland")
-
-
-@control_plane.command("pulse")
-def helm_check_pulse():
-    """Helm chart: pulse"""
-    click.echo("Checking helm chart: pulse")
-
-
-@control_plane.command("web")
-def helm_check_web():
-    """Helm chart: web"""
-    click.echo("Checking helm chart: web")
-
 
 # Data plane commands
 @check.group("data-plane", cls=OrderedGroup)
