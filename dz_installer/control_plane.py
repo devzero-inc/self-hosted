@@ -31,6 +31,10 @@ class ControlPlane:
             config.globals.control_plane.domain_name = click.prompt("Please provide a domain name for the control plane.\n Examples: example.com or subdomain.example.com", prompt_suffix="\n")
             config.save()
 
+        if not config.globals.control_plane.has_attr("license_key") or force:
+            config.globals.control_plane.license_key = click.prompt("Please provide your DevZero license key")
+            config.save()
+
         if not config.globals.control_plane.has_attr("docker_hub") or force:
             setattr(config.globals.control_plane, "docker_hub", {})
             config.globals.control_plane.docker_hub.access = click.confirm("Does your cluster have configured credentials for Docker Hub?", default=False)
