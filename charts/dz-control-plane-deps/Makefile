@@ -4,7 +4,6 @@ include ../Makefile.common
 install:
 	@$(MAKE) install-cert-manager
 	@$(MAKE) install-ingress-nginx
-	@$(MAKE) install-mysql-polland
 	@$(MAKE) install-mysql-pulse
 	@$(MAKE) install-mongodb
 	@$(MAKE) install-redis-backend
@@ -12,6 +11,7 @@ install:
 	@$(MAKE) install-redis-polland
 	@$(MAKE) install-postgres-logsrv
 	@$(MAKE) install-postgres-hydra
+	@$(MAKE) install-postgres-polland
 	@$(MAKE) install-postgres-vault
 	@$(MAKE) install-timescaledb-single
 	@$(MAKE) install-elasticmq
@@ -24,7 +24,6 @@ install:
 delete:
 	@$(MAKE) delete-cert-manager
 	@$(MAKE) delete-ingress-nginx
-	@$(MAKE) delete-mysql-polland
 	@$(MAKE) delete-mysql-pulse
 	@$(MAKE) delete-mongodb
 	@$(MAKE) delete-redis-backend
@@ -32,6 +31,7 @@ delete:
 	@$(MAKE) delete-redis-polland
 	@$(MAKE) delete-postgres-logsrv
 	@$(MAKE) delete-postgres-hydra
+	@$(MAKE) delete-postgres-polland
 	@$(MAKE) delete-postgres-vault
 	@$(MAKE) delete-timescaledb-single
 	@$(MAKE) delete-elasticmq
@@ -71,21 +71,6 @@ install-ingress-nginx:
 delete-ingress-nginx:
 	helm delete ingress-nginx -n ingress-nginx  --ignore-not-found
 	kubectl delete namespace ingress-nginx --ignore-not-found=true
-
-
-.PHONY: install-mysql-polland
-install-mysql-polland:
-	@$(MAKE) _install-helm-chart \
-		APP_NAME=mysql-polland \
-		REPO_NAME=bitnami \
-		REPO_URL=https://charts.bitnami.com/bitnami \
-		REPO_APP_NAME=mysql \
-		VERSION=11.1.19 \
-		NAMESPACE=devzero
-
-.PHONY: delete-mysql-polland
-delete-mysql-polland:
-	helm delete mysql-polland -n devzero --ignore-not-found
 
 .PHONY: install-mysql-pulse
 install-mysql-pulse:
@@ -185,6 +170,20 @@ install-postgres-hydra:
 .PHONY: delete-postgres-hydra
 delete-postgres-hydra:
 	helm delete postgres-hydra -n devzero --ignore-not-found
+
+.PHONY: install-postgres-polland
+install-postgres-polland:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=postgres-polland \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=postgresql \
+		VERSION=16.3.5 \
+		NAMESPACE=devzero
+
+.PHONY: delete-postgres-polland
+delete-postgres-polland:
+	helm delete postgres-polland -n devzero --ignore-not-found
 
 .PHONY: install-postgres-vault
 install-postgres-vault:
