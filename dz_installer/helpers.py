@@ -1,7 +1,7 @@
 import click
 import re
 from typing import Any
-from subprocess import STDOUT, CalledProcessError, check_output, run
+from subprocess import STDOUT, CalledProcessError, check_output
 
 from dz_installer.dz_config import DZConfig
 
@@ -64,7 +64,7 @@ def check_chart_is_installed(chart_name, namespace=None):
     # check if helm is installed
     command = "helm version"
     try:
-        run(command.split(" "), stderr=STDOUT)
+        check_output(command.split(" "), stderr=STDOUT)
     except CalledProcessError as err:
         click.echo(f"Error checking chart {chart_name}: helm is not installed, please install it first", err=True)
         raise RuntimeError("HELM_NOT_INSTALLED")
