@@ -7,7 +7,7 @@
 #########################################################################
 
 # -- Overrides the chart's name.
-nameOverride: "-"
+nameOverride: null
 
 # -- Overrides the chart's computed fullname.
 fullnameOverride: null
