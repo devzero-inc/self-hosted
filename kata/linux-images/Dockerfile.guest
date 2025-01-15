@@ -32,3 +32,5 @@ RUN --mount=type=cache,target=/home/root/.cache/sccache make -j$(nproc) vmlinux 
 
 FROM busybox
 COPY --from=build linux/vmlinux guest-vmlinux
+
+CMD ["sh", "-c", "sleep 300"]

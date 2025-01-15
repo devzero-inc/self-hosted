@@ -32,6 +32,8 @@ RUN scripts/config -d ADDRESS_MASKING && \
 
 RUN --mount=type=cache,target=/home/root/.cache/sccache make -j$(nproc) rpm-pkg CC='sccache gcc' LOCALVERSION= EXTRAVERSION=-dz-pvm-host KBUILD_BUILD_TIMESTAMP=""
 
-FROM scratch
+FROM alpine
 COPY --from=build linux/rpmbuild/RPMS/x86_64/*.rpm .
 COPY --from=build linux/rpmbuild/SRPMS/*.rpm .
+
+CMD ["sh", "-c", "sleep 300"]
