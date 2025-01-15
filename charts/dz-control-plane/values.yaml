@@ -1,3 +1,11 @@
+#########################################################################
+# REDIS DATABASES
+#
+# POLLAND/BUILDQD: 0
+# BACKEND: 1
+# HYDRA: 2
+#########################################################################
+
 # -- Overrides the chart's name.
 nameOverride: "-"
 
@@ -160,7 +168,7 @@ backend:
   annotations: {}
 
   redis:
-    url: redis://devzero-redis-backend-master:6379
+    url: redis://redis-headless:6379/1
     password: ""
 
   mongo:
@@ -288,7 +296,7 @@ hydra:
     password: "hydra"
 
   redis:
-    url: redis://default:@devzero-redis-hydra-master:6379/0
+    url: redis://redis-headless:6379/2
 
   cidr:
     v6: fd7a:115c:a1e0::/48
@@ -545,10 +553,6 @@ polland:
   # -- Annotations
   annotations: {}
 
-  redis:
-    host: redis-polland-headless
-    port: 6379
-
   # -- Env configuration for polland configmap
   env:
     USE_POSTGRES_DB: "true"
@@ -558,7 +562,7 @@ polland:
     POSTGRES_PASSWORD: "polland"
     POSTGRES_HOST: "postgres-polland-postgresql-hl"
 
-    REDIS_URL: "redis://redis-polland-headless:6379/0"
+    REDIS_URL: "redis://redis-headless:6379/0"
 
     USE_DOCKER: "yes"
     # Disable connection pooling in preprod because we are running a small container and we don't want to keep connections open.
@@ -752,7 +756,7 @@ buildqd:
     region: elasticmq
 
   redis:
-    url: redis://redis-polland-headless:6379
+    url: redis://redis-headless:6379/0
 
   # Buildqd autoscaling configuration
   autoscaling:
