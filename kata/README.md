@@ -35,14 +35,20 @@ git clone https://github.com/devzero-inc/self-hosted.git
 cd self-hosted/kata/linux-images
 ```
 
-### 3. Build and Run the Docker Container of the Host
+### 3. Clone the Linux Repository
+
+```bash
+git clone https://github.com/virt-pvm/linux.git
+```
+
+### 4. Build and Run the Docker Container of the Host
 
 ```bash
 docker build -t linux-image-host -f Dockerfile.host .
 docker run -d --name linux-image-host linux-image-host
 ```
 
-### 4. Copy the Package files to the Packer Directory
+### 5. Copy the Package files to the Packer Directory
 
 ```bash
 docker cp linux-image-host:/kernel-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel.rpm
@@ -50,20 +56,20 @@ docker cp linux-image-host:/kernel-headers-6.7.0_dz_pvm_host-1.x86_64.rpm /packe
 docker cp linux-image-host:/kernel-devel-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel-devel.rpm
 ```
 
-### 5. Build and Run the Docker Container of the Guest
+### 6. Build and Run the Docker Container of the Guest
 
 ```bash
 docker build -t linux-image-guest -f Dockerfile.guest .
 docker run -d --name linux-image-guest linux-image-guest
 ```
 
-### 6. Copy guest-vmlinux to the Packer Directory
+### 7. Copy guest-vmlinux to the Packer Directory
 
 ```bash
 docker cp linux-image-guest:/guest-vmlinux /packer
 ```
 
-### 7. Build the AMI with Packer
+### 8. Build the AMI with Packer
 
 ```bash
 packer init .
@@ -81,13 +87,13 @@ us-west-2: ami-wwwwxxxxyyyyzzzzz
 
 Copy the AMI of `ws-west-1` region.
 
-### 5. Navigate to the Terraform to update the AMI for EC2 launch template
+### 9. Navigate to the Terraform to update the AMI for EC2 launch template
 
 ```bash
 cd ../../terraform/examples/aws/simple-deployment
 ```
 
-### 6. Paste the AMI in the EC2 launch template
+### 10. Paste the AMI in the EC2 launch template
 
 In `main.tf`, replace the `ami_id` in the `eks_managed_node_groups` with the copied AMI.
 
@@ -95,20 +101,20 @@ In `main.tf`, replace the `ami_id` in the `eks_managed_node_groups` with the cop
 ami_id = "ami-wwwwxxxxyyyyzzzzz"
 ```
 
-### 7. Run the Terraform
+### 11. Run the Terraform
 
 ```bash
 terraform init
 terraform apply
 ```
 
-### 8. Update the kubeconfig
+### 12. Update the kubeconfig
 
 ```bash
 aws eks update-kubeconfig --region <region> --name <cluster-name>
 ```
 
-### 9. Apply the Kata runtimeclass
+### 13. Apply the Kata runtimeclass
 
 ```bash
 cd ../../../../kata
@@ -116,14 +122,14 @@ kubectl apply -f runtimeclass.yaml
 ```
 
 
-### 10. Set up the CRDs
+### 14. Set up the CRDs
 
 ```bash
 helm pull oci://registry-1.docker.io/devzeroinc/dz-data-plane-crds
 helm install dz-control-plane-crds oci://registry-1.docker.io/devzeroinc/dz-control-plane-crds -n devzero --create-namespace
 ```
 
-### 11. Install the Control Plane
+### 15. Install the Control Plane
 
 ```bash
 helm pull oci://registry-1.docker.io/devzeroinc/dz-control-plane
