@@ -5,7 +5,7 @@ metadata:
   annotations:
     "helm.sh/hook": post-install, post-upgrade
     "helm.sh/hook-weight": "0"
-    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   backoffLimit: 1
   template:
@@ -21,7 +21,7 @@ spec:
             - |
               set -e
               echo "Starting Docker daemon..."
-              dockerd --insecure-registry dz-control-plane-docker-registry:5000 &
+              dockerd --insecure-registry docker-registry:5000 &
 
               echo "Waiting for Docker daemon to be ready..."
               while ! docker info >/dev/null 2>&1; do
@@ -32,10 +32,10 @@ spec:
               docker pull {{ .Values.workspace.image }}:base-latest
 
               echo "Tagging image for local registry..."
-              docker tag {{ .Values.workspace.image }}:base-latest dz-control-plane-docker-registry:5000/devzero-devbox-base:{{ .Values.workspace.localTag }}
+              docker tag {{ .Values.workspace.image }}:base-latest docker-registry:5000/devzero-devbox-base:{{ .Values.workspace.localTag }}
 
               echo "Pushing image to local registry..."
-              docker push dz-control-plane-docker-registry:5000/devzero-devbox-base:{{ .Values.workspace.localTag }}
+              docker push docker-registry:5000/devzero-devbox-base:{{ .Values.workspace.localTag }}
           env:
             - name: DOCKER_TLS_CERTDIR
               value: ""
