@@ -1,0 +1,2488 @@
+{
+    "title": "Chart Values",
+    "type": "object",
+    "properties": {
+        "nameOverride": {
+            "type": "string",
+            "description": "String to override the chart's name",
+            "default": ""
+        },
+        "fullnameOverride": {
+            "type": "string",
+            "description": "String to override the chart's computed fullname",
+            "default": ""
+        },
+        "domain": {
+            "type": "string",
+            "description": "Domain name for the installation",
+            "default": "domain.example"
+        },
+        "credentials": {
+            "type": "object",
+            "properties": {
+                "registry": {
+                    "type": "string",
+                    "description": "Container registry URL",
+                    "default": ""
+                },
+                "username": {
+                    "type": "string",
+                    "description": "Registry username",
+                    "default": ""
+                },
+                "password": {
+                    "type": "string",
+                    "description": "Registry password",
+                    "default": ""
+                },
+                "email": {
+                    "type": "string",
+                    "description": "Registry email address",
+                    "default": ""
+                }
+            }
+        },
+        "image": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "type": "string",
+                    "description": "Devzero container image repository",
+                    "default": "docker.io/devzeroinc"
+                },
+                "tag": {
+                    "type": "string",
+                    "description": "Devzero container image tag",
+                    "default": "v1.0.0"
+                },
+                "pullPolicy": {
+                    "type": "string",
+                    "description": "Container pull policy",
+                    "default": "IfNotPresent"
+                },
+                "pullSecrets": {
+                    "type": "array",
+                    "description": "Optionally specify an array of imagePullSecrets",
+                    "default": [],
+                    "items": {}
+                }
+            }
+        },
+        "workspace": {
+            "type": "object",
+            "properties": {
+                "image": {
+                    "type": "string",
+                    "description": "Base image for workspaces",
+                    "default": "public.ecr.aws/v1i4e1r2/devzero-devbox-base"
+                },
+                "localTag": {
+                    "type": "string",
+                    "description": "Tag for local workspace image",
+                    "default": "base-latest"
+                }
+            }
+        },
+        "global": {
+            "type": "object",
+            "properties": {
+                "podAnnotations": {
+                    "type": "object",
+                    "description": "Global pod annotations",
+                    "default": {}
+                }
+            }
+        },
+        "serviceAccount": {
+            "type": "object",
+            "properties": {
+                "create": {
+                    "type": "boolean",
+                    "description": "Specifies whether a service account should be created",
+                    "default": false
+                },
+                "annotations": {
+                    "type": "object",
+                    "description": "Annotations to add to the service account",
+                    "default": {}
+                },
+                "name": {
+                    "type": "string",
+                    "description": "The name of the service account to use",
+                    "default": "devzero"
+                }
+            }
+        },
+        "gateway": {
+            "type": "object",
+            "properties": {
+                "replicas": {
+                    "type": "number",
+                    "description": "Number of replicas for Api Gateway",
+                    "default": 3
+                },
+                "imageName": {
+                    "type": "string",
+                    "description": "Image name for the API Gateway",
+                    "default": "api-gateway"
+                },
+                "schedulerName": {
+                    "type": "string",
+                    "description": "Optionally set the scheduler for pods",
+                    "default": ""
+                },
+                "priorityClassName": {
+                    "type": "string",
+                    "description": "Optionally set the name of the PriorityClass for pods",
+                    "default": ""
+                },
+                "nodeSelector": {
+                    "type": "object",
+                    "description": "NodeSelector to pin pods to certain set of nodes",
+                    "default": {}
+                },
+                "affinity": {
+                    "type": "object",
+                    "description": "Pod affinity settings",
+                    "default": {}
+                },
+                "tolerations": {
+                    "type": "array",
+                    "description": "Pod tolerations",
+                    "default": [],
+                    "items": {}
+                },
+                "podLabels": {
+                    "type": "object",
+                    "description": "Pod labels",
+                    "default": {}
+                },
+                "podAnnotations": {
+                    "type": "object",
+                    "description": "Pod annotations",
+                    "default": {}
+                },
+                "annotations": {
+                    "type": "object",
+                    "description": "Annotations",
+                    "default": {}
+                },
+                "autoscaling": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable autoscaling for Api Gateway",
+                            "default": false
+                        },
+                        "minReplicas": {
+                            "type": "number",
+                            "description": "Minimum autoscaling replicas for Api Gateway",
+                            "default": 1
+                        },
+                        "maxReplicas": {
+                            "type": "number",
+                            "description": "Maximum autoscaling replicas for Api Gateway",
+                            "default": 3
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target CPU utilisation percentage for Api Gateway",
+                            "default": 60
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target memory utilisation percentage for Api Gateway",
+                            "default": 80
+                        }
+                    }
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU limit for Api Gateway",
+                                    "default": "1000m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory limit for Api Gateway",
+                                    "default": "1Gi"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU request for Api Gateway",
+                                    "default": "100m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory request for Api Gateway",
+                                    "default": "128Mi"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "number",
+                            "description": "Port of the Api Gateway service",
+                            "default": 8443
+                        },
+                        "metricsPort": {
+                            "type": "number",
+                            "description": "Port of the Api Gateway Metrics service",
+                            "default": 9090
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Type of the Api Gateway service",
+                            "default": "ClusterIP"
+                        },
+                        "annotations": {
+                            "type": "object",
+                            "description": "Annotations for the Api Gateway service",
+                            "default": {}
+                        },
+                        "labels": {
+                            "type": "object",
+                            "description": "Labels for the Api Gateway service",
+                            "default": {}
+                        }
+                    }
+                },
+                "ingress": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "string",
+                            "description": "Specify if the Api Gateway Ingress is enabled",
+                            "default": "enable"
+                        },
+                        "ingressClassName": {
+                            "type": "string",
+                            "description": "Ingress Class Name. May be required for k8s >= 1.18",
+                            "default": "nginx"
+                        },
+                        "tls": {
+                            "type": "array",
+                            "description": "TLS secret name for ingress",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "secretName": {
+                                        "type": "string",
+                                        "description": "TLS secret name for ingress"
+                                    },
+                                    "hosts": {
+                                        "type": "array",
+                                        "description": "List of TLS hosts for ingress",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "hosts": {
+                            "type": "array",
+                            "description": "Host name for ingress",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "host": {
+                                        "type": "string",
+                                        "description": "Host name for ingress"
+                                    },
+                                    "paths": {
+                                        "type": "array",
+                                        "description": "Path for ingress route",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "path": {
+                                                    "type": "string",
+                                                    "description": "Path for ingress route"
+                                                },
+                                                "pathType": {
+                                                    "type": "string",
+                                                    "description": "Path type for ingress route"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "backend": {
+            "type": "object",
+            "properties": {
+                "replicas": {
+                    "type": "number",
+                    "description": "Number of replicas for Backend",
+                    "default": 1
+                },
+                "imageName": {
+                    "type": "string",
+                    "description": "Image name for Backend service",
+                    "default": "backend"
+                },
+                "schedulerName": {
+                    "type": "string",
+                    "description": "Optionally set the scheduler for pods",
+                    "default": ""
+                },
+                "priorityClassName": {
+                    "type": "string",
+                    "description": "Optionally set the name of the PriorityClass for pods",
+                    "default": ""
+                },
+                "nodeSelector": {
+                    "type": "object",
+                    "description": "NodeSelector to pin pods to certain set of nodes",
+                    "default": {}
+                },
+                "affinity": {
+                    "type": "object",
+                    "description": "Pod affinity settings",
+                    "default": {}
+                },
+                "tolerations": {
+                    "type": "array",
+                    "description": "Pod tolerations",
+                    "default": [],
+                    "items": {}
+                },
+                "podLabels": {
+                    "type": "object",
+                    "description": "Pod labels",
+                    "default": {}
+                },
+                "podAnnotations": {
+                    "type": "object",
+                    "description": "Pod annotations",
+                    "default": {}
+                },
+                "annotations": {
+                    "type": "object",
+                    "description": "Annotations",
+                    "default": {}
+                },
+                "redis": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "Redis URL for Backend",
+                            "default": "redis://redis-headless:6379/1"
+                        },
+                        "password": {
+                            "type": "string",
+                            "description": "Redis password for Backend",
+                            "default": ""
+                        }
+                    }
+                },
+                "mongo": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "MongoDB connection URL",
+                            "default": "mongodb://devzero:backend@devzero-mongodb-0.devzero-mongodb-headless:27017/backend?directConnection=true"
+                        }
+                    }
+                },
+                "hydra": {
+                    "type": "object",
+                    "properties": {
+                        "apiKey": {
+                            "type": "string",
+                            "description": "API key for Hydra service",
+                            "default": ""
+                        }
+                    }
+                },
+                "logsrv": {
+                    "type": "object",
+                    "properties": {
+                        "queue": {
+                            "type": "string",
+                            "description": "LogSrv queue URL",
+                            "default": "http://devzero-elasticmq:9324/queue/logsrv.fifo"
+                        },
+                        "region": {
+                            "type": "string",
+                            "description": "LogSrv region",
+                            "default": "elasticmq"
+                        }
+                    }
+                },
+                "github": {
+                    "type": "object",
+                    "properties": {
+                        "appId": {
+                            "type": "string",
+                            "description": "GitHub App ID",
+                            "default": ""
+                        },
+                        "appPrivateKey": {
+                            "type": "string",
+                            "description": "GitHub App Private Key",
+                            "default": ""
+                        }
+                    }
+                },
+                "mimir": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "Mimir service URL",
+                            "default": "http://mimir:8080/prometheus"
+                        }
+                    }
+                },
+                "hibernation": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable hibernation feature",
+                            "default": false
+                        }
+                    }
+                },
+                "sendgrid": {
+                    "type": "object",
+                    "properties": {
+                        "apiKey": {
+                            "type": "string",
+                            "description": "SendGrid API Key",
+                            "default": "test-key"
+                        }
+                    }
+                },
+                "grafana": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable Grafana integration",
+                            "default": true
+                        },
+                        "datasourceId": {
+                            "type": "string",
+                            "description": "Main datasource ID",
+                            "default": "mimir"
+                        },
+                        "doraDatasourceId": {
+                            "type": "string",
+                            "description": "DORA metrics datasource ID",
+                            "default": "pulse"
+                        },
+                        "odaDatasourceId": {
+                            "type": "string",
+                            "description": "ODA metrics datasource ID",
+                            "default": "timescale"
+                        },
+                        "password": {
+                            "type": "string",
+                            "description": "Grafana password",
+                            "default": "prom-operator"
+                        }
+                    }
+                },
+                "storage": {
+                    "type": "object",
+                    "properties": {
+                        "allowedTeam": {
+                            "type": "string",
+                            "description": "Allowed team ID for storage access",
+                            "default": "team-example-id"
+                        },
+                        "ceph": {
+                            "type": "object",
+                            "properties": {
+                                "clusterId": {
+                                    "type": "string",
+                                    "description": "Ceph cluster ID",
+                                    "default": ""
+                                },
+                                "filesystemName": {
+                                    "type": "string",
+                                    "description": "Ceph filesystem name",
+                                    "default": "cephfs"
+                                },
+                                "filesystemPath": {
+                                    "type": "string",
+                                    "description": "Ceph filesystem path",
+                                    "default": "cephfs"
+                                },
+                                "monitorAddress": {
+                                    "type": "string",
+                                    "description": "Ceph monitor address",
+                                    "default": "/volumes/cache"
+                                },
+                                "userCredentials": {
+                                    "type": "string",
+                                    "description": "Ceph user credentials",
+                                    "default": ""
+                                },
+                                "username": {
+                                    "type": "string",
+                                    "description": "Ceph username",
+                                    "default": "vuser"
+                                }
+                            }
+                        }
+                    }
+                },
+                "mainTeamId": {
+                    "type": "string",
+                    "description": "Main team ID",
+                    "default": ""
+                },
+                "licenseKey": {
+                    "type": "string",
+                    "description": "License key",
+                    "default": ""
+                },
+                "arch": {
+                    "type": "string",
+                    "description": "Architecture type",
+                    "default": "amd64"
+                },
+                "cortex": {
+                    "type": "object",
+                    "properties": {
+                        "key": {
+                            "type": "string",
+                            "description": "Cortex key",
+                            "default": ""
+                        }
+                    }
+                },
+                "autoscaling": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable autoscaling for Backend",
+                            "default": false
+                        },
+                        "minReplicas": {
+                            "type": "number",
+                            "description": "Minimum autoscaling replicas for Backend",
+                            "default": 1
+                        },
+                        "maxReplicas": {
+                            "type": "number",
+                            "description": "Maximum autoscaling replicas for Backend",
+                            "default": 3
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target CPU utilisation percentage for Backend",
+                            "default": 60
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target memory utilisation percentage for Backend",
+                            "default": 80
+                        }
+                    }
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource limits for Backend",
+                                    "default": "1000m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource limits for Backend",
+                                    "default": "1Gi"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource requests for Backend",
+                                    "default": "100m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource requests for Backend",
+                                    "default": "128Mi"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "number",
+                            "description": "Port of the Backend service",
+                            "default": 8443
+                        },
+                        "metricsPort": {
+                            "type": "number",
+                            "description": "Port of the Backend Metrics service",
+                            "default": 9090
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Type of the Backend service",
+                            "default": "ClusterIP"
+                        },
+                        "annotations": {
+                            "type": "object",
+                            "description": "Annotations for the Backend service",
+                            "default": {}
+                        },
+                        "labels": {
+                            "type": "object",
+                            "description": "Labels for the Backend service",
+                            "default": {}
+                        }
+                    }
+                }
+            }
+        },
+        "hydra": {
+            "type": "object",
+            "properties": {
+                "replicas": {
+                    "type": "number",
+                    "description": "Number of replicas for Hydra",
+                    "default": 1
+                },
+                "imageName": {
+                    "type": "string",
+                    "description": "Image name for Hydra service",
+                    "default": "hydra"
+                },
+                "schedulerName": {
+                    "type": "string",
+                    "description": "Optionally set the scheduler for pods",
+                    "default": ""
+                },
+                "priorityClassName": {
+                    "type": "string",
+                    "description": "Optionally set the name of the PriorityClass for pods",
+                    "default": ""
+                },
+                "nodeSelector": {
+                    "type": "object",
+                    "description": "NodeSelector to pin pods to certain set of nodes",
+                    "default": {}
+                },
+                "affinity": {
+                    "type": "object",
+                    "description": "Pod affinity settings",
+                    "default": {}
+                },
+                "tolerations": {
+                    "type": "array",
+                    "description": "Pod tolerations",
+                    "default": [],
+                    "items": {}
+                },
+                "podLabels": {
+                    "type": "object",
+                    "description": "Pod labels",
+                    "default": {}
+                },
+                "podAnnotations": {
+                    "type": "object",
+                    "description": "Pod annotations",
+                    "default": {}
+                },
+                "annotations": {
+                    "type": "object",
+                    "description": "Annotations",
+                    "default": {}
+                },
+                "job": {
+                    "type": "boolean",
+                    "description": "Enable job mode",
+                    "default": true
+                },
+                "postgres": {
+                    "type": "object",
+                    "properties": {
+                        "host": {
+                            "type": "string",
+                            "description": "PostgreSQL host",
+                            "default": "postgres-hydra-postgresql-hl"
+                        },
+                        "port": {
+                            "type": "number",
+                            "description": "PostgreSQL port",
+                            "default": 5432
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "PostgreSQL database name",
+                            "default": "postgres"
+                        },
+                        "user": {
+                            "type": "string",
+                            "description": "PostgreSQL user",
+                            "default": "hydra"
+                        },
+                        "password": {
+                            "type": "string",
+                            "description": "PostgreSQL password",
+                            "default": "hydra"
+                        }
+                    }
+                },
+                "redis": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "Redis URL for Hydra",
+                            "default": "redis://redis-headless:6379/2"
+                        }
+                    }
+                },
+                "cidr": {
+                    "type": "object",
+                    "properties": {
+                        "v6": {
+                            "type": "string",
+                            "description": "IPv6 CIDR range",
+                            "default": "fd7a:115c:a1e0::/48"
+                        },
+                        "v4": {
+                            "type": "string",
+                            "description": "IPv4 CIDR range",
+                            "default": "100.64.0.0/10"
+                        }
+                    }
+                },
+                "derp": {
+                    "type": "object",
+                    "properties": {
+                        "server": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean",
+                                    "description": "Enable DERP server",
+                                    "default": false
+                                }
+                            }
+                        },
+                        "urls": {
+                            "type": "array",
+                            "description": "DERP server URLs",
+                            "default": [
+                                "https://controlplane.tailscale.com/derpmap/default"
+                            ],
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "paths": {
+                            "type": "array",
+                            "description": "DERP paths",
+                            "default": [],
+                            "items": {}
+                        },
+                        "autoUpdateEnabled": {
+                            "type": "boolean",
+                            "description": "Enable auto-update for DERP",
+                            "default": true
+                        },
+                        "updateFrequency": {
+                            "type": "string",
+                            "description": "Update frequency for DERP",
+                            "default": "24h"
+                        }
+                    }
+                },
+                "autoscaling": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable autoscaling for Hydra",
+                            "default": false
+                        },
+                        "minReplicas": {
+                            "type": "number",
+                            "description": "Minimum autoscaling replicas for Hydra",
+                            "default": 1
+                        },
+                        "maxReplicas": {
+                            "type": "number",
+                            "description": "Maximum autoscaling replicas for Hydra",
+                            "default": 3
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target CPU utilisation percentage for Hydra",
+                            "default": 60
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target memory utilisation percentage for Hydra",
+                            "default": 80
+                        }
+                    }
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource limits for Hydra",
+                                    "default": "1000m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource limits for Hydra",
+                                    "default": "1Gi"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource requests for Hydra",
+                                    "default": "100m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource requests for Hydra",
+                                    "default": "128Mi"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "number",
+                            "description": "Port of the Hydra service",
+                            "default": 8443
+                        },
+                        "metricsPort": {
+                            "type": "number",
+                            "description": "Port of the Hydra Metrics service",
+                            "default": 9090
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Type of the Hydra service",
+                            "default": "ClusterIP"
+                        },
+                        "annotations": {
+                            "type": "object",
+                            "description": "Annotations for the Hydra service",
+                            "default": {}
+                        },
+                        "labels": {
+                            "type": "object",
+                            "description": "Labels for the Hydra service",
+                            "default": {}
+                        }
+                    }
+                },
+                "ingress": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Specify if the Hydra Ingress is enabled",
+                            "default": true
+                        },
+                        "ingressClassName": {
+                            "type": "string",
+                            "description": "Ingress Class Name",
+                            "default": "nginx"
+                        },
+                        "tls": {
+                            "type": "array",
+                            "description": "TLS secret name for ingress",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "secretName": {
+                                        "type": "string",
+                                        "description": "TLS secret name for ingress"
+                                    },
+                                    "hosts": {
+                                        "type": "array",
+                                        "description": "List of TLS hosts for ingress",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "hosts": {
+                            "type": "array",
+                            "description": "Host name for ingress",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "host": {
+                                        "type": "string",
+                                        "description": "Host name for ingress"
+                                    },
+                                    "paths": {
+                                        "type": "array",
+                                        "description": "Path for ingress route",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "path": {
+                                                    "type": "string",
+                                                    "description": "Path for ingress route"
+                                                },
+                                                "pathType": {
+                                                    "type": "string",
+                                                    "description": "Path type for ingress route"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "logsrv": {
+            "type": "object",
+            "properties": {
+                "replicas": {
+                    "type": "number",
+                    "description": "Number of replicas for LogSrv",
+                    "default": 1
+                },
+                "imageName": {
+                    "type": "string",
+                    "description": "Image name for LogSrv",
+                    "default": "logsrv"
+                },
+                "schedulerName": {
+                    "type": "string",
+                    "description": "Scheduler name for LogSrv pods",
+                    "default": ""
+                },
+                "priorityClassName": {
+                    "type": "string",
+                    "description": "Priority class name for LogSrv pods",
+                    "default": ""
+                },
+                "nodeSelector": {
+                    "type": "object",
+                    "description": "Node selector for LogSrv pods",
+                    "default": {}
+                },
+                "affinity": {
+                    "type": "object",
+                    "description": "Affinity settings for LogSrv pods",
+                    "default": {}
+                },
+                "tolerations": {
+                    "type": "array",
+                    "description": "Tolerations for LogSrv pods",
+                    "default": [],
+                    "items": {}
+                },
+                "podLabels": {
+                    "type": "object",
+                    "description": "Pod labels for LogSrv",
+                    "default": {}
+                },
+                "podAnnotations": {
+                    "type": "object",
+                    "description": "Pod annotations for LogSrv",
+                    "default": {}
+                },
+                "annotations": {
+                    "type": "object",
+                    "description": "Annotations for LogSrv",
+                    "default": {}
+                },
+                "queue": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "Queue URL for LogSrv",
+                            "default": "http://devzero-elasticmq:9324/queue/logsrv.fifo"
+                        }
+                    }
+                },
+                "postgres": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "PostgreSQL URL for LogSrv",
+                            "default": "postgresql://logsrv:logsrv@postgres-logsrv-postgresql-hl:5432/logsrv"
+                        },
+                        "password": {
+                            "type": "string",
+                            "description": "PostgreSQL password for LogSrv",
+                            "default": "logsrv"
+                        }
+                    }
+                },
+                "refreshJwksTimer": {
+                    "type": "number",
+                    "description": "JWKS refresh timer in seconds",
+                    "default": 3600
+                },
+                "autoscaling": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable autoscaling for LogSrv",
+                            "default": false
+                        },
+                        "minReplicas": {
+                            "type": "number",
+                            "description": "Minimum replicas for LogSrv",
+                            "default": 1
+                        },
+                        "maxReplicas": {
+                            "type": "number",
+                            "description": "Maximum replicas for LogSrv",
+                            "default": 3
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target CPU utilization percentage",
+                            "default": 60
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target memory utilization percentage",
+                            "default": 80
+                        }
+                    }
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource limits for LogSrv  ",
+                                    "default": "1000m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource limits for LogSrv",
+                                    "default": "1Gi"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource requests for LogSrv",
+                                    "default": "100m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource requests for LogSrv",
+                                    "default": "128Mi"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "number",
+                            "description": "Service port for LogSrv",
+                            "default": 8443
+                        },
+                        "metricsPort": {
+                            "type": "number",
+                            "description": "Metrics port for LogSrv",
+                            "default": 9090
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Service type for LogSrv",
+                            "default": "ClusterIP"
+                        },
+                        "annotations": {
+                            "type": "object",
+                            "description": "Service annotations for LogSrv",
+                            "default": {}
+                        },
+                        "labels": {
+                            "type": "object",
+                            "description": "Service labels for LogSrv",
+                            "default": {}
+                        }
+                    }
+                },
+                "ingress": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable ingress for LogSrv",
+                            "default": true
+                        },
+                        "ingressClassName": {
+                            "type": "string",
+                            "description": "Ingress class name for LogSrv",
+                            "default": "nginx"
+                        },
+                        "tls": {
+                            "type": "array",
+                            "description": "TLS secret name for ingress",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "secretName": {
+                                        "type": "string",
+                                        "description": "TLS secret name for ingress"
+                                    },
+                                    "hosts": {
+                                        "type": "array",
+                                        "description": "List of TLS hosts for ingress",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "hosts": {
+                            "type": "array",
+                            "description": "Host name for ingress",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "host": {
+                                        "type": "string",
+                                        "description": "Host name for ingress"
+                                    },
+                                    "paths": {
+                                        "type": "array",
+                                        "description": "Path for ingress route",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "path": {
+                                                    "type": "string",
+                                                    "description": "Path for ingress route"
+                                                },
+                                                "pathType": {
+                                                    "type": "string",
+                                                    "description": "Path type for ingress route"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "polland": {
+            "type": "object",
+            "properties": {
+                "worker": {
+                    "type": "object",
+                    "properties": {
+                        "replicas": {
+                            "type": "number",
+                            "description": "Number of replicas for Polland Worker",
+                            "default": 3
+                        },
+                        "terminationGracePeriodSeconds": {
+                            "type": "number",
+                            "description": "Termination grace period in seconds",
+                            "default": 3600
+                        },
+                        "queues": {
+                            "type": "array",
+                            "description": "Configuration for the fast queue",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Configuration for the hibernation queue"
+                                    },
+                                    "replicaCount": {
+                                        "type": "number",
+                                        "description": "Number of replicas for queue"
+                                    },
+                                    "autoscaling": {
+                                        "type": "object",
+                                        "properties": {
+                                            "enabled": {
+                                                "type": "boolean",
+                                                "description": "Enable autoscaling for queue"
+                                            },
+                                            "minReplicas": {
+                                                "type": "number",
+                                                "description": "Minimum autoscaling replicas for queue"
+                                            },
+                                            "maxReplicas": {
+                                                "type": "number",
+                                                "description": "Maximum autoscaling replicas for queue"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "beat": {
+                    "type": "object",
+                    "properties": {
+                        "replicas": {
+                            "type": "number",
+                            "description": "Number of replicas for Polland Beat",
+                            "default": 1
+                        }
+                    }
+                },
+                "flower": {
+                    "type": "object",
+                    "properties": {
+                        "replicas": {
+                            "type": "number",
+                            "description": "Number of replicas for Polland Flower",
+                            "default": 1
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "type": "number",
+                                    "description": "Port for Flower service",
+                                    "default": 5555
+                                },
+                                "type": {
+                                    "type": "string",
+                                    "description": "Type of Flower service",
+                                    "default": "ClusterIP"
+                                }
+                            }
+                        }
+                    }
+                },
+                "celeryExporter": {
+                    "type": "object",
+                    "properties": {
+                        "replicas": {
+                            "type": "number",
+                            "description": "Number of replicas for Celery Exporter",
+                            "default": 1
+                        }
+                    }
+                },
+                "replicas": {
+                    "type": "number",
+                    "description": "Number of replicas for Polland",
+                    "default": 1
+                },
+                "imageName": {
+                    "type": "string",
+                    "description": "Image name for Polland",
+                    "default": "polland"
+                },
+                "schedulerName": {
+                    "type": "string",
+                    "description": "Scheduler name for Polland pods",
+                    "default": ""
+                },
+                "priorityClassName": {
+                    "type": "string",
+                    "description": "Priority class name for Polland pods",
+                    "default": ""
+                },
+                "nodeSelector": {
+                    "type": "object",
+                    "description": "Node selector for Polland pods",
+                    "default": {}
+                },
+                "affinity": {
+                    "type": "object",
+                    "description": "Affinity settings for Polland pods",
+                    "default": {}
+                },
+                "tolerations": {
+                    "type": "array",
+                    "description": "Tolerations for Polland pods",
+                    "default": [],
+                    "items": {}
+                },
+                "podLabels": {
+                    "type": "object",
+                    "description": "Pod labels for Polland",
+                    "default": {}
+                },
+                "podAnnotations": {
+                    "type": "object",
+                    "description": "Pod annotations for Polland",
+                    "default": {}
+                },
+                "annotations": {
+                    "type": "object",
+                    "description": "Annotations for Polland",
+                    "default": {}
+                },
+                "env": {
+                    "type": "object",
+                    "properties": {
+                        "USE_POSTGRES_DB": {
+                            "type": "string",
+                            "description": "Use PostgreSQL database",
+                            "default": "true"
+                        },
+                        "POSTGRES_PORT": {
+                            "type": "string",
+                            "description": "PostgreSQL port",
+                            "default": "5432"
+                        },
+                        "POSTGRES_DB": {
+                            "type": "string",
+                            "description": "PostgreSQL database name",
+                            "default": "polland"
+                        },
+                        "POSTGRES_USER": {
+                            "type": "string",
+                            "description": "PostgreSQL user",
+                            "default": "polland"
+                        },
+                        "POSTGRES_PASSWORD": {
+                            "type": "string",
+                            "description": "PostgreSQL password",
+                            "default": "polland"
+                        },
+                        "POSTGRES_HOST": {
+                            "type": "string",
+                            "description": "PostgreSQL host",
+                            "default": "postgres-polland-postgresql-hl"
+                        },
+                        "REDIS_URL": {
+                            "type": "string",
+                            "description": "Redis URL",
+                            "default": "redis://redis-headless:6379/0"
+                        },
+                        "USE_DOCKER": {
+                            "type": "string",
+                            "description": "Use Docker",
+                            "default": "yes"
+                        },
+                        "CONN_MAX_AGE": {
+                            "type": "string",
+                            "description": "Connection max age",
+                            "default": "60"
+                        },
+                        "DJANGO_ALLOWED_HOSTS": {
+                            "type": "string",
+                            "description": "Allowed hosts for Django",
+                            "default": "*"
+                        },
+                        "DJANGO_SETTINGS_MODULE": {
+                            "type": "string",
+                            "description": "Django settings module",
+                            "default": "config.settings.production"
+                        },
+                        "DJANGO_SECRET_KEY": {
+                            "type": "string",
+                            "description": "Django secret key",
+                            "default": "super_secret_key"
+                        },
+                        "CELERY_FLOWER_USER": {
+                            "type": "string",
+                            "description": "Celery Flower user",
+                            "default": "devzero"
+                        },
+                        "CELERY_FLOWER_PASSWORD": {
+                            "type": "string",
+                            "description": "Celery Flower password",
+                            "default": "devzero"
+                        },
+                        "SELF_HOSTED": {
+                            "type": "string",
+                            "description": "Self-hosted mode",
+                            "default": "True"
+                        },
+                        "USE_INSECURE_REGISTRY": {
+                            "type": "string",
+                            "description": "Use insecure registry",
+                            "default": "True"
+                        },
+                        "USE_ECR_REGISTRY": {
+                            "type": "string",
+                            "description": "Use ECR registry",
+                            "default": "False"
+                        },
+                        "USE_LOCAL_LOGSRV": {
+                            "type": "string",
+                            "description": "Use local LogSrv",
+                            "default": "True"
+                        },
+                        "VAULT_AUTH_METHOD": {
+                            "type": "string",
+                            "description": "Vault auth method",
+                            "default": "kubernetes"
+                        },
+                        "VAULT_SECRETS_MOUNT_POINT": {
+                            "type": "string",
+                            "description": "Vault secrets mount point",
+                            "default": "vault-csi-production-writer"
+                        },
+                        "LOGSRV_DEFAULT_QUEUE": {
+                            "type": "string",
+                            "description": "Default LogSrv queue URL",
+                            "default": "http://devzero-elasticmq:9324/queue/logsrv.fifo"
+                        },
+                        "LOGSRV_DEFAULT_REGION": {
+                            "type": "string",
+                            "description": "Default LogSrv region",
+                            "default": "elasticmq"
+                        }
+                    }
+                },
+                "autoscaling": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable autoscaling for Polland",
+                            "default": false
+                        },
+                        "minReplicas": {
+                            "type": "number",
+                            "description": "Minimum autoscaling replicas for Polland",
+                            "default": 1
+                        },
+                        "maxReplicas": {
+                            "type": "number",
+                            "description": "Maximum autoscaling replicas for Polland",
+                            "default": 3
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target CPU utilisation percentage for Polland",
+                            "default": 60
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target memory utilisation percentage for Polland",
+                            "default": 80
+                        }
+                    }
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource limits for Polland",
+                                    "default": "1000m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource limits for Polland",
+                                    "default": "1Gi"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource requests for Polland",
+                                    "default": "100m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource requests for Polland",
+                                    "default": "128Mi"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "number",
+                            "description": "Port of the Polland service",
+                            "default": 8000
+                        },
+                        "metricsPort": {
+                            "type": "number",
+                            "description": "Port of the Polland Metrics service",
+                            "default": 9090
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Type of the Polland service",
+                            "default": "ClusterIP"
+                        },
+                        "annotations": {
+                            "type": "object",
+                            "description": "Annotations for the Polland service",
+                            "default": {}
+                        },
+                        "labels": {
+                            "type": "object",
+                            "description": "Labels for the Polland service",
+                            "default": {}
+                        }
+                    }
+                }
+            }
+        },
+        "pulse": {
+            "type": "object",
+            "properties": {
+                "replicas": {
+                    "type": "number",
+                    "description": "Number of replicas for Pulse",
+                    "default": 1
+                },
+                "imageName": {
+                    "type": "string",
+                    "description": "Image name for Pulse",
+                    "default": "pulse"
+                },
+                "schedulerName": {
+                    "type": "string",
+                    "description": "Scheduler name for Pulse pods",
+                    "default": ""
+                },
+                "priorityClassName": {
+                    "type": "string",
+                    "description": "Priority class name for Pulse pods",
+                    "default": ""
+                },
+                "nodeSelector": {
+                    "type": "object",
+                    "description": "Node selector for Pulse pods",
+                    "default": {}
+                },
+                "affinity": {
+                    "type": "object",
+                    "description": "Affinity settings for Pulse pods",
+                    "default": {}
+                },
+                "tolerations": {
+                    "type": "array",
+                    "description": "Tolerations for Pulse pods",
+                    "default": [],
+                    "items": {}
+                },
+                "podLabels": {
+                    "type": "object",
+                    "description": "Pod labels for Pulse",
+                    "default": {}
+                },
+                "podAnnotations": {
+                    "type": "object",
+                    "description": "Pod annotations for Pulse",
+                    "default": {}
+                },
+                "annotations": {
+                    "type": "object",
+                    "description": "Annotations for Pulse",
+                    "default": {}
+                },
+                "postgres": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "description": "PostgreSQL password for Pulse",
+                            "default": "pulse"
+                        },
+                        "user": {
+                            "type": "string",
+                            "description": "PostgreSQL user for Pulse",
+                            "default": "postgres"
+                        },
+                        "host": {
+                            "type": "string",
+                            "description": "PostgreSQL host for Pulse",
+                            "default": "timescaledb-single"
+                        },
+                        "port": {
+                            "type": "number",
+                            "description": "PostgreSQL port for Pulse",
+                            "default": 5432
+                        },
+                        "database": {
+                            "type": "string",
+                            "description": "PostgreSQL database for Pulse",
+                            "default": "postgres"
+                        },
+                        "ssl": {
+                            "type": "string",
+                            "description": "SSL mode for PostgreSQL",
+                            "default": "allow"
+                        }
+                    }
+                },
+                "mysql": {
+                    "type": "object",
+                    "properties": {
+                        "user": {
+                            "type": "string",
+                            "description": "MySQL user for Pulse",
+                            "default": "pulse"
+                        },
+                        "password": {
+                            "type": "string",
+                            "description": "MySQL password for Pulse",
+                            "default": "pulse"
+                        },
+                        "host": {
+                            "type": "string",
+                            "description": "MySQL host for Pulse",
+                            "default": "mysql-pulse-headless"
+                        },
+                        "port": {
+                            "type": "number",
+                            "description": "MySQL port for Pulse",
+                            "default": 3306
+                        },
+                        "database": {
+                            "type": "string",
+                            "description": "MySQL database for Pulse",
+                            "default": "pulse"
+                        }
+                    }
+                },
+                "devlake": {
+                    "type": "object",
+                    "properties": {
+                        "secret": {
+                            "type": "string",
+                            "description": "Devlake secret for Pulse",
+                            "default": ""
+                        }
+                    }
+                },
+                "openApi": {
+                    "type": "object",
+                    "properties": {
+                        "token": {
+                            "type": "string",
+                            "description": "OpenAPI token for Pulse",
+                            "default": ""
+                        }
+                    }
+                },
+                "autoscaling": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable autoscaling for Pulse",
+                            "default": false
+                        },
+                        "minReplicas": {
+                            "type": "number",
+                            "description": "Minimum autoscaling replicas for Pulse",
+                            "default": 1
+                        },
+                        "maxReplicas": {
+                            "type": "number",
+                            "description": "Maximum autoscaling replicas for Pulse",
+                            "default": 3
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target CPU utilisation percentage for Pulse",
+                            "default": 60
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target memory utilisation percentage for Pulse",
+                            "default": 80
+                        }
+                    }
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource limits for Pulse",
+                                    "default": "1000m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource limits for Pulse",
+                                    "default": "1Gi"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource requests for Pulse",
+                                    "default": "100m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource requests for Pulse",
+                                    "default": "128Mi"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "number",
+                            "description": "Port of the Pulse service",
+                            "default": 8443
+                        },
+                        "metricsPort": {
+                            "type": "number",
+                            "description": "Port of the Pulse Metrics service",
+                            "default": 9090
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Type of the Pulse service",
+                            "default": "ClusterIP"
+                        },
+                        "annotations": {
+                            "type": "object",
+                            "description": "Annotations for the Pulse service",
+                            "default": {}
+                        },
+                        "labels": {
+                            "type": "object",
+                            "description": "Labels for the Pulse service",
+                            "default": {}
+                        }
+                    }
+                },
+                "ingress": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Specify if the Pulse Ingress is enabled",
+                            "default": true
+                        },
+                        "ingressClassName": {
+                            "type": "string",
+                            "description": "Ingress Class Name. May be required for k8s >= 1.18",
+                            "default": "nginx"
+                        },
+                        "tls": {
+                            "type": "array",
+                            "description": "TLS secret name for ingress",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "secretName": {
+                                        "type": "string",
+                                        "description": "TLS secret name for ingress"
+                                    },
+                                    "hosts": {
+                                        "type": "array",
+                                        "description": "List of TLS hosts for ingress",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "hosts": {
+                            "type": "array",
+                            "description": "Host name for ingress",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "host": {
+                                        "type": "string",
+                                        "description": "Host name for ingress"
+                                    },
+                                    "paths": {
+                                        "type": "array",
+                                        "description": "Path for ingress",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "path": {
+                                                    "type": "string",
+                                                    "description": "Path for ingress"
+                                                },
+                                                "pathType": {
+                                                    "type": "string",
+                                                    "description": "Path type for ingress"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "buildqd": {
+            "type": "object",
+            "properties": {
+                "replicas": {
+                    "type": "number",
+                    "description": "Number of replicas for Buildqd",
+                    "default": 1
+                },
+                "imageName": {
+                    "type": "string",
+                    "description": "Image name for Buildqd",
+                    "default": "buildqd"
+                },
+                "schedulerName": {
+                    "type": "string",
+                    "description": "Scheduler name for Buildqd pods",
+                    "default": ""
+                },
+                "priorityClassName": {
+                    "type": "string",
+                    "description": "Priority class name for Buildqd pods",
+                    "default": ""
+                },
+                "nodeSelector": {
+                    "type": "object",
+                    "description": "Node selector for Buildqd pods",
+                    "default": {}
+                },
+                "affinity": {
+                    "type": "object",
+                    "description": "Affinity settings for Buildqd pods",
+                    "default": {}
+                },
+                "tolerations": {
+                    "type": "array",
+                    "description": "Tolerations for Buildqd pods",
+                    "default": [],
+                    "items": {}
+                },
+                "logsrv": {
+                    "type": "object",
+                    "properties": {
+                        "queue": {
+                            "type": "string",
+                            "description": "Queue URL for LogSrv",
+                            "default": "http://devzero-elasticmq:9324/queue/logsrv.fifo"
+                        },
+                        "region": {
+                            "type": "string",
+                            "description": "Region for LogSrv",
+                            "default": "elasticmq"
+                        }
+                    }
+                },
+                "redis": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "Redis URL for Buildqd",
+                            "default": "redis://redis-headless:6379/0"
+                        }
+                    }
+                },
+                "autoscaling": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable autoscaling for Buildqd",
+                            "default": false
+                        },
+                        "minReplicas": {
+                            "type": "number",
+                            "description": "Minimum autoscaling replicas for Buildqd",
+                            "default": 1
+                        },
+                        "maxReplicas": {
+                            "type": "number",
+                            "description": "Maximum autoscaling replicas for Buildqd",
+                            "default": 3
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target CPU utilisation percentage for Buildqd",
+                            "default": 60
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target memory utilisation percentage for Buildqd",
+                            "default": 80
+                        }
+                    }
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource limits for Buildqd",
+                                    "default": "1000m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource limits for Buildqd",
+                                    "default": "1Gi"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource requests for Buildqd",
+                                    "default": "100m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource requests for Buildqd",
+                                    "default": "128Mi"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "number",
+                            "description": "Port of the Buildqd service",
+                            "default": 8443
+                        },
+                        "metricsPort": {
+                            "type": "number",
+                            "description": "Port of the Buildqd Metrics service",
+                            "default": 9090
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Type of the Buildqd service",
+                            "default": "ClusterIP"
+                        },
+                        "annotations": {
+                            "type": "object",
+                            "description": "Annotations for the Buildqd service",
+                            "default": {}
+                        },
+                        "labels": {
+                            "type": "object",
+                            "description": "Labels for the Buildqd service",
+                            "default": {}
+                        }
+                    }
+                },
+                "buildkit": {
+                    "type": "object",
+                    "properties": {
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "repository": {
+                                    "type": "string",
+                                    "description": "Buildkit repository",
+                                    "default": "docker.io/moby/buildkit"
+                                },
+                                "pullPolicy": {
+                                    "type": "string",
+                                    "description": "Buildkit image policy",
+                                    "default": "IfNotPresent"
+                                },
+                                "tag": {
+                                    "type": "string",
+                                    "description": "Buildkit image tag",
+                                    "default": "v0.15.1"
+                                }
+                            }
+                        },
+                        "securityContext": {
+                            "type": "object",
+                            "properties": {
+                                "privileged": {
+                                    "type": "boolean",
+                                    "description": "Privileged mode for Buildkit container",
+                                    "default": true
+                                }
+                            }
+                        },
+                        "command": {
+                            "type": "string",
+                            "description": "Buildkit command",
+                            "default": "buildkitd"
+                        },
+                        "args": {
+                            "type": "array",
+                            "description": "Buildkit args",
+                            "default": [
+                                "--addr",
+                                "unix:///run/buildkit/buildkitd.sock",
+                                "--addr",
+                                "tcp://0.0.0.0:1234"
+                            ],
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string",
+                                            "description": "CPU resource limits for Buildkit",
+                                            "default": "1000m"
+                                        },
+                                        "memory": {
+                                            "type": "string",
+                                            "description": "Memory resource limits for Buildkit",
+                                            "default": "1Gi"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string",
+                                            "description": "CPU resource requests for Buildkit",
+                                            "default": "100m"
+                                        },
+                                        "memory": {
+                                            "type": "string",
+                                            "description": "Memory resource requests for Buildkit",
+                                            "default": "128Mi"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "persistentVolumeClaim": {
+                            "type": "object",
+                            "properties": {
+                                "storageSize": {
+                                    "type": "string",
+                                    "description": "Storage size for Buildkit shared cache",
+                                    "default": "100Gi"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "web": {
+            "type": "object",
+            "properties": {
+                "replicas": {
+                    "type": "number",
+                    "description": "Number of replicas for Web",
+                    "default": 1
+                },
+                "imageName": {
+                    "type": "string",
+                    "description": "Image name for Web",
+                    "default": "web"
+                },
+                "schedulerName": {
+                    "type": "string",
+                    "description": "Scheduler name for Web pods",
+                    "default": ""
+                },
+                "priorityClassName": {
+                    "type": "string",
+                    "description": "Priority class name for Web pods",
+                    "default": ""
+                },
+                "nodeSelector": {
+                    "type": "object",
+                    "description": "Node selector for Web pods",
+                    "default": {}
+                },
+                "affinity": {
+                    "type": "object",
+                    "description": "Affinity settings for Web pods",
+                    "default": {}
+                },
+                "tolerations": {
+                    "type": "array",
+                    "description": "Tolerations for Web pods",
+                    "default": [],
+                    "items": {}
+                },
+                "podLabels": {
+                    "type": "object",
+                    "description": "Pod labels for Web",
+                    "default": {}
+                },
+                "podAnnotations": {
+                    "type": "object",
+                    "description": "Pod annotations for Web",
+                    "default": {}
+                },
+                "annotations": {
+                    "type": "object",
+                    "description": "Annotations for Web",
+                    "default": {}
+                },
+                "env": {
+                    "type": "object",
+                    "properties": {
+                        "NEXT_AUTH_ENABLE_CREDENTIALS_PROVIDER": {
+                            "type": "string",
+                            "description": "Enable credentials provider for NextAuth",
+                            "default": "true"
+                        },
+                        "NEXT_PUBLIC_BYPASS_AUTH0_FLOW": {
+                            "type": "string",
+                            "description": "Bypass Auth0 flow for Next.js",
+                            "default": "true"
+                        },
+                        "NEXT_PUBLIC_SELF_HOSTED": {
+                            "type": "string",
+                            "description": "Self-hosted mode for Next.js",
+                            "default": "true"
+                        }
+                    }
+                },
+                "autoscaling": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable autoscaling for Web",
+                            "default": false
+                        },
+                        "minReplicas": {
+                            "type": "number",
+                            "description": "Minimum autoscaling replicas for Web",
+                            "default": 1
+                        },
+                        "maxReplicas": {
+                            "type": "number",
+                            "description": "Maximum autoscaling replicas for Web",
+                            "default": 3
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target CPU utilisation percentage for Web",
+                            "default": 60
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "type": "number",
+                            "description": "Target memory utilisation percentage for Web",
+                            "default": 80
+                        }
+                    }
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource limits for Web",
+                                    "default": "2000m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource limits for Web",
+                                    "default": "4Gi"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string",
+                                    "description": "CPU resource requests for Web",
+                                    "default": "1000m"
+                                },
+                                "memory": {
+                                    "type": "string",
+                                    "description": "Memory resource requests for Web",
+                                    "default": "2Gi"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "number",
+                            "description": "Port of the Web service",
+                            "default": 3000
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Type of the Web service",
+                            "default": "ClusterIP"
+                        },
+                        "annotations": {
+                            "type": "object",
+                            "description": "Annotations for the Web service",
+                            "default": {}
+                        },
+                        "labels": {
+                            "type": "object",
+                            "description": "Labels for the Web service",
+                            "default": {}
+                        }
+                    }
+                },
+                "ingress": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Specify if the Web Ingress is enabled",
+                            "default": true
+                        },
+                        "ingressClassName": {
+                            "type": "string",
+                            "description": "Ingress Class Name. May be required for k8s >= 1.18",
+                            "default": "nginx"
+                        },
+                        "tls": {
+                            "type": "array",
+                            "description": "TLS secret name for ingress",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "secretName": {
+                                        "type": "string",
+                                        "description": "TLS secret name for ingress"
+                                    },
+                                    "hosts": {
+                                        "type": "array",
+                                        "description": "List of TLS hosts for ingress",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "hosts": {
+                            "type": "array",
+                            "description": "Host name for ingress",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "host": {
+                                        "type": "string",
+                                        "description": "Host name for ingress"
+                                    },
+                                    "paths": {
+                                        "type": "array",
+                                        "description": "Path for ingress",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "path": {
+                                                    "type": "string",
+                                                    "description": "Path for ingress"
+                                                },
+                                                "pathType": {
+                                                    "type": "string",
+                                                    "description": "Path type for ingress"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "issuer": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Enable Cluster Issuer",
+                    "default": true
+                },
+                "acme": {
+                    "type": "string",
+                    "description": "ACME server URL",
+                    "default": "https://acme-v02.api.letsencrypt.org/directory"
+                },
+                "email": {
+                    "type": "string",
+                    "description": "Email address used for ACME registration",
+                    "default": "email@selfzero.net"
+                }
+            }
+        },
+        "vault": {
+            "type": "object",
+            "properties": {
+                "job": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable Vault job",
+                            "default": true
+                        },
+                        "address": {
+                            "type": "string",
+                            "description": "Vault address for job",
+                            "default": "vault:8200"
+                        }
+                    }
+                },
+                "ingress": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable Vault ingress",
+                            "default": false
+                        }
+                    }
+                }
+            }
+        },
+        "mimir": {
+            "type": "object",
+            "properties": {
+                "ingress": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable Mimir ingress",
+                            "default": false
+                        }
+                    }
+                }
+            }
+        },
+        "grafana": {
+            "type": "object",
+            "properties": {
+                "ingress": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable Grafana ingress",
+                            "default": false
+                        }
+                    }
+                }
+            }
+        },
+        "registry": {
+            "type": "object",
+            "properties": {
+                "ingress": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable Registry ingress",
+                            "default": false
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

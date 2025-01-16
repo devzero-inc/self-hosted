@@ -1,953 +1,1219 @@
-#########################################################################
-# REDIS DATABASES
-#
-# POLLAND/BUILDQD: 0
-# BACKEND: 1
-# HYDRA: 2
-#########################################################################
+## @section Redis Database Configuration
+## POLLAND/BUILDQD: 0
+## BACKEND: 1
+## HYDRA: 2
 
-# -- Overrides the chart's name.
-nameOverride: null
+## @param nameOverride String to override the chart's name
+nameOverride: ""
 
-# -- Overrides the chart's computed fullname.
-fullnameOverride: null
+## @param fullnameOverride String to override the chart's computed fullname
+fullnameOverride: ""
 
+## @param domain Domain name for the installation
 domain: "domain.example"
 
+## @section Credentials Configuration
 credentials:
+  ## @param credentials.registry Container registry URL
   registry: ""
+  ## @param credentials.username Registry username
   username: ""
+  ## @param credentials.password Registry password
   password: ""
+  ## @param credentials.email Registry email address
   email: ""
 
+
+## @section Image Configuration
+## @param image.repository Devzero container image repository
 image:
-  # -- Devzero container image repository'
+  ## @param image.repository Devzero container image repository
   repository: docker.io/devzeroinc
-  # -- Devzero container image tag'
+  ## @param image.tag Devzero container image tag
   tag: "v1.0.0"
-  # -- Container pull policy
+  ## @param image.pullPolicy Container pull policy
   pullPolicy: IfNotPresent
   # -- Optionally specify an array of imagePullSecrets
   # pullSecrets:
   #   - pull-secret
+  ## @param image.pullSecrets Optionally specify an array of imagePullSecrets
   pullSecrets: []
 
+## @section Workspace Configuration
 workspace:
+  ## @param workspace.image Base image for workspaces
   image: public.ecr.aws/v1i4e1r2/devzero-devbox-base
+  ## @param workspace.localTag Tag for local workspace image
   localTag: base-latest
 
+## @section Global Configuration
+## @param global.podAnnotations Global pod annotations
 global:
   podAnnotations: {}
 
+## @section Service Account Configuration
 serviceAccount:
-  # -- Specifies whether a service account should be created
+  ## @param serviceAccount.create Specifies whether a service account should be created
   create: false
-  # -- Annotations to add to the service account
+  ## @param serviceAccount.annotations Annotations to add to the service account
   annotations: {}
-  # -- The name of the service account to use
+  ## @param serviceAccount.name The name of the service account to use
   name: "devzero"
 
+## @section API Gateway Configuration
 gateway:
-  # -- Number of replicas for Api Gateway
+  ## @param gateway.replicas Number of replicas for Api Gateway
   replicas: 3
-
+  ## @param gateway.imageName Image name for the API Gateway
   imageName: "api-gateway"
-
-  # -- Optionally set the scheduler for pods
+  ## @param gateway.schedulerName Optionally set the scheduler for pods
   schedulerName: ""
-
-  # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
-
-  # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
-
-  # -- Pod affinity settings
-  affinity: { }
-
-  # -- Pod tolerations
+  ## @param gateway.priorityClassName Optionally set the name of the PriorityClass for pods
+  priorityClassName: ""
+  ## @param gateway.nodeSelector NodeSelector to pin pods to certain set of nodes
+  nodeSelector: {}
+  ## @param gateway.affinity Pod affinity settings
+  affinity: {}
+  ## @param gateway.tolerations Pod tolerations
   tolerations: []
-
-  # -- Pod labels
+  ## @param gateway.podLabels Pod labels
   podLabels: {}
-
-  # -- Pod annotations
+  ## @param gateway.podAnnotations Pod annotations
   podAnnotations: {}
-
-  # -- Annotations
+  ## @param gateway.annotations Annotations
   annotations: {}
 
-
-  # Api Gateway autoscaling configuration
+  ## @subsection Gateway Autoscaling Configuration
   autoscaling:
-    # -- Enable autoscaling for Api Gateway
+    ## @param gateway.autoscaling.enabled Enable autoscaling for Api Gateway
     enabled: false
-    # -- Minimum autoscaling replicas for Api Gateway
+    ## @param gateway.autoscaling.minReplicas Minimum autoscaling replicas for Api Gateway
     minReplicas: 1
-    # -- Maximum autoscaling replicas for Api Gateway
+    ## @param gateway.autoscaling.maxReplicas Maximum autoscaling replicas for Api Gateway
     maxReplicas: 3
-    # -- Target CPU utilisation percentage for Api Gateway
+    ## @param gateway.autoscaling.targetCPUUtilizationPercentage Target CPU utilisation percentage for Api Gateway
     targetCPUUtilizationPercentage: 60
-    # -- Target memory utilisation percentage for Api Gateway
+    ## @param gateway.autoscaling.targetMemoryUtilizationPercentage Target memory utilisation percentage for Api Gateway
     targetMemoryUtilizationPercentage: 80
 
+  ## @subsection Gateway Resources Configuration
   resources:
-    # -- Resource limits for Api Gateway
+    # @param gateway.resources.limits Resource limits for Api Gateway
     limits:
+      ## @param gateway.resources.limits.cpu CPU limit for Api Gateway
       cpu: 1000m
+      ## @param gateway.resources.limits.memory Memory limit for Api Gateway
       memory: 1Gi
-    # -- Resource requests for Api Gateway
+    # @param gateway.resources.requests Resource requests for Api Gateway
     requests:
+      ## @param gateway.resources.requests.cpu CPU request for Api Gateway
       cpu: 100m
+      ## @param gateway.resources.requests.memory Memory request for Api Gateway
       memory: 128Mi
 
-  # Api Gateway service configuration
+  ## @subsection Gateway Service Configuration
   service:
-    # -- Port of the Api Gateway service
+    ## @param gateway.service.port Port of the Api Gateway service
     port: 8443
-    # -- Port of the Api Gateway Metrics service
+    ## @param gateway.service.metricsPort Port of the Api Gateway Metrics service
     metricsPort: 9090
-    # -- Type of the Api Gateway service
+    ## @param gateway.service.type Type of the Api Gateway service
     type: ClusterIP
-    # -- Annotations for the Api Gateway service
+    ## @param gateway.service.annotations Annotations for the Api Gateway service
     annotations: {}
-    # -- Labels for the Api Gateway service
+    ## @param gateway.service.labels Labels for the Api Gateway service
     labels: {}
 
-  # Api Gateway ingress configuration
+  ## @subsection Gateway Ingress Configuration
   ingress:
-    # -- Specify if the Api Gateway Ingress is enabled
+    ## @param gateway.ingress.enabled Specify if the Api Gateway Ingress is enabled
     enabled: enable
-    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ## @param gateway.ingress.ingressClassName Ingress Class Name. May be required for k8s >= 1.18
     ingressClassName: "nginx"
-    # -- Annotations
+    # @param gateway.ingress.annotations Annotations for ingress
     annotations:
+      ## @param gateway.ingress.annotations.cert-manager.io/cluster-issuer Certificate issuer for ingress
       cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+      ## @param gateway.ingress.annotations.nginx.ingress.kubernetes.io/force-ssl-redirect Force SSL redirect for ingress
       nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    # -- TLS
+    # @param gateway.ingress.tls TLS configuration
     tls:
+      ## @param gateway.ingress.tls[0].secretName TLS secret name for ingress
       - secretName: devzero-api-tls
+        ## @param gateway.ingress.tls[0].hosts List of TLS hosts for ingress
         hosts:
           - "api.{{ .Values.domain }}"
-    # -- Hosts
+    # @param gateway.ingress.hosts Hosts configuration
     hosts:
+      ## @param gateway.ingress.hosts[0].host Host name for ingress
       - host: "api.{{ .Values.domain }}"
+        # @param gateway.ingress.hosts[0].paths List of path configurations for ingress
         paths:
+          ## @param gateway.ingress.hosts[0].paths[0].path Path for ingress route
           - path: /
+            ## @param gateway.ingress.hosts[0].paths[0].pathType Path type for ingress route
             pathType: Prefix
 
-
+## @section Backend Configuration
 backend:
-  # -- Number of replicas for Backend
+  ## @param backend.replicas Number of replicas for Backend
   replicas: 1
 
+  ## @param backend.imageName Image name for Backend service
   imageName: "backend"
 
-  # -- Optionally set the scheduler for pods
+  ## @param backend.schedulerName Optionally set the scheduler for pods
   schedulerName: ""
 
-  # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  ## @param backend.priorityClassName Optionally set the name of the PriorityClass for pods
+  priorityClassName: ""
 
-  # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  ## @param backend.nodeSelector NodeSelector to pin pods to certain set of nodes
+  nodeSelector: {}
 
-  # -- Pod affinity settings
-  affinity: { }
+  ## @param backend.affinity Pod affinity settings
+  affinity: {}
 
-  # -- Pod tolerations
+  ## @param backend.tolerations Pod tolerations
   tolerations: []
 
-  # -- Pod labels
+  ## @param backend.podLabels Pod labels
   podLabels: {}
 
-  # -- Pod annotations
+  ## @param backend.podAnnotations Pod annotations
   podAnnotations: {}
 
-  # -- Annotations
+  ## @param backend.annotations Annotations
   annotations: {}
 
+  ## @subsection Backend Redis Configuration
   redis:
+    ## @param backend.redis.url Redis URL for Backend
     url: redis://redis-headless:6379/1
+    ## @param backend.redis.password Redis password for Backend
     password: ""
 
+  ## @subsection Backend MongoDB Configuration
   mongo:
+    ## @param backend.mongo.url MongoDB connection URL
     url: "mongodb://devzero:backend@devzero-mongodb-0.devzero-mongodb-headless:27017/backend?directConnection=true"
 
+  ## @subsection Backend Hydra Configuration
   hydra:
-    apiKey:
+    ## @param backend.hydra.apiKey API key for Hydra service
+    apiKey: ""
 
+  ## @subsection Backend LogSrv Configuration
   logsrv:
+    ## @param backend.logsrv.queue LogSrv queue URL
     queue: http://devzero-elasticmq:9324/queue/logsrv.fifo
+    ## @param backend.logsrv.region LogSrv region
     region: "elasticmq"
 
+  ## @subsection Backend GitHub Configuration
   github:
-    appId: 
+    ## @param backend.github.appId GitHub App ID
+    appId: ""
+    ## @param backend.github.appPrivateKey GitHub App Private Key
     appPrivateKey: ""
 
+  ## @subsection Backend Mimir Configuration
   mimir:
+    ## @param backend.mimir.url Mimir service URL
     url: http://mimir:8080/prometheus
 
+  ## @subsection Backend Hibernation Configuration
   hibernation:
+    ## @param backend.hibernation.enabled Enable hibernation feature
     enabled: false
 
+  ## @subsection Backend SendGrid Configuration
   sendgrid:
+    ## @param backend.sendgrid.apiKey SendGrid API Key
     apiKey: test-key
 
+  ## @subsection Backend Grafana Configuration
   grafana:
+    ## @param backend.grafana.enabled Enable Grafana integration
     enabled: true
+    ## @param backend.grafana.datasourceId Main datasource ID
     datasourceId: "mimir"
+    ## @param backend.grafana.doraDatasourceId DORA metrics datasource ID
     doraDatasourceId: "pulse"
+    ## @param backend.grafana.odaDatasourceId ODA metrics datasource ID
     odaDatasourceId: "timescale"
+    ## @param backend.grafana.password Grafana password
     password: prom-operator
 
+  ## @subsection Backend Storage Configuration
   storage:
+    ## @param backend.storage.allowedTeam Allowed team ID for storage access
     allowedTeam: team-example-id
+    ## @subsection Backend Ceph Storage Configuration
     ceph:
+      ## @param backend.storage.ceph.clusterId Ceph cluster ID
       clusterId: ""
+      ## @param backend.storage.ceph.filesystemName Ceph filesystem name
       filesystemName: cephfs
+      ## @param backend.storage.ceph.filesystemPath Ceph filesystem path
       filesystemPath: cephfs
+      ## @param backend.storage.ceph.monitorAddress Ceph monitor address
       monitorAddress: /volumes/cache
+      ## @param backend.storage.ceph.userCredentials Ceph user credentials
       userCredentials: ""
+      ## @param backend.storage.ceph.username Ceph username
       username: vuser
 
+  ## @param backend.mainTeamId Main team ID
   mainTeamId: ""
 
+  ## @param backend.licenseKey License key
   licenseKey: ""
   
+  ## @param backend.arch Architecture type
   arch: amd64
 
+  ## @param backend.cortex.key Cortex key
   cortex:
     key: ""
 
-  # Backend autoscaling configuration
+  ## @subsection Backend Autoscaling Configuration
   autoscaling:
-    # -- Enable autoscaling for Backend
+    ## @param backend.autoscaling.enabled Enable autoscaling for Backend
     enabled: false
-    # -- Minimum autoscaling replicas for Backend
+    ## @param backend.autoscaling.minReplicas Minimum autoscaling replicas for Backend
     minReplicas: 1
-    # -- Maximum autoscaling replicas for Backend
+    ## @param backend.autoscaling.maxReplicas Maximum autoscaling replicas for Backend
     maxReplicas: 3
-    # -- Target CPU utilisation percentage for Backend
+    ## @param backend.autoscaling.targetCPUUtilizationPercentage Target CPU utilisation percentage for Backend
     targetCPUUtilizationPercentage: 60
-    # -- Target memory utilisation percentage for Backend
+    ## @param backend.autoscaling.targetMemoryUtilizationPercentage Target memory utilisation percentage for Backend
     targetMemoryUtilizationPercentage: 80
 
+  ## @subsection Backend Resources Configuration
   resources:
-    # -- Resource limits for Backend
+    # @param backend.resources.limits Resource limits for Backend
     limits:
+      ## @param backend.resources.limits.cpu CPU resource limits for Backend
       cpu: 1000m
+      ## @param backend.resources.limits.memory Memory resource limits for Backend
       memory: 1Gi
-    # -- Resource requests for Backend
+    # @param backend.resources.requests Resource requests for Backend
     requests:
+      ## @param backend.resources.requests.cpu CPU resource requests for Backend
       cpu: 100m
+      ## @param backend.resources.requests.memory Memory resource requests for Backend
       memory: 128Mi
 
-  # Api Gateway service configuration
+  ## @subsection Backend Service Configuration
   service:
-    # -- Port of the Backend service
+    ## @param backend.service.port Port of the Backend service
     port: 8443
-    # -- Port of the Backend Metrics service
+    ## @param backend.service.metricsPort Port of the Backend Metrics service
     metricsPort: 9090
-    # -- Type of the Backend service
+    ## @param backend.service.type Type of the Backend service
     type: ClusterIP
-    # -- Annotations for the Backend service
+    ## @param backend.service.annotations Annotations for the Backend service
     annotations: {}
-    # -- Labels for the Backend service
+    ## @param backend.service.labels Labels for the Backend service
     labels: {}
 
+## @section Hydra Configuration
 hydra:
-  # -- Number of replicas for Hydra
+  ## @param hydra.replicas Number of replicas for Hydra
   replicas: 1
 
+  ## @param hydra.imageName Image name for Hydra service
   imageName: "hydra"
 
-  # -- Optionally set the scheduler for pods
+  ## @param hydra.schedulerName Optionally set the scheduler for pods
   schedulerName: ""
 
-  # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  ## @param hydra.priorityClassName Optionally set the name of the PriorityClass for pods
+  priorityClassName: ""
 
-  # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  ## @param hydra.nodeSelector NodeSelector to pin pods to certain set of nodes
+  nodeSelector: {}
 
-  # -- Pod affinity settings
-  affinity: { }
+  ## @param hydra.affinity Pod affinity settings
+  affinity: {}
 
-  # -- Pod tolerations
+  ## @param hydra.tolerations Pod tolerations
   tolerations: []
 
-  # -- Pod labels
+  ## @param hydra.podLabels Pod labels
   podLabels: {}
 
-  # -- Pod annotations
+  ## @param hydra.podAnnotations Pod annotations
   podAnnotations: {}
 
-  # -- Annotations
+  ## @param hydra.annotations Annotations
   annotations: {}
 
+  ## @param hydra.job Enable job mode
   job: true
 
+  ## @subsection Hydra Postgres Configuration
   postgres:
+    ## @param hydra.postgres.host PostgreSQL host
     host: "postgres-hydra-postgresql-hl"
+    ## @param hydra.postgres.port PostgreSQL port
     port: 5432
+    ## @param hydra.postgres.name PostgreSQL database name
     name: "postgres"
+    ## @param hydra.postgres.user PostgreSQL user
     user: "hydra"
+    ## @param hydra.postgres.password PostgreSQL password
     password: "hydra"
 
+  ## @subsection Hydra Redis Configuration
   redis:
+    ## @param hydra.redis.url Redis URL for Hydra
     url: redis://redis-headless:6379/2
 
+  ## @subsection Hydra CIDR Configuration
   cidr:
+    ## @param hydra.cidr.v6 IPv6 CIDR range
     v6: fd7a:115c:a1e0::/48
+    ## @param hydra.cidr.v4 IPv4 CIDR range
     v4: 100.64.0.0/10
 
+  ## @subsection Hydra DERP Configuration
   derp:
     server:
+      ## @param hydra.derp.server.enabled Enable DERP server
       enabled: false
+    ## @param hydra.derp.urls DERP server URLs
     urls:
       - "https://controlplane.tailscale.com/derpmap/default"
+    ## @param hydra.derp.paths DERP paths
     paths: []
+    ## @param hydra.derp.autoUpdateEnabled Enable auto-update for DERP
     autoUpdateEnabled: true
+    ## @param hydra.derp.updateFrequency Update frequency for DERP
     updateFrequency: "24h"
 
-  # Hydra autoscaling configuration
+  ## @subsection Hydra Autoscaling Configuration
   autoscaling:
-    # -- Enable autoscaling for Hydra
+    ## @param hydra.autoscaling.enabled Enable autoscaling for Hydra
     enabled: false
-    # -- Minimum autoscaling replicas for Hydra
+    ## @param hydra.autoscaling.minReplicas Minimum autoscaling replicas for Hydra
     minReplicas: 1
-    # -- Maximum autoscaling replicas for Hydra
+    ## @param hydra.autoscaling.maxReplicas Maximum autoscaling replicas for Hydra
     maxReplicas: 3
-    # -- Target CPU utilisation percentage for Hydra
+    ## @param hydra.autoscaling.targetCPUUtilizationPercentage Target CPU utilisation percentage for Hydra
     targetCPUUtilizationPercentage: 60
-    # -- Target memory utilisation percentage for Hydra
+    ## @param hydra.autoscaling.targetMemoryUtilizationPercentage Target memory utilisation percentage for Hydra
     targetMemoryUtilizationPercentage: 80
 
+  ## @subsection Hydra Resources Configuration
   resources:
-    # -- Resource limits for Hydra
+    # @param hydra.resources.limits Resource limits for Hydra
     limits:
+      ## @param hydra.resources.limits.cpu CPU resource limits for Hydra
       cpu: 1000m
+      ## @param hydra.resources.limits.memory Memory resource limits for Hydra
       memory: 1Gi
-    # -- Resource requests for Hydra
+    # @param hydra.resources.requests Resource requests for Hydra
     requests:
+      ## @param hydra.resources.requests.cpu CPU resource requests for Hydra
       cpu: 100m
+      ## @param hydra.resources.requests.memory Memory resource requests for Hydra
       memory: 128Mi
 
-  # Hydra service configuration
+  ## @subsection Hydra Service Configuration
   service:
-    # -- Port of the Hydra service
+    ## @param hydra.service.port Port of the Hydra service
     port: 8443
-    # -- Port of the Hydra Metrics service
+    ## @param hydra.service.metricsPort Port of the Hydra Metrics service
     metricsPort: 9090
-    # -- Type of the Hydra service
+    ## @param hydra.service.type Type of the Hydra service
     type: ClusterIP
-    # -- Annotations for the Hydra service
+    ## @param hydra.service.annotations Annotations for the Hydra service
     annotations: {}
-    # -- Labels for the Hydra service
+    ## @param hydra.service.labels Labels for the Hydra service
     labels: {}
 
-  # Hydra ingress configuration
+  ## @subsection Hydra Ingress Configuration
   ingress:
-    # -- Specify if the Hydra Ingress is enabled
+    ## @param hydra.ingress.enabled Specify if the Hydra Ingress is enabled
     enabled: true
-    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ## @param hydra.ingress.ingressClassName Ingress Class Name
     ingressClassName: "nginx"
-    # -- Annotations
+    # @param hydra.ingress.annotations Annotations for Hydra ingress
     annotations:
+      ## @param hydra.ingress.annotations.cert-manager.io/cluster-issuer Certificate issuer for ingress
       cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+      ## @param hydra.ingress.annotations.nginx.ingress.kubernetes.io/force-ssl-redirect Force SSL redirect for ingress
       nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    # -- TLS
+    # @param hydra.ingress.tls TLS configuration for Hydra ingress
     tls:
+      ## @param hydra.ingress.tls[0].secretName TLS secret name for ingress
       - secretName: devzero-hydra-tls
+        ## @param hydra.ingress.tls[0].hosts List of TLS hosts for ingress
         hosts:
           - "hydra.{{ .Values.domain }}"
-    # -- Hosts
+    # @param hydra.ingress.hosts Hosts configuration for Hydra ingress
     hosts:
+      ## @param hydra.ingress.hosts[0].host Host name for ingress
       - host: "hydra.{{ .Values.domain }}"
+        # @param hydra.ingress.hosts[0].paths List of path configurations for ingress
         paths:
+          ## @param hydra.ingress.hosts[0].paths[0].path Path for ingress route
           - path: /
+            ## @param hydra.ingress.hosts[0].paths[0].pathType Path type for ingress route
             pathType: Prefix
 
+## @section LogSrv Configuration
 logsrv:
-  # -- Number of replicas for Logsrv
+  ## @param logsrv.replicas Number of replicas for LogSrv
   replicas: 1
 
+  ## @param logsrv.imageName Image name for LogSrv
   imageName: "logsrv"
 
-  # -- Optionally set the scheduler for pods
+  ## @param logsrv.schedulerName Scheduler name for LogSrv pods
   schedulerName: ""
 
-  # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  ## @param logsrv.priorityClassName Priority class name for LogSrv pods
+  priorityClassName: ""
 
-  # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  ## @param logsrv.nodeSelector Node selector for LogSrv pods
+  nodeSelector: {}
 
-  # -- Pod affinity settings
-  affinity: { }
+  ## @param logsrv.affinity Affinity settings for LogSrv pods
+  affinity: {}
 
-  # -- Pod tolerations
+  ## @param logsrv.tolerations Tolerations for LogSrv pods
   tolerations: []
 
-  # -- Pod labels
+  ## @param logsrv.podLabels Pod labels for LogSrv
   podLabels: {}
 
-  # -- Pod annotations
+  ## @param logsrv.podAnnotations Pod annotations for LogSrv
   podAnnotations: {}
 
-  # -- Annotations
+  ## @param logsrv.annotations Annotations for LogSrv
   annotations: {}
 
+  ## @subsection LogSrv Queue Configuration
   queue:
+    ## @param logsrv.queue.url Queue URL for LogSrv
     url: http://devzero-elasticmq:9324/queue/logsrv.fifo
 
+  ## @subsection LogSrv Postgres Configuration
   postgres:
+    ## @param logsrv.postgres.url PostgreSQL URL for LogSrv
     url: postgresql://logsrv:logsrv@postgres-logsrv-postgresql-hl:5432/logsrv
+    ## @param logsrv.postgres.password PostgreSQL password for LogSrv
     password: logsrv
 
+  ## @param logsrv.refreshJwksTimer JWKS refresh timer in seconds
   refreshJwksTimer: 3600
 
-  # Logsrv autoscaling configuration
+  ## @subsection LogSrv Autoscaling Configuration
   autoscaling:
-    # -- Enable autoscaling for Logsrv
+    ## @param logsrv.autoscaling.enabled Enable autoscaling for LogSrv
     enabled: false
-    # -- Minimum autoscaling replicas for Logsrv
+    ## @param logsrv.autoscaling.minReplicas Minimum replicas for LogSrv
     minReplicas: 1
-    # -- Maximum autoscaling replicas for Logsrv
+    ## @param logsrv.autoscaling.maxReplicas Maximum replicas for LogSrv
     maxReplicas: 3
-    # -- Target CPU utilisation percentage for Logsrv
+    ## @param logsrv.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage
     targetCPUUtilizationPercentage: 60
-    # -- Target memory utilisation percentage for Logsrv
+    ## @param logsrv.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage
     targetMemoryUtilizationPercentage: 80
 
+  ## @subsection LogSrv Resources Configuration
   resources:
-    # -- Resource limits for Logsrv
+    # @param logsrv.resources.limits Resource limits for LogSrv
     limits:
+      ## @param logsrv.resources.limits.cpu CPU resource limits for LogSrv  
       cpu: 1000m
+      ## @param logsrv.resources.limits.memory Memory resource limits for LogSrv
       memory: 1Gi
-    # -- Resource requests for Logsrv
+    # @param logsrv.resources.requests Resource requests for LogSrv
     requests:
+      ## @param logsrv.resources.requests.cpu CPU resource requests for LogSrv
       cpu: 100m
+      ## @param logsrv.resources.requests.memory Memory resource requests for LogSrv
       memory: 128Mi
 
-  # Logsrv service configuration
+  ## @subsection LogSrv Service Configuration
   service:
-    # -- Port of the Logsrv service
+    ## @param logsrv.service.port Service port for LogSrv
     port: 8443
-    # -- Port of the Logsrv Metrics service
+    ## @param logsrv.service.metricsPort Metrics port for LogSrv
     metricsPort: 9090
-    # -- Type of the Logsrv service
+    ## @param logsrv.service.type Service type for LogSrv
     type: ClusterIP
-    # -- Annotations for the Logsrv service
+    ## @param logsrv.service.annotations Service annotations for LogSrv
     annotations: {}
-    # -- Labels for the Logsrv service
+    ## @param logsrv.service.labels Service labels for LogSrv
     labels: {}
 
-  # Logsrv ingress configuration
+  ## @subsection LogSrv Ingress Configuration
   ingress:
-    # -- Specify if the Logsrv Ingress is enabled
+    ## @param logsrv.ingress.enabled Enable ingress for LogSrv
     enabled: true
-    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ## @param logsrv.ingress.ingressClassName Ingress class name for LogSrv
     ingressClassName: "nginx"
-    # -- Annotations
+    # @param logsrv.ingress.annotations Ingress annotations for LogSrv
     annotations:
+      ## @param logsrv.ingress.annotations.cert-manager.io/cluster-issuer Certificate issuer for ingress
       cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+      ## @param logsrv.ingress.annotations.nginx.ingress.kubernetes.io/force-ssl-redirect Force SSL redirect for ingress
       nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    # -- TLS
+    # @param logsrv.ingress.tls TLS configuration for LogSrv ingress
     tls:
+      ## @param logsrv.ingress.tls[0].secretName TLS secret name for ingress
       - secretName: devzero-logsrv-tls
+        ## @param logsrv.ingress.tls[0].hosts List of TLS hosts for ingress
         hosts:
           - "logsrv.{{ .Values.domain }}"
-    # -- Hosts
+    # @param logsrv.ingress.hosts Hosts configuration for LogSrv ingress
     hosts:
+      ## @param logsrv.ingress.hosts[0].host Host name for ingress
       - host: "logsrv.{{ .Values.domain }}"
+        # @param logsrv.ingress.hosts[0].paths List of path configurations for ingress
         paths:
+          ## @param logsrv.ingress.hosts[0].paths[0].path Path for ingress route
           - path: /
+            ## @param logsrv.ingress.hosts[0].paths[0].pathType Path type for ingress route
             pathType: Prefix
 
+## @section Polland Configuration
 polland:
+  ## @subsection Polland Worker Configuration
   worker:
-    # -- Number of replicas for Polland Worker
+    ## @param polland.worker.replicas Number of replicas for Polland Worker
     replicas: 3
 
-    # 1 hour of termination grace to allow stacks to finishing tasks
+    ## @param polland.worker.terminationGracePeriodSeconds Termination grace period in seconds
     terminationGracePeriodSeconds: 3600
 
-    # Available queues created from worker
+    # @param polland.worker.queues Queue configurations for workers
     queues:
+      ## @param polland.worker.queues[0].name Configuration for the fast queue
       - name: fast
+        ## @param polland.worker.queues[0].replicaCount Number of replicas for queue
         replicaCount: 1
+        # @param polland.worker.queues[0].autoscaling Autoscaling configuration for queue
         autoscaling:
+          ## @param polland.worker.queues[0].autoscaling.enabled Enable autoscaling for queue
           enabled: false 
+          ## @param polland.worker.queues[0].autoscaling.minReplicas Minimum autoscaling replicas for queue
           minReplicas: 3
+          ## @param polland.worker.queues[0].autoscaling.maxReplicas Maximum autoscaling replicas for queue
           maxReplicas: 5
+      ## @param polland.worker.queues[1].name Configuration for the build queue
       - name: build
+        ## @param polland.worker.queues[1].replicaCount Number of replicas for queue
         replicaCount: 1
+        # @param polland.worker.queues[1].autoscaling Autoscaling configuration for queue
         autoscaling:
+          ## @param polland.worker.queues[1].autoscaling.enabled Enable autoscaling for queue
           enabled: false 
+          ## @param polland.worker.queues[1].autoscaling.minReplicas Minimum autoscaling replicas for queue
           minReplicas: 3
+          ## @param polland.worker.queues[1].autoscaling.maxReplicas Maximum autoscaling replicas for queue
           maxReplicas: 5
+      ## @param polland.worker.queues[2].name Configuration for the workload queue
       - name: workload
+        ## @param polland.worker.queues[2].replicaCount Number of replicas for queue
         replicaCount: 1
+        # @param polland.worker.queues[2].autoscaling Autoscaling configuration for queue
         autoscaling:
+          ## @param polland.worker.queues[2].autoscaling.enabled Enable autoscaling for queue
           enabled: false 
+          ## @param polland.worker.queues[2].autoscaling.minReplicas Minimum autoscaling replicas for queue
           minReplicas: 3
+          ## @param polland.worker.queues[2].autoscaling.maxReplicas Maximum autoscaling replicas for queue
           maxReplicas: 5
+      ## @param polland.worker.queues[3].name Configuration for the cluster queue
       - name: cluster
+        ## @param polland.worker.queues[3].replicaCount Number of replicas for queue
         replicaCount: 1
+        # @param polland.worker.queues[3].autoscaling Autoscaling configuration for queue
         autoscaling:
+          ## @param polland.worker.queues[3].autoscaling.enabled Enable autoscaling for queue
           enabled: false 
+          ## @param polland.worker.queues[3].autoscaling.minReplicas Minimum autoscaling replicas for queue
           minReplicas: 3
+          ## @param polland.worker.queues[3].autoscaling.maxReplicas Maximum autoscaling replicas for queue
           maxReplicas: 5
+      ## @param polland.worker.queues[4].name Configuration for the hibernation queue
       - name: hibernation
+        ## @param polland.worker.queues[4].replicaCount Number of replicas for queue
         replicaCount: 1
+        # @param polland.worker.queues[4].autoscaling Autoscaling configuration for queue
         autoscaling:
+          ## @param polland.worker.queues[4].autoscaling.enabled Enable autoscaling for queue
           enabled: false
+          ## @param polland.worker.queues[4].autoscaling.minReplicas Minimum autoscaling replicas for queue
           minReplicas: 1
+          ## @param polland.worker.queues[4].autoscaling.maxReplicas Maximum autoscaling replicas for queue
           maxReplicas: 1
 
+  ## @subsection Polland Beat Configuration
   beat:
-    # -- Number of replicas for Polland Beat
+    ## @param polland.beat.replicas Number of replicas for Polland Beat
     replicas: 1
 
+  ## @subsection Polland Flower Configuration
   flower:
-    # -- Number of replicas for Polland Flower
+    ## @param polland.flower.replicas Number of replicas for Polland Flower
     replicas: 1
+    ## @subsection Polland Flower Service Configuration
     service:
-      # -- Port of the Flower service
+      ## @param polland.flower.service.port Port for Flower service
       port: 5555
-      # -- Type of the Flower service
+      ## @param polland.flower.service.type Type of Flower service
       type: ClusterIP
 
+  ## @subsection Polland Celery Exporter Configuration
   celeryExporter:
-    # -- Number of replicas for Polland Celery Exporter
+    ## @param polland.celeryExporter.replicas Number of replicas for Celery Exporter
     replicas: 1
 
-  # -- Number of replicas for Polland
+  ## @param polland.replicas Number of replicas for Polland
   replicas: 1
 
+  ## @param polland.imageName Image name for Polland
   imageName: "polland"
 
-  # -- Optionally set the scheduler for pods
+  ## @param polland.schedulerName Scheduler name for Polland pods
   schedulerName: ""
 
-  # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  ## @param polland.priorityClassName Priority class name for Polland pods
+  priorityClassName: ""
 
-  # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  ## @param polland.nodeSelector Node selector for Polland pods
+  nodeSelector: {}
 
-  # -- Pod affinity settings
-  affinity: { }
+  ## @param polland.affinity Affinity settings for Polland pods
+  affinity: {}
 
-  # -- Pod tolerations
+  ## @param polland.tolerations Tolerations for Polland pods
   tolerations: []
 
-  # -- Pod labels
+  ## @param polland.podLabels Pod labels for Polland
   podLabels: {}
 
-  # -- Pod annotations
+  ## @param polland.podAnnotations Pod annotations for Polland
   podAnnotations: {}
 
-  # -- Annotations
+  ## @param polland.annotations Annotations for Polland
   annotations: {}
 
-  # -- Env configuration for polland configmap
+  ## @subsection Polland Environment Configuration
   env:
+    ## @param polland.env.USE_POSTGRES_DB Use PostgreSQL database
     USE_POSTGRES_DB: "true"
+    ## @param polland.env.POSTGRES_PORT PostgreSQL port
     POSTGRES_PORT: "5432"
+    ## @param polland.env.POSTGRES_DB PostgreSQL database name
     POSTGRES_DB: "polland"
+    ## @param polland.env.POSTGRES_USER PostgreSQL user
     POSTGRES_USER: "polland"
+    ## @param polland.env.POSTGRES_PASSWORD PostgreSQL password
     POSTGRES_PASSWORD: "polland"
+    ## @param polland.env.POSTGRES_HOST PostgreSQL host
     POSTGRES_HOST: "postgres-polland-postgresql-hl"
 
+    ## @param polland.env.REDIS_URL Redis URL
     REDIS_URL: "redis://redis-headless:6379/0"
 
+    ## @param polland.env.USE_DOCKER Use Docker
     USE_DOCKER: "yes"
-    # Disable connection pooling in preprod because we are running a small container and we don't want to keep connections open.
+    ## @param polland.env.CONN_MAX_AGE Connection max age
     CONN_MAX_AGE: "60"
+    ## @param polland.env.DJANGO_ALLOWED_HOSTS Allowed hosts for Django
     DJANGO_ALLOWED_HOSTS: "*"
+    ## @param polland.env.DJANGO_SETTINGS_MODULE Django settings module
     DJANGO_SETTINGS_MODULE: "config.settings.production"
-    # This is supposed to be a secret, but since it is only used to encrypt sessions and we don't use sessions, it can be defined plaintext.
+    ## @param polland.env.DJANGO_SECRET_KEY Django secret key
     DJANGO_SECRET_KEY: "super_secret_key"
+    ## @param polland.env.CELERY_FLOWER_USER Celery Flower user
     CELERY_FLOWER_USER: "devzero"
+    ## @param polland.env.CELERY_FLOWER_PASSWORD Celery Flower password
     CELERY_FLOWER_PASSWORD: "devzero"
 
+    ## @param polland.env.SELF_HOSTED Self-hosted mode
     SELF_HOSTED: "True"
 
+    ## @param polland.env.USE_INSECURE_REGISTRY Use insecure registry
     USE_INSECURE_REGISTRY: "True"
+    ## @param polland.env.USE_ECR_REGISTRY Use ECR registry
     USE_ECR_REGISTRY: "False"
+    ## @param polland.env.USE_LOCAL_LOGSRV Use local LogSrv
     USE_LOCAL_LOGSRV: "True"
 
+    ## @param polland.env.VAULT_AUTH_METHOD Vault auth method
     VAULT_AUTH_METHOD: "kubernetes"
+    ## @param polland.env.VAULT_SECRETS_MOUNT_POINT Vault secrets mount point
     VAULT_SECRETS_MOUNT_POINT: "vault-csi-production-writer"
+    ## @param polland.env.LOGSRV_DEFAULT_QUEUE Default LogSrv queue URL
     LOGSRV_DEFAULT_QUEUE: "http://devzero-elasticmq:9324/queue/logsrv.fifo"
+    ## @param polland.env.LOGSRV_DEFAULT_REGION Default LogSrv region
     LOGSRV_DEFAULT_REGION: "elasticmq"
 
-  # Polland autoscaling configuration
+  ## @subsection Polland Autoscaling Configuration
   autoscaling:
-    # -- Enable autoscaling for Polland
+    ## @param polland.autoscaling.enabled Enable autoscaling for Polland
     enabled: false
-    # -- Minimum autoscaling replicas for Polland
+    ## @param polland.autoscaling.minReplicas Minimum autoscaling replicas for Polland
     minReplicas: 1
-    # -- Maximum autoscaling replicas for Polland
+    ## @param polland.autoscaling.maxReplicas Maximum autoscaling replicas for Polland
     maxReplicas: 3
-    # -- Target CPU utilisation percentage for Polland
+    ## @param polland.autoscaling.targetCPUUtilizationPercentage Target CPU utilisation percentage for Polland
     targetCPUUtilizationPercentage: 60
-    # -- Target memory utilisation percentage for Polland
+    ## @param polland.autoscaling.targetMemoryUtilizationPercentage Target memory utilisation percentage for Polland
     targetMemoryUtilizationPercentage: 80
 
+  ## @subsection Polland Resources Configuration
   resources:
-    # -- Resource limits for Polland
+    # @param polland.resources.limits Resource limits for Polland
     limits:
+      ## @param polland.resources.limits.cpu CPU resource limits for Polland
       cpu: 1000m
+      ## @param polland.resources.limits.memory Memory resource limits for Polland
       memory: 1Gi
-    # -- Resource requests for Polland
+    # @param polland.resources.requests Resource requests for Polland
     requests:
+      ## @param polland.resources.requests.cpu CPU resource requests for Polland
       cpu: 100m
+      ## @param polland.resources.requests.memory Memory resource requests for Polland
       memory: 128Mi
 
-  # Polland service configuration
+  ## @subsection Polland Service Configuration
   service:
-    # -- Port of the Polland service
+    ## @param polland.service.port Port of the Polland service
     port: 8000
-    # -- Port of the Polland Metrics service
+    ## @param polland.service.metricsPort Port of the Polland Metrics service
     metricsPort: 9090
-    # -- Type of the Polland service
+    ## @param polland.service.type Type of the Polland service
     type: ClusterIP
-    # -- Annotations for the Polland service
+    ## @param polland.service.annotations Annotations for the Polland service
     annotations: {}
-    # -- Labels for the Polland service
+    ## @param polland.service.labels Labels for the Polland service
     labels: {}
 
+## @section Pulse Configuration
 pulse:
-  # -- Number of replicas for Pulse
+  ## @param pulse.replicas Number of replicas for Pulse
   replicas: 1
 
+  ## @param pulse.imageName Image name for Pulse
   imageName: "pulse"
 
-  # -- Optionally set the scheduler for pods
+  ## @param pulse.schedulerName Scheduler name for Pulse pods
   schedulerName: ""
 
-  # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  ## @param pulse.priorityClassName Priority class name for Pulse pods
+  priorityClassName: ""
 
-  # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  ## @param pulse.nodeSelector Node selector for Pulse pods
+  nodeSelector: {}
 
-  # -- Pod affinity settings
-  affinity: { }
+  ## @param pulse.affinity Affinity settings for Pulse pods
+  affinity: {}
 
-  # -- Pod tolerations
+  ## @param pulse.tolerations Tolerations for Pulse pods
   tolerations: []
 
-  # -- Pod labels
+  ## @param pulse.podLabels Pod labels for Pulse
   podLabels: {}
 
-  # -- Pod annotations
+  ## @param pulse.podAnnotations Pod annotations for Pulse
   podAnnotations: {}
 
-  # -- Annotations
+  ## @param pulse.annotations Annotations for Pulse
   annotations: {}
 
+  ## @subsection Pulse Postgres Configuration
   postgres:
+    ## @param pulse.postgres.password PostgreSQL password for Pulse
     password: pulse
+    ## @param pulse.postgres.user PostgreSQL user for Pulse
     user: postgres
+    ## @param pulse.postgres.host PostgreSQL host for Pulse
     host: timescaledb-single
+    ## @param pulse.postgres.port PostgreSQL port for Pulse
     port: 5432
+    ## @param pulse.postgres.database PostgreSQL database for Pulse
     database: postgres
-    ssl: allow 
+    ## @param pulse.postgres.ssl SSL mode for PostgreSQL
+    ssl: allow
 
+  ## @subsection Pulse MySQL Configuration
   mysql:
+    ## @param pulse.mysql.user MySQL user for Pulse
     user: pulse
+    ## @param pulse.mysql.password MySQL password for Pulse
     password: pulse
+    ## @param pulse.mysql.host MySQL host for Pulse
     host: mysql-pulse-headless
+    ## @param pulse.mysql.port MySQL port for Pulse
     port: 3306
+    ## @param pulse.mysql.database MySQL database for Pulse
     database: pulse
 
+  ## @subsection Pulse Devlake Configuration
   devlake:
+    ## @param pulse.devlake.secret Devlake secret for Pulse
     secret: ""
 
+  ## @subsection Pulse OpenAPI Configuration
   openApi:
+    ## @param pulse.openApi.token OpenAPI token for Pulse
     token: ""
 
-  # Pulse autoscaling configuration
+  ## @subsection Pulse Autoscaling Configuration
   autoscaling:
-    # -- Enable autoscaling for Pulse
+    ## @param pulse.autoscaling.enabled Enable autoscaling for Pulse
     enabled: false
-    # -- Minimum autoscaling replicas for Pulse
+    ## @param pulse.autoscaling.minReplicas Minimum autoscaling replicas for Pulse
     minReplicas: 1
-    # -- Maximum autoscaling replicas for Pulse
+    ## @param pulse.autoscaling.maxReplicas Maximum autoscaling replicas for Pulse
     maxReplicas: 3
-    # -- Target CPU utilisation percentage for Pulse
+    ## @param pulse.autoscaling.targetCPUUtilizationPercentage Target CPU utilisation percentage for Pulse
     targetCPUUtilizationPercentage: 60
-    # -- Target memory utilisation percentage for Pulse
+    ## @param pulse.autoscaling.targetMemoryUtilizationPercentage Target memory utilisation percentage for Pulse
     targetMemoryUtilizationPercentage: 80
 
+  ## @subsection Pulse Resources Configuration
   resources:
-    # -- Resource limits for Pulse
+    # @param pulse.resources.limits Resource limits for Pulse
     limits:
+      ## @param pulse.resources.limits.cpu CPU resource limits for Pulse
       cpu: 1000m
+      ## @param pulse.resources.limits.memory Memory resource limits for Pulse
       memory: 1Gi
-    # -- Resource requests for Pulse
+    # @param pulse.resources.requests Resource requests for Pulse
     requests:
+      ## @param pulse.resources.requests.cpu CPU resource requests for Pulse
       cpu: 100m
+      ## @param pulse.resources.requests.memory Memory resource requests for Pulse
       memory: 128Mi
 
-  # Pulse service configuration
+  ## @subsection Pulse Service Configuration
   service:
-    # -- Port of the Pulse service
+    ## @param pulse.service.port Port of the Pulse service
     port: 8443
-    # -- Port of the Pulse Metrics service
+    ## @param pulse.service.metricsPort Port of the Pulse Metrics service
     metricsPort: 9090
-    # -- Type of the Pulse service
+    ## @param pulse.service.type Type of the Pulse service
     type: ClusterIP
-    # -- Annotations for the Pulse service
+    ## @param pulse.service.annotations Annotations for the Pulse service
     annotations: {}
-    # -- Labels for the Pulse service
+    ## @param pulse.service.labels Labels for the Pulse service
     labels: {}
 
+  ## @subsection Pulse Ingress Configuration
   ingress:
-    # -- Specify if the Pulse Ingress is enabled
+    ## @param pulse.ingress.enabled Specify if the Pulse Ingress is enabled
     enabled: true
-    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ## @param pulse.ingress.ingressClassName Ingress Class Name. May be required for k8s >= 1.18
     ingressClassName: "nginx"
-    # -- Annotations
+    # @param pulse.ingress.annotations Annotations for ingress
     annotations:
+      ## @param pulse.ingress.annotations.cert-manager.io/cluster-issuer Cluster issuer for ingress
       cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+      ## @param pulse.ingress.annotations.nginx.ingress.kubernetes.io/force-ssl-redirect Force SSL redirect for ingress
       nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    # -- TLS
+    # @param pulse.ingress.tls TLS configuration
     tls:
+      ## @param pulse.ingress.tls[0].secretName TLS secret name for ingress
       - secretName: devzero-pulse-tls
+        ## @param pulse.ingress.tls[0].hosts List of TLS hosts for ingress
         hosts:
           - "pulse.{{ .Values.domain }}"
-    # -- Hosts
+    # @param pulse.ingress.hosts Hosts configuration
     hosts:
+      ## @param pulse.ingress.hosts[0].host Host name for ingress
       - host: "pulse.{{ .Values.domain }}"
+        # @param pulse.ingress.hosts[0].paths List of path configurations for ingress
         paths:
+          ## @param pulse.ingress.hosts[0].paths[0].path Path for ingress
           - path: /
+            ## @param pulse.ingress.hosts[0].paths[0].pathType Path type for ingress
             pathType: Prefix
 
-
+## @section Buildqd Configuration
 buildqd:
-  # -- Number of replicas for Buildqd
+  ## @param buildqd.replicas Number of replicas for Buildqd
   replicas: 1
 
+  ## @param buildqd.imageName Image name for Buildqd
   imageName: "buildqd"
 
-  # -- Optionally set the scheduler for pods
+  ## @param buildqd.schedulerName Scheduler name for Buildqd pods
   schedulerName: ""
 
-  # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  ## @param buildqd.priorityClassName Priority class name for Buildqd pods
+  priorityClassName: ""
 
-  # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  ## @param buildqd.nodeSelector Node selector for Buildqd pods
+  nodeSelector: {}
 
-  # -- Pod affinity settings
-  affinity: { }
+  ## @param buildqd.affinity Affinity settings for Buildqd pods
+  affinity: {}
 
-  # -- Pod tolerations
+  ## @param buildqd.tolerations Tolerations for Buildqd pods
   tolerations: []
 
+  ## @subsection Buildqd LogSrv Configuration
   logsrv:
+    ## @param buildqd.logsrv.queue Queue URL for LogSrv
     queue: http://devzero-elasticmq:9324/queue/logsrv.fifo
+    ## @param buildqd.logsrv.region Region for LogSrv
     region: elasticmq
 
+  ## @subsection Buildqd Redis Configuration
   redis:
+    ## @param buildqd.redis.url Redis URL for Buildqd
     url: redis://redis-headless:6379/0
 
-  # Buildqd autoscaling configuration
+  ## @subsection Buildqd Autoscaling Configuration
   autoscaling:
-    # -- Enable autoscaling for Buildqd
+    ## @param buildqd.autoscaling.enabled Enable autoscaling for Buildqd
     enabled: false
-    # -- Minimum autoscaling replicas for Buildqd
+    ## @param buildqd.autoscaling.minReplicas Minimum autoscaling replicas for Buildqd
     minReplicas: 1
-    # -- Maximum autoscaling replicas for Buildqd
+    ## @param buildqd.autoscaling.maxReplicas Maximum autoscaling replicas for Buildqd
     maxReplicas: 3
-    # -- Target CPU utilisation percentage for Buildqd
+    ## @param buildqd.autoscaling.targetCPUUtilizationPercentage Target CPU utilisation percentage for Buildqd
     targetCPUUtilizationPercentage: 60
-    # -- Target memory utilisation percentage for Buildqd
+    ## @param buildqd.autoscaling.targetMemoryUtilizationPercentage Target memory utilisation percentage for Buildqd
     targetMemoryUtilizationPercentage: 80
 
+  ## @subsection Buildqd Resources Configuration
   resources:
-    # -- Resource limits for Buildqd
+    # @param buildqd.resources.limits Resource limits for Buildqd
     limits:
+      ## @param buildqd.resources.limits.cpu CPU resource limits for Buildqd
       cpu: 1000m
+      ## @param buildqd.resources.limits.memory Memory resource limits for Buildqd
       memory: 1Gi
-    # -- Resource requests for Buildqd
+    # @param buildqd.resources.requests Resource requests for Buildqd
     requests:
+      ## @param buildqd.resources.requests.cpu CPU resource requests for Buildqd
       cpu: 100m
+      ## @param buildqd.resources.requests.memory Memory resource requests for Buildqd
       memory: 128Mi
 
-  # Buildqd service configuration
+  ## @subsection Buildqd Service Configuration
   service:
-    # -- Port of the Buildqd service
+    ## @param buildqd.service.port Port of the Buildqd service
     port: 8443
-    # -- Port of the Buildqd Metrics service
+    ## @param buildqd.service.metricsPort Port of the Buildqd Metrics service
     metricsPort: 9090
-    # -- Type of the Buildqd service
+    ## @param buildqd.service.type Type of the Buildqd service
     type: ClusterIP
-    # -- Annotations for the Buildqd service
+    ## @param buildqd.service.annotations Annotations for the Buildqd service
     annotations: {}
-    # -- Labels for the Buildqd service
+    ## @param buildqd.service.labels Labels for the Buildqd service
     labels: {}
 
+  ## @subsection Buildqd Buildkit Configuration
   buildkit:
+    ## @subsection Buildkit Image Configuration
     image:
-      # Buildkit repository
+      ## @param buildqd.buildkit.image.repository Buildkit repository
       repository: docker.io/moby/buildkit
-      # Buildkit image policy
+      ## @param buildqd.buildkit.image.pullPolicy Buildkit image policy
       pullPolicy: IfNotPresent
-      # Buildkit image tag
+      ## @param buildqd.buildkit.image.tag Buildkit image tag
       tag: "v0.15.1"
 
-    # Buildkit container security context
+    ## @subsection Buildkit Container Security Configuration
     securityContext:
+      ## @param buildqd.buildkit.securityContext.privileged Privileged mode for Buildkit container
       privileged: true
 
-    # Buildkit command
+    ## @param buildqd.buildkit.command Buildkit command
     command: buildkitd
 
-    # Buildkit args
+    ## @param buildqd.buildkit.args Buildkit args
     args:
       - --addr
       - unix:///run/buildkit/buildkitd.sock
       - --addr
       - tcp://0.0.0.0:1234
-  
+
+    ## @subsection Buildkit Resources Configuration
     resources:
-      # -- Resource limits for Buildqd
+      # @param buildqd.buildkit.resources.limits Resource limits for Buildkit
       limits:
+        ## @param buildqd.buildkit.resources.limits.cpu CPU resource limits for Buildkit
         cpu: 1000m
+        ## @param buildqd.buildkit.resources.limits.memory Memory resource limits for Buildkit
         memory: 1Gi
-      # -- Resource requests for Buildqd
+      # @param buildqd.buildkit.resources.requests Resource requests for Buildkit
       requests:
+        ## @param buildqd.buildkit.resources.requests.cpu CPU resource requests for Buildkit
         cpu: 100m
+        ## @param buildqd.buildkit.resources.requests.memory Memory resource requests for Buildkit
         memory: 128Mi
 
-    # Buildkit persistant volume size for shared cache
+    ## @subsection Buildkit Persistent Volume Configuration
     persistentVolumeClaim:
+      ## @param buildqd.buildkit.persistentVolumeClaim.storageSize Storage size for Buildkit shared cache
       storageSize: 100Gi
 
+## @section Web Configuration
 web:
-  # -- Number of replicas for Web
+  ## @param web.replicas Number of replicas for Web
   replicas: 1
 
+  ## @param web.imageName Image name for Web
   imageName: "web"
 
-  # -- Optionally set the scheduler for pods
+  ## @param web.schedulerName Scheduler name for Web pods
   schedulerName: ""
 
-  # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  ## @param web.priorityClassName Priority class name for Web pods
+  priorityClassName: ""
 
-  # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  ## @param web.nodeSelector Node selector for Web pods
+  nodeSelector: {}
 
-  # -- Pod affinity settings
-  affinity: { }
+  ## @param web.affinity Affinity settings for Web pods
+  affinity: {}
 
-  # -- Pod tolerations
+  ## @param web.tolerations Tolerations for Web pods
   tolerations: []
 
-  # -- Pod labels
+  ## @param web.podLabels Pod labels for Web
   podLabels: {}
 
-  # -- Pod annotations
+  ## @param web.podAnnotations Pod annotations for Web
   podAnnotations: {}
 
-  # -- Annotations
+  ## @param web.annotations Annotations for Web
   annotations: {}
 
-  # Web autoscaling configuration
-  autoscaling:
-    # -- Enable autoscaling for Web
-    enabled: false
-    # -- Minimum autoscaling replicas for Web
-    minReplicas: 1
-    # -- Maximum autoscaling replicas for Web
-    maxReplicas: 3
-    # -- Target CPU utilisation percentage for Web
-    targetCPUUtilizationPercentage: 60
-    # -- Target memory utilisation percentage for Web
-    targetMemoryUtilizationPercentage: 80
-
-  # -- Env configuration for web configmap
-  env: 
+  ## @subsection Web Environment Configuration
+  env:
+    ## @param web.env.NEXT_AUTH_ENABLE_CREDENTIALS_PROVIDER Enable credentials provider for NextAuth
     NEXT_AUTH_ENABLE_CREDENTIALS_PROVIDER: "true"
+    ## @param web.env.NEXT_PUBLIC_BYPASS_AUTH0_FLOW Bypass Auth0 flow for Next.js
     NEXT_PUBLIC_BYPASS_AUTH0_FLOW: "true"
+    ## @param web.env.NEXT_PUBLIC_SELF_HOSTED Self-hosted mode for Next.js
     NEXT_PUBLIC_SELF_HOSTED: "true"
 
+  ## @subsection Web Autoscaling Configuration
+  autoscaling:
+    ## @param web.autoscaling.enabled Enable autoscaling for Web
+    enabled: false
+    ## @param web.autoscaling.minReplicas Minimum autoscaling replicas for Web
+    minReplicas: 1
+    ## @param web.autoscaling.maxReplicas Maximum autoscaling replicas for Web
+    maxReplicas: 3
+    ## @param web.autoscaling.targetCPUUtilizationPercentage Target CPU utilisation percentage for Web
+    targetCPUUtilizationPercentage: 60
+    ## @param web.autoscaling.targetMemoryUtilizationPercentage Target memory utilisation percentage for Web
+    targetMemoryUtilizationPercentage: 80
+
+  ## @subsection Web Resources Configuration
   resources:
-    # -- Resource limits for Web
+    # @param web.resources.limits Resource limits for Web
     limits:
+      ## @param web.resources.limits.cpu CPU resource limits for Web
       cpu: 2000m
+      ## @param web.resources.limits.memory Memory resource limits for Web
       memory: 4Gi
-    # -- Resource requests for Web
+    # @param web.resources.requests Resource requests for Web
     requests:
+      ## @param web.resources.requests.cpu CPU resource requests for Web
       cpu: 1000m
+      ## @param web.resources.requests.memory Memory resource requests for Web
       memory: 2Gi
 
-  # Web service configuration
+  ## @subsection Web Service Configuration
   service:
-    # -- Port of the Web service
+    ## @param web.service.port Port of the Web service
     port: 3000
-    # -- Type of the Web service
+    ## @param web.service.type Type of the Web service
     type: ClusterIP
-    # -- Annotations for the Web service
+    ## @param web.service.annotations Annotations for the Web service
     annotations: {}
-    # -- Labels for the Web service
+    ## @param web.service.labels Labels for the Web service
     labels: {}
 
-  # Web ingress configuration
+  ## @subsection Web Ingress Configuration
   ingress:
-    # -- Specify if the Web Ingress is enabled
+    ## @param web.ingress.enabled Specify if the Web Ingress is enabled
     enabled: true
-    # -- Ingress Class Name. May be required for k8s >= 1.18
+    ## @param web.ingress.ingressClassName Ingress Class Name. May be required for k8s >= 1.18
     ingressClassName: "nginx"
-    # -- Annotations
+    # @param web.ingress.annotations Annotations for ingress
     annotations:
+      ## @param web.ingress.annotations.cert-manager.io/cluster-issuer Cluster issuer for ingress
       cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+      ## @param web.ingress.annotations.nginx.ingress.kubernetes.io/force-ssl-redirect Force SSL redirect for ingress
       nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    # -- TLS
+    # @param web.ingress.tls TLS configuration
     tls:
+      ## @param web.ingress.tls[0].secretName TLS secret name for ingress
       - secretName: devzero-web-tls
+        ## @param web.ingress.tls[0].hosts List of TLS hosts for ingress
         hosts:
           - "{{ .Values.domain }}"
-    # -- Hosts
+    # @param web.ingress.hosts Hosts configuration
     hosts:
+      ## @param web.ingress.hosts[0].host Host name for ingress
       - host: "{{ .Values.domain }}"
+        # @param web.ingress.hosts[0].paths List of path configurations for ingress
         paths:
+          ## @param web.ingress.hosts[0].paths[0].path Path for ingress
           - path: /
+            ## @param web.ingress.hosts[0].paths[0].pathType Path type for ingress
             pathType: Prefix
 
-
-# Cluster issuer for cert manager
+## @section Cluster Issuer Configuration
 issuer:
+  ## @param issuer.enabled Enable Cluster Issuer
   enabled: true
 
-  # ACME server URL
+  ## @param issuer.acme ACME server URL
   acme: https://acme-v02.api.letsencrypt.org/directory
-  # Email address used for ACME registration
+  ## @param issuer.email Email address used for ACME registration
   email: email@selfzero.net
 
+## @section Vault Configuration
 vault:
+  ## @subsection Vault Job Configuration
   job:
+    ## @param vault.job.enabled Enable Vault job
     enabled: true
-    # We can't use vault-active because there is no active vault yet
-    # Pinning to vault-0 so we use the same pod for every unsealing attempt
-    # This could be flaky if vault-0 is down for some reason
+    ## @param vault.job.address Vault address for job
     address: "vault:8200"
+
+  ## @subsection Vault Ingress Configuration
   ingress:
+    ## @param vault.ingress.enabled Enable Vault ingress
     enabled: false
+
+## @section Mimir Configuration
 mimir:
+  ## @subsection Mimir Ingress Configuration
   ingress:
+    ## @param mimir.ingress.enabled Enable Mimir ingress
     enabled: false
+
+## @section Grafana Configuration
 grafana:
+  ## @subsection Grafana Ingress Configuration
   ingress:
+    ## @param grafana.ingress.enabled Enable Grafana ingress
     enabled: false
+
+## @section Registry Configuration
 registry:
+  ## @subsection Registry Ingress Configuration
   ingress:
+    ## @param registry.ingress.enabled Enable Registry ingress
     enabled: false
+
