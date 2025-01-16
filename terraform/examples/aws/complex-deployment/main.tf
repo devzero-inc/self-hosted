@@ -21,7 +21,7 @@ locals {
   vpc_dns_resolver = cidrhost(var.cidr, 2) # Calculates the +2 host of the CIDR for VPN DNS resolving
 
   static_node_groups = {
-    "node_group_1" = module.eks.eks_managed_node_groups["${var.name}-node-1-2"].node_group_autoscaling_group_names[0]
+    "node_group_1" = module.eks.eks_managed_node_groups["${var.name}-nodes"].node_group_autoscaling_group_names[0]
   }
 }
 
@@ -236,8 +236,8 @@ module "eks" {
   kms_key_enable_default_policy = var.kms_key_enable_default_policy
 
   eks_managed_node_groups = {
-    "${var.name}-node-1-2" = {
-      name           = "${var.name}-node-1-2"
+    "${var.name}-nodes" = {
+      name           = "${var.name}-nodes"
       instance_types = [var.worker_instance_type]
       key_name       = var.nodes_key_name
 
@@ -380,108 +380,108 @@ module "eks_blueprints_addons" {
 # GP3 default
 ################################################################################
 
-#resource "kubernetes_annotations" "gp2_default" {
-#  annotations = {
-#    "storageclass.kubernetes.io/is-default-class" : "false"
-#  }
-#  api_version = "storage.k8s.io/v1"
-#  kind        = "StorageClass"
-#  metadata {
-#    name = "gp2"
-#  }
-#
-#  force = true
-#
-#  depends_on = [
-#    module.eks,
-#  ]
-#}
-#
-#resource "kubernetes_storage_class" "gp3_default" {
-#  metadata {
-#    name = "gp3"
-#    annotations = {
-#      "storageclass.kubernetes.io/is-default-class" : "true"
-#    }
-#  }
-#
-#  storage_provisioner    = "ebs.csi.aws.com"
-#  reclaim_policy         = "Delete"
-#  allow_volume_expansion = true
-#  volume_binding_mode    = "WaitForFirstConsumer"
-#  parameters = {
-#    fsType    = "ext4"
-#    encrypted = true
-#    type      = "gp3"
-#  }
-#
-#  depends_on = [
-#    kubernetes_annotations.gp2_default,
-#  ]
-#}
+resource "kubernetes_annotations" "gp2_default" {
+  annotations = {
+    "storageclass.kubernetes.io/is-default-class" : "false"
+  }
+  api_version = "storage.k8s.io/v1"
+  kind        = "StorageClass"
+  metadata {
+    name = "gp2"
+  }
+
+  force = true
+
+  depends_on = [
+    module.eks,
+  ]
+}
+
+resource "kubernetes_storage_class" "gp3_default" {
+  metadata {
+    name = "gp3"
+    annotations = {
+      "storageclass.kubernetes.io/is-default-class" : "true"
+    }
+  }
+
+  storage_provisioner    = "ebs.csi.aws.com"
+  reclaim_policy         = "Delete"
+  allow_volume_expansion = true
+  volume_binding_mode    = "WaitForFirstConsumer"
+  parameters = {
+    fsType    = "ext4"
+    encrypted = true
+    type      = "gp3"
+  }
+
+  depends_on = [
+    kubernetes_annotations.gp2_default,
+  ]
+}
 
 ################################################################################
 # EFS
 ################################################################################
 
-#module "efs" {
-#  depends_on = [
-#    module.eks,
-#  ]
-#  source  = "terraform-aws-modules/efs/aws"
-#  version = "1.6.5"
-#
-#  name = module.eks.cluster_name
-#  encrypted = true
-#
-#  performance_mode = "generalPurpose"
-#  throughput_mode = "elastic"
-#
-#  create_backup_policy = false
-#  enable_backup_policy = false
-#
-#  lifecycle_policy = {
-#    transition_to_ia = "AFTER_30_DAYS"
-#  }
-#
-#  mount_targets = { for i, r in local.calculated_private_subnets_ids : "mount_${i}" => {subnet_id : r } }
-#
-#  create_security_group      = true
-#  security_group_description = "EFS security group for ${module.eks.cluster_name} EKS cluster"
-#  security_group_vpc_id      = local.vpc_id
-#  security_group_rules = {
-#    vpc = {
-#      # relying on the defaults provided for EFS/NFS (2049/TCP + ingress)
-#      description = "NFS ingress from VPC private subnets"
-#      cidr_blocks = local.private_subnet_cidr_blocks
-#    }
-#  }
-#
-#  tags = var.tags
-#}
-#
-#resource "kubernetes_storage_class" "efs_etcd" {
-#  metadata {
-#    name = "efs-etcd"
-#  }
-#  storage_provisioner = "efs.csi.aws.com"
-#  reclaim_policy      = "Delete"
-#  parameters = {
-#    basePath              = "/etcd"
-#    directoryPerms        = "700"
-#    ensureUniqueDirectory = "true"
-#    fileSystemId          = module.efs.id
-#    gidRangeEnd           = "2000"
-#    gidRangeStart         = "1000"
-#    provisioningMode      = "efs-ap"
-#    reuseAccessPoint      = "false"
-#    subPathPattern        = "$${.PVC.name}"
-#  }
-#
-#  depends_on = [
-#    module.eks,
-#  ]
-#}
+module "efs" {
+  depends_on = [
+    module.eks,
+  ]
+  source  = "terraform-aws-modules/efs/aws"
+  version = "1.6.5"
+
+  name = module.eks.cluster_name
+  encrypted = true
+
+  performance_mode = "generalPurpose"
+  throughput_mode = "elastic"
+
+  create_backup_policy = false
+  enable_backup_policy = false
+
+  lifecycle_policy = {
+    transition_to_ia = "AFTER_30_DAYS"
+  }
+
+  mount_targets = { for i, r in local.calculated_private_subnets_ids : "mount_${i}" => {subnet_id : r } }
+
+  create_security_group      = true
+  security_group_description = "EFS security group for ${module.eks.cluster_name} EKS cluster"
+  security_group_vpc_id      = local.vpc_id
+  security_group_rules = {
+    vpc = {
+      # relying on the defaults provided for EFS/NFS (2049/TCP + ingress)
+      description = "NFS ingress from VPC private subnets"
+      cidr_blocks = local.private_subnet_cidr_blocks
+    }
+  }
+
+  tags = var.tags
+}
+
+resource "kubernetes_storage_class" "efs_etcd" {
+  metadata {
+    name = "efs-etcd"
+  }
+  storage_provisioner = "efs.csi.aws.com"
+  reclaim_policy      = "Delete"
+  parameters = {
+    basePath              = "/etcd"
+    directoryPerms        = "700"
+    ensureUniqueDirectory = "true"
+    fileSystemId          = module.efs.id
+    gidRangeEnd           = "2000"
+    gidRangeStart         = "1000"
+    provisioningMode      = "efs-ap"
+    reuseAccessPoint      = "false"
+    subPathPattern        = "$${.PVC.name}"
+  }
+
+  depends_on = [
+    module.eks,
+  ]
+}
 
 ################################################################################
 # Ingress configuration
@@ -503,6 +503,8 @@ resource "aws_route53_zone" "private" {
 ################################################################################
 
 module "vpn" {
+  count = var.create_vpn ? 1 : 0
+
   source = "../../../modules/aws/vpn"
 
   name                          = var.name
@@ -520,7 +522,7 @@ module "vpn" {
 }
 
 ################################################################################
-# Backend
+# Example of using custom ALB, and pointing it to the cluster node port
 ################################################################################
 
 module "alb" {
@@ -533,11 +535,11 @@ module "alb" {
   additional_security_group_ids = [module.eks.node_security_group_id]
   vpc_id                        = local.vpc_id
   subnet_ids                    = local.calculated_private_subnets_ids
-  vpc_cidr                      = module.vpc.vpc_cidr_block
-  certificate_arn               = module.vpn.vpn_server_certificate_arn
+  vpc_cidr                      = local.effective_vpc_cidr_block
+  certificate_arn               = module.vpn[0].vpn_server_certificate_arn
   target_port                   = 30080
   record                        = "backend.${var.domain}"
-  zone_id                       = aws_route53_zone.private[0].zone_id 
+  zone_id                       = local.effective_zone_id
   health_check = {
     enabled             = true
     path                = "/"       
