@@ -1,8 +1,12 @@
 ## @section Redis Database Configuration
-## POLLAND/BUILDQD: 0
-## BACKEND: 1
-## HYDRA: 2
+## @descriptionStart
+## 1. POLLAND/BUILDQD: 0
+## 2. BACKEND: 1
+## 3. HYDRA: 2
+##
+## @descriptionEnd
 
+## @section Chart Configuration
 ## @param nameOverride String to override the chart's name
 nameOverride: ""
 

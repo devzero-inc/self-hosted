@@ -5,6 +5,14 @@
 
 ### Redis Database Configuration
 
+1. POLLAND/BUILDQD: 0
+2. BACKEND: 1
+3. HYDRA: 2
+
+
+
+### Chart Configuration Configuration
+
 | Name               | Description                                      | Value            |
 | ------------------ | ------------------------------------------------ | ---------------- |
 | `nameOverride`     | String to override the chart's name              | `""`             |
