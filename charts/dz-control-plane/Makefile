@@ -10,3 +10,14 @@ install:
 .PHONY: delete
 delete:
 	helm delete devzero -n devzero --ignore-not-found
+
+.PHONY: docs
+docs:
+	docker run --rm \
+		--workdir /docs \
+		-v $(PWD):/docs \
+		devzeroinc/readme-generator-for-helm:latest /app/bin/readme-generator \
+		--readme Readme.md \
+		--values values.yaml \
+		--schema values.schema.json
+
