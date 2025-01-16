@@ -7,24 +7,25 @@
 #########################################################################
 
 # -- Overrides the chart's name.
-nameOverride: null
+nameOverride:
 
 # -- Overrides the chart's computed fullname.
-fullnameOverride: null
+fullnameOverride:
 
 domain: "domain.example"
 
 credentials:
-  registry: ""
-  username: ""
-  password: ""
-  email: ""
+  enable: true
+  registry: docker.io
+  username: ''
+  password: ''
+  email: ''
 
 image:
   # -- Devzero container image repository'
   repository: docker.io/devzeroinc
   # -- Devzero container image tag'
-  tag: "v1.0.0"
+  tag: v1.0.0
   # -- Container pull policy
   pullPolicy: IfNotPresent
   # -- Optionally specify an array of imagePullSecrets
@@ -45,25 +46,25 @@ serviceAccount:
   # -- Annotations to add to the service account
   annotations: {}
   # -- The name of the service account to use
-  name: "devzero"
+  name: devzero
 
 gateway:
   # -- Number of replicas for Api Gateway
   replicas: 3
 
-  imageName: "api-gateway"
+  imageName: api-gateway
 
   # -- Optionally set the scheduler for pods
-  schedulerName: ""
+  schedulerName: ''
 
   # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  priorityClassName:
 
   # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  nodeSelector: {}
 
   # -- Pod affinity settings
-  affinity: { }
+  affinity: {}
 
   # -- Pod tolerations
   tolerations: []
@@ -119,41 +120,41 @@ gateway:
     # -- Specify if the Api Gateway Ingress is enabled
     enabled: enable
     # -- Ingress Class Name. May be required for k8s >= 1.18
-    ingressClassName: "nginx"
+    ingressClassName: nginx
     # -- Annotations
     annotations:
-      cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-self-hosted
+      nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
     # -- TLS
     tls:
-      - secretName: devzero-api-tls
-        hosts:
-          - "api.{{ .Values.domain }}"
+    - secretName: devzero-api-tls
+      hosts:
+      - api.{{ .Values.domain }}
     # -- Hosts
     hosts:
-      - host: "api.{{ .Values.domain }}"
-        paths:
-          - path: /
-            pathType: Prefix
+    - host: api.{{ .Values.domain }}
+      paths:
+      - path: /
+        pathType: Prefix
 
 
 backend:
   # -- Number of replicas for Backend
   replicas: 1
 
-  imageName: "backend"
+  imageName: backend
 
   # -- Optionally set the scheduler for pods
-  schedulerName: ""
+  schedulerName: ''
 
   # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  priorityClassName:
 
   # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  nodeSelector: {}
 
   # -- Pod affinity settings
-  affinity: { }
+  affinity: {}
 
   # -- Pod tolerations
   tolerations: []
@@ -169,21 +170,22 @@ backend:
 
   redis:
     url: redis://redis-headless:6379/1
-    password: ""
+    password: ''
 
   mongo:
-    url: "mongodb://devzero:backend@devzero-mongodb-0.devzero-mongodb-headless:27017/backend?directConnection=true"
+    url: 
+      mongodb://devzero:backend@devzero-mongodb-0.devzero-mongodb-headless:27017/backend?directConnection=true
 
   hydra:
     apiKey:
 
   logsrv:
     queue: http://devzero-elasticmq:9324/queue/logsrv.fifo
-    region: "elasticmq"
+    region: elasticmq
 
   github:
-    appId: 
-    appPrivateKey: ""
+    appId:
+    appPrivateKey: ''
 
   mimir:
     url: http://mimir:8080/prometheus
@@ -196,29 +198,29 @@ backend:
 
   grafana:
     enabled: true
-    datasourceId: "mimir"
-    doraDatasourceId: "pulse"
-    odaDatasourceId: "timescale"
+    datasourceId: mimir
+    doraDatasourceId: pulse
+    odaDatasourceId: timescale
     password: prom-operator
 
   storage:
     allowedTeam: team-example-id
     ceph:
-      clusterId: ""
+      clusterId: ''
       filesystemName: cephfs
       filesystemPath: cephfs
       monitorAddress: /volumes/cache
-      userCredentials: ""
+      userCredentials: ''
       username: vuser
 
-  mainTeamId: ""
+  mainTeamId: ''
 
   licenseKey: ""
   
   arch: amd64
 
   cortex:
-    key: ""
+    key: ''
 
   # Backend autoscaling configuration
   autoscaling:
@@ -260,19 +262,19 @@ hydra:
   # -- Number of replicas for Hydra
   replicas: 1
 
-  imageName: "hydra"
+  imageName: hydra
 
   # -- Optionally set the scheduler for pods
-  schedulerName: ""
+  schedulerName: ''
 
   # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  priorityClassName:
 
   # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  nodeSelector: {}
 
   # -- Pod affinity settings
-  affinity: { }
+  affinity: {}
 
   # -- Pod tolerations
   tolerations: []
@@ -289,11 +291,11 @@ hydra:
   job: true
 
   postgres:
-    host: "postgres-hydra-postgresql-hl"
+    host: postgres-hydra-postgresql-hl
     port: 5432
-    name: "postgres"
-    user: "hydra"
-    password: "hydra"
+    name: postgres
+    user: hydra
+    password: hydra
 
   redis:
     url: redis://redis-headless:6379/2
@@ -306,10 +308,10 @@ hydra:
     server:
       enabled: false
     urls:
-      - "https://controlplane.tailscale.com/derpmap/default"
+    - https://controlplane.tailscale.com/derpmap/default
     paths: []
     autoUpdateEnabled: true
-    updateFrequency: "24h"
+    updateFrequency: 24h
 
   # Hydra autoscaling configuration
   autoscaling:
@@ -352,40 +354,40 @@ hydra:
     # -- Specify if the Hydra Ingress is enabled
     enabled: true
     # -- Ingress Class Name. May be required for k8s >= 1.18
-    ingressClassName: "nginx"
+    ingressClassName: nginx
     # -- Annotations
     annotations:
-      cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-self-hosted
+      nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
     # -- TLS
     tls:
-      - secretName: devzero-hydra-tls
-        hosts:
-          - "hydra.{{ .Values.domain }}"
+    - secretName: devzero-hydra-tls
+      hosts:
+      - hydra.{{ .Values.domain }}
     # -- Hosts
     hosts:
-      - host: "hydra.{{ .Values.domain }}"
-        paths:
-          - path: /
-            pathType: Prefix
+    - host: hydra.{{ .Values.domain }}
+      paths:
+      - path: /
+        pathType: Prefix
 
 logsrv:
   # -- Number of replicas for Logsrv
   replicas: 1
 
-  imageName: "logsrv"
+  imageName: logsrv
 
   # -- Optionally set the scheduler for pods
-  schedulerName: ""
+  schedulerName: ''
 
   # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  priorityClassName:
 
   # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  nodeSelector: {}
 
   # -- Pod affinity settings
-  affinity: { }
+  affinity: {}
 
   # -- Pod tolerations
   tolerations: []
@@ -449,22 +451,22 @@ logsrv:
     # -- Specify if the Logsrv Ingress is enabled
     enabled: true
     # -- Ingress Class Name. May be required for k8s >= 1.18
-    ingressClassName: "nginx"
+    ingressClassName: nginx
     # -- Annotations
     annotations:
-      cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-self-hosted
+      nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
     # -- TLS
     tls:
-      - secretName: devzero-logsrv-tls
-        hosts:
-          - "logsrv.{{ .Values.domain }}"
+    - secretName: devzero-logsrv-tls
+      hosts:
+      - logsrv.{{ .Values.domain }}
     # -- Hosts
     hosts:
-      - host: "logsrv.{{ .Values.domain }}"
-        paths:
-          - path: /
-            pathType: Prefix
+    - host: logsrv.{{ .Values.domain }}
+      paths:
+      - path: /
+        pathType: Prefix
 
 polland:
   worker:
@@ -476,36 +478,36 @@ polland:
 
     # Available queues created from worker
     queues:
-      - name: fast
-        replicaCount: 1
-        autoscaling:
-          enabled: false 
-          minReplicas: 3
-          maxReplicas: 5
-      - name: build
-        replicaCount: 1
-        autoscaling:
-          enabled: false 
-          minReplicas: 3
-          maxReplicas: 5
-      - name: workload
-        replicaCount: 1
-        autoscaling:
-          enabled: false 
-          minReplicas: 3
-          maxReplicas: 5
-      - name: cluster
-        replicaCount: 1
-        autoscaling:
-          enabled: false 
-          minReplicas: 3
-          maxReplicas: 5
-      - name: hibernation
-        replicaCount: 1
-        autoscaling:
-          enabled: false
-          minReplicas: 1
-          maxReplicas: 1
+    - name: fast
+      replicaCount: 1
+      autoscaling:
+        enabled: false
+        minReplicas: 3
+        maxReplicas: 5
+    - name: build
+      replicaCount: 1
+      autoscaling:
+        enabled: false
+        minReplicas: 3
+        maxReplicas: 5
+    - name: workload
+      replicaCount: 1
+      autoscaling:
+        enabled: false
+        minReplicas: 3
+        maxReplicas: 5
+    - name: cluster
+      replicaCount: 1
+      autoscaling:
+        enabled: false
+        minReplicas: 3
+        maxReplicas: 5
+    - name: hibernation
+      replicaCount: 1
+      autoscaling:
+        enabled: false
+        minReplicas: 1
+        maxReplicas: 1
 
   beat:
     # -- Number of replicas for Polland Beat
@@ -527,19 +529,19 @@ polland:
   # -- Number of replicas for Polland
   replicas: 1
 
-  imageName: "polland"
+  imageName: polland
 
   # -- Optionally set the scheduler for pods
-  schedulerName: ""
+  schedulerName: ''
 
   # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  priorityClassName:
 
   # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  nodeSelector: {}
 
   # -- Pod affinity settings
-  affinity: { }
+  affinity: {}
 
   # -- Pod tolerations
   tolerations: []
@@ -555,35 +557,35 @@ polland:
 
   # -- Env configuration for polland configmap
   env:
-    USE_POSTGRES_DB: "true"
-    POSTGRES_PORT: "5432"
-    POSTGRES_DB: "polland"
-    POSTGRES_USER: "polland"
-    POSTGRES_PASSWORD: "polland"
-    POSTGRES_HOST: "postgres-polland-postgresql-hl"
+    USE_POSTGRES_DB: 'true'
+    POSTGRES_PORT: '5432'
+    POSTGRES_DB: polland
+    POSTGRES_USER: polland
+    POSTGRES_PASSWORD: polland
+    POSTGRES_HOST: postgres-polland-postgresql-hl
 
-    REDIS_URL: "redis://redis-headless:6379/0"
+    REDIS_URL: redis://redis-headless:6379/0
 
-    USE_DOCKER: "yes"
+    USE_DOCKER: yes
     # Disable connection pooling in preprod because we are running a small container and we don't want to keep connections open.
-    CONN_MAX_AGE: "60"
-    DJANGO_ALLOWED_HOSTS: "*"
-    DJANGO_SETTINGS_MODULE: "config.settings.production"
+    CONN_MAX_AGE: '60'
+    DJANGO_ALLOWED_HOSTS: '*'
+    DJANGO_SETTINGS_MODULE: config.settings.production
     # This is supposed to be a secret, but since it is only used to encrypt sessions and we don't use sessions, it can be defined plaintext.
-    DJANGO_SECRET_KEY: "super_secret_key"
-    CELERY_FLOWER_USER: "devzero"
-    CELERY_FLOWER_PASSWORD: "devzero"
+    DJANGO_SECRET_KEY: super_secret_key
+    CELERY_FLOWER_USER: devzero
+    CELERY_FLOWER_PASSWORD: devzero
 
-    SELF_HOSTED: "True"
+    SELF_HOSTED: 'True'
 
-    USE_INSECURE_REGISTRY: "True"
-    USE_ECR_REGISTRY: "False"
-    USE_LOCAL_LOGSRV: "True"
+    USE_INSECURE_REGISTRY: 'True'
+    USE_ECR_REGISTRY: 'False'
+    USE_LOCAL_LOGSRV: 'True'
 
-    VAULT_AUTH_METHOD: "kubernetes"
-    VAULT_SECRETS_MOUNT_POINT: "vault-csi-production-writer"
-    LOGSRV_DEFAULT_QUEUE: "http://devzero-elasticmq:9324/queue/logsrv.fifo"
-    LOGSRV_DEFAULT_REGION: "elasticmq"
+    VAULT_AUTH_METHOD: kubernetes
+    VAULT_SECRETS_MOUNT_POINT: vault-csi-production-writer
+    LOGSRV_DEFAULT_QUEUE: http://devzero-elasticmq:9324/queue/logsrv.fifo
+    LOGSRV_DEFAULT_REGION: elasticmq
 
   # Polland autoscaling configuration
   autoscaling:
@@ -625,19 +627,19 @@ pulse:
   # -- Number of replicas for Pulse
   replicas: 1
 
-  imageName: "pulse"
+  imageName: pulse
 
   # -- Optionally set the scheduler for pods
-  schedulerName: ""
+  schedulerName: ''
 
   # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  priorityClassName:
 
   # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  nodeSelector: {}
 
   # -- Pod affinity settings
-  affinity: { }
+  affinity: {}
 
   # -- Pod tolerations
   tolerations: []
@@ -657,7 +659,7 @@ pulse:
     host: timescaledb-single
     port: 5432
     database: postgres
-    ssl: allow 
+    ssl: allow
 
   mysql:
     user: pulse
@@ -667,10 +669,10 @@ pulse:
     database: pulse
 
   devlake:
-    secret: ""
+    secret: ''
 
   openApi:
-    token: ""
+    token: ''
 
   # Pulse autoscaling configuration
   autoscaling:
@@ -712,41 +714,41 @@ pulse:
     # -- Specify if the Pulse Ingress is enabled
     enabled: true
     # -- Ingress Class Name. May be required for k8s >= 1.18
-    ingressClassName: "nginx"
+    ingressClassName: nginx
     # -- Annotations
     annotations:
-      cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-self-hosted
+      nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
     # -- TLS
     tls:
-      - secretName: devzero-pulse-tls
-        hosts:
-          - "pulse.{{ .Values.domain }}"
+    - secretName: devzero-pulse-tls
+      hosts:
+      - pulse.{{ .Values.domain }}
     # -- Hosts
     hosts:
-      - host: "pulse.{{ .Values.domain }}"
-        paths:
-          - path: /
-            pathType: Prefix
+    - host: pulse.{{ .Values.domain }}
+      paths:
+      - path: /
+        pathType: Prefix
 
 
 buildqd:
   # -- Number of replicas for Buildqd
   replicas: 1
 
-  imageName: "buildqd"
+  imageName: buildqd
 
   # -- Optionally set the scheduler for pods
-  schedulerName: ""
+  schedulerName: ''
 
   # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  priorityClassName:
 
   # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  nodeSelector: {}
 
   # -- Pod affinity settings
-  affinity: { }
+  affinity: {}
 
   # -- Pod tolerations
   tolerations: []
@@ -801,7 +803,7 @@ buildqd:
       # Buildkit image policy
       pullPolicy: IfNotPresent
       # Buildkit image tag
-      tag: "v0.15.1"
+      tag: v0.15.1
 
     # Buildkit container security context
     securityContext:
@@ -812,11 +814,11 @@ buildqd:
 
     # Buildkit args
     args:
-      - --addr
-      - unix:///run/buildkit/buildkitd.sock
-      - --addr
-      - tcp://0.0.0.0:1234
-  
+    - --addr
+    - unix:///run/buildkit/buildkitd.sock
+    - --addr
+    - tcp://0.0.0.0:1234
+
     resources:
       # -- Resource limits for Buildqd
       limits:
@@ -835,19 +837,19 @@ web:
   # -- Number of replicas for Web
   replicas: 1
 
-  imageName: "web"
+  imageName: web
 
   # -- Optionally set the scheduler for pods
-  schedulerName: ""
+  schedulerName: ''
 
   # -- Optionally set the name of the PriorityClass for pods
-  priorityClassName: null
+  priorityClassName:
 
   # -- NodeSelector to pin pods to certain set of nodes
-  nodeSelector: { }
+  nodeSelector: {}
 
   # -- Pod affinity settings
-  affinity: { }
+  affinity: {}
 
   # -- Pod tolerations
   tolerations: []
@@ -875,10 +877,10 @@ web:
     targetMemoryUtilizationPercentage: 80
 
   # -- Env configuration for web configmap
-  env: 
-    NEXT_AUTH_ENABLE_CREDENTIALS_PROVIDER: "true"
-    NEXT_PUBLIC_BYPASS_AUTH0_FLOW: "true"
-    NEXT_PUBLIC_SELF_HOSTED: "true"
+  env:
+    NEXT_AUTH_ENABLE_CREDENTIALS_PROVIDER: 'true'
+    NEXT_PUBLIC_BYPASS_AUTH0_FLOW: 'true'
+    NEXT_PUBLIC_SELF_HOSTED: 'true'
 
   resources:
     # -- Resource limits for Web
@@ -906,22 +908,22 @@ web:
     # -- Specify if the Web Ingress is enabled
     enabled: true
     # -- Ingress Class Name. May be required for k8s >= 1.18
-    ingressClassName: "nginx"
+    ingressClassName: nginx
     # -- Annotations
     annotations:
-      cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-self-hosted
+      nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
     # -- TLS
     tls:
-      - secretName: devzero-web-tls
-        hosts:
-          - "{{ .Values.domain }}"
+    - secretName: devzero-web-tls
+      hosts:
+      - '{{ .Values.domain }}'
     # -- Hosts
     hosts:
-      - host: "{{ .Values.domain }}"
-        paths:
-          - path: /
-            pathType: Prefix
+    - host: '{{ .Values.domain }}'
+      paths:
+      - path: /
+        pathType: Prefix
 
 
 # Cluster issuer for cert manager
@@ -939,7 +941,7 @@ vault:
     # We can't use vault-active because there is no active vault yet
     # Pinning to vault-0 so we use the same pod for every unsealing attempt
     # This could be flaky if vault-0 is down for some reason
-    address: "vault:8200"
+    address: vault:8200
   ingress:
     enabled: false
 mimir:

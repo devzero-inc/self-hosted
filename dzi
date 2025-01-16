@@ -56,12 +56,10 @@ def check(force):
     """Checks for various required resources"""
     pass
 
-
 @check.command("all")
 def check_all():
     """Runs all checks"""
     click.echo("Running all checks...")
-
 
 # Control plane commands
 @check.group("control-plane", cls=OrderedGroup)
@@ -107,10 +105,10 @@ def control_plane_ingress():
 @click.option(
     "--force", is_flag=True, help="Force run checks even if already checked before"
 )
-def helm_check_backend(force):
+def helm_check_control_plane(force):
     """Helm chart: control-plane"""
     click.echo("Checking helm chart: control-plane")
-    ControlPlane().control_plane_checks(force)
+    ControlPlane().checks(force)
 
 @control_plane.command("cert-issuer")
 def helm_check_cert_issuer():
@@ -196,6 +194,40 @@ def helm_check_prometheus():
     """Helm chart: prometheus"""
     click.echo("Checking helm chart: prometheus")
 
+@cli.group(name="install")
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
+def install(force):
+    """Installs various required resources"""
+    pass
+
+
+@install.command("all")
+def install_all():
+    """Runs all checks"""
+    click.echo("Running all checks...")
+
+# Control plane commands
+@install.group("control-plane", cls=OrderedGroup)
+def install_control_plane():
+    """Runs control plane checks for the current cloud provider"""
+    pass
+
+@install_control_plane.command("all")
+def install_control_plane_all():
+    """Runs all control-plane checks"""
+    click.echo("Running all control plane checks...")
+
+# Control plane Helm chart checks
+@install_control_plane.command("chart")
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
+def helm_install_control_plane(force):
+    """Helm chart: control-plane"""
+    click.echo("Checking helm chart: control-plane")
+    ControlPlane().install(force)
 
 if __name__ == "__main__":
     cli()

@@ -9,6 +9,7 @@ class DZConfig(Prodict):
 
     NAMESPACES = [
         "globals",
+        "control_plane",
         "networking",
     ]
     _instance = None
