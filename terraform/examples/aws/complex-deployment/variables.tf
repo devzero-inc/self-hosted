@@ -1,13 +1,13 @@
 ################################################################################
 # Common
 ################################################################################
-variable "cluster_name" {
+variable "name" {
   type        = string
   description = "Name prefix to be used by resources"
   default     = "devzero"
   validation {
-    condition = length(var.cluster_name) < 39
-    error_message = "The cluster name must be less than 39 characters"
+    condition = length(var.name) < 39
+    error_message = "The name must be less than 39 characters"
   }
 }
 
@@ -120,6 +120,55 @@ variable "manage_default_network_acl" {
   description = "Should be true to adopt and manage Default Network ACL"
   type        = bool
   default     = true
+}
+
+################################################################################
+# VPN
+################################################################################
+
+variable "create_vpn" {
+  description = "Controls if VPN gateway and VPN resources will be created."
+  type        = bool
+  default     = false
+}
+
+variable "additional_routes" {
+  description = "Additional Routes"
+  type        = list(map(string))
+  default     = []
+}
+
+variable "client_vpn_cidr_block" {
+  type    = string
+  default = "10.9.0.0/22"
+  description = "CIDR for Client VPN IP addresses"
+}
+
+variable "vpn_client_list" {
+  description = "Subnets"
+  type        = set(string)
+  default     = ["root"]
+}
+
+
+################################################################################
+# Routes
+################################################################################
+variable "domain" {
+  type        = string
+  description = "Name of the private domain"
+}
+
+variable "use_existing_route53_zone" {
+  type    = bool
+  default = false
+  description = "If true, skip creating a new Route53 zone and use an existing zone_id instead"
+}
+
+variable "existing_zone_id" {
+  type      = string
+  default   = null
+  description = "The existing Route53 zone ID (if use_existing_route53_zone is true)"
 }
 
 ################################################################################
