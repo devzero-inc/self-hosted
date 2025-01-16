@@ -1,0 +1,14 @@
+# https://github.com/prometheus-community/helm-charts/blob/prometheus-26.0.1/charts/prometheus/values.yaml
+
+extraScrapeConfigs:
+  - job_name: "cortex"
+    metrics_path: "/metrics"
+    kubernetes_sd_configs:
+      - role: "pod"
+remoteWrite:
+  - url: "https://mimir.devzero.dev/api/v1/push"
+    headers:
+      X-Scope-OrgID: "1"
+    writeRelabelConfigs:
+      - targetLabel: "region"
+        replacement: "self-hosted"

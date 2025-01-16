@@ -11,7 +11,7 @@
 
 
 
-### Chart Configuration Configuration
+### Chart Configuration
 
 | Name               | Description                                      | Value            |
 | ------------------ | ------------------------------------------------ | ---------------- |

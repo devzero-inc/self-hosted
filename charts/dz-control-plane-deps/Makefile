@@ -14,7 +14,7 @@ install:
 	@$(MAKE) install-timescaledb-single
 	@$(MAKE) install-elasticmq
 	@$(MAKE) install-docker-registry
-	@$(MAKE) install-kube-prometheus-stack
+	@$(MAKE) install-grafana
 	@$(MAKE) install-mimir-distributed
 	@$(MAKE) install-vault
 
@@ -32,7 +32,7 @@ delete:
 	@$(MAKE) delete-timescaledb-single
 	@$(MAKE) delete-elasticmq
 	@$(MAKE) delete-docker-registry
-	@$(MAKE) delete-kube-prometheus-stack
+	@$(MAKE) delete-grafana
 	@$(MAKE) delete-mimir-distributed
 	@$(MAKE) delete-vault
 
@@ -208,19 +208,19 @@ install-docker-registry:
 delete-docker-registry:
 	helm delete docker-registry -n devzero --ignore-not-found
 
-.PHONY: install-kube-prometheus-stack
-install-kube-prometheus-stack:
+.PHONY: install-grafana
+install-grafana:
 	@$(MAKE) _install-helm-chart \
-		APP_NAME=kube-prometheus-stack \
-		REPO_NAME=prometheus-community \
-		REPO_URL=https://prometheus-community.github.io/helm-charts \
-		REPO_APP_NAME=kube-prometheus-stack \
-		VERSION=67.1.0 \
+		APP_NAME=grafana \
+		REPO_NAME=grafana \
+		REPO_URL=https://grafana.github.io/helm-charts \
+		REPO_APP_NAME=grafana \
+		VERSION=8.8.2 \
 		NAMESPACE=devzero
 
-.PHONY: delete-kube-prometheus-stack
-delete-kube-prometheus-stack:
-	helm delete kube-prometheus-stack -n devzero --ignore-not-found
+.PHONY: delete-grafana
+delete-grafana:
+	helm delete grafana -n devzero --ignore-not-found
 
 .PHONY: install-mimir-distributed
 install-mimir-distributed:
