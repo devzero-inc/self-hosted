@@ -7,9 +7,8 @@ worker_instance_type = "m5.4xlarge"
 desired_node_size    = 4
 max_node_size        = 4
 
+cluster_endpoint_public_access = false
 cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
-
-create_separate_data_plane_cluster = false
 
 # VPC
 create_vpc               = true

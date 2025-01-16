@@ -227,9 +227,9 @@ module "eks" {
 
   subnet_ids = local.calculated_private_subnets_ids
 
-  # cluster_endpoint_public_access       = var.cluster_endpoint_public_access
-  # cluster_endpoint_public_access_cidrs = var.cluster_endpoint_public_access ? var.cluster_endpoint_public_access_cidrs : []
-  cluster_endpoint_private_access = true
+  cluster_endpoint_public_access       = var.cluster_endpoint_public_access
+  cluster_endpoint_public_access_cidrs = var.cluster_endpoint_public_access ? var.cluster_endpoint_public_access_cidrs : []
+  cluster_endpoint_private_access = !var.cluster_endpoint_public_access
 
   kms_key_administrators        = var.kms_key_administrators
   kms_key_aliases               = ["${var.name}-cluster"]

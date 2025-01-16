@@ -132,6 +132,10 @@ resource "aws_ec2_client_vpn_route" "public" {
   client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.vpn-client.id
   destination_cidr_block = "0.0.0.0/0"
   target_vpc_subnet_id   = var.subnet_ids[count.index]
+
+  timeouts {
+    create = "10m"
+  }
 }
 
 resource "aws_ec2_client_vpn_route" "routes" {
@@ -139,6 +143,10 @@ resource "aws_ec2_client_vpn_route" "routes" {
   client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.vpn-client.id
   destination_cidr_block = var.additional_routes[count.index].destination_cidr
   target_vpc_subnet_id   = var.additional_routes[count.index].subnet_id
+
+  timeouts {
+    create = "10m"
+  }
 }
 
 resource "aws_s3_bucket" "vpn-config-files" {
