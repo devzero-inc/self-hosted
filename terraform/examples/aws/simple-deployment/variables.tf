@@ -131,12 +131,6 @@ variable "cluster_version" {
   default     = "1.30"
 }
 
-variable "create_separate_data_plane_cluster" {
-  type        = bool
-  description = "Create two clusters one for data plane and one for control plane, default is keeping everything in one cluster"
-  default     = false
-}
-
 variable "region" {
   type        = string
   description = "AWS region"

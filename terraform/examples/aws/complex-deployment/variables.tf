@@ -5,11 +5,10 @@ variable "name" {
   type        = string
   description = "Name prefix to be used by resources"
   default     = "devzero"
-}
-
-variable "domain" {
-  type        = string
-  description = "Name of the private domain"
+  validation {
+    condition = length(var.name) < 39
+    error_message = "The name must be less than 39 characters"
+  }
 }
 
 variable "tags" {
@@ -123,6 +122,10 @@ variable "manage_default_network_acl" {
   default     = true
 }
 
+################################################################################
+# VPN
+################################################################################
+
 variable "create_vpn" {
   description = "Controls if VPN gateway and VPN resources will be created."
   type        = bool
@@ -133,21 +136,6 @@ variable "additional_routes" {
   description = "Additional Routes"
   type        = list(map(string))
   default     = []
-}
-
-################################################################################
-# Routes
-################################################################################
-variable "use_existing_route53_zone" {
-  type    = bool
-  default = false
-  description = "If true, skip creating a new Route53 zone and use an existing zone_id instead"
-}
-
-variable "existing_zone_id" {
-  type      = string
-  default   = null
-  description = "The existing Route53 zone ID (if use_existing_route53_zone is true)"
 }
 
 variable "client_vpn_cidr_block" {
@@ -162,19 +150,34 @@ variable "vpn_client_list" {
   default     = ["root"]
 }
 
+
+################################################################################
+# Routes
+################################################################################
+variable "domain" {
+  type        = string
+  description = "Name of the private domain"
+}
+
+variable "use_existing_route53_zone" {
+  type    = bool
+  default = false
+  description = "If true, skip creating a new Route53 zone and use an existing zone_id instead"
+}
+
+variable "existing_zone_id" {
+  type      = string
+  default   = null
+  description = "The existing Route53 zone ID (if use_existing_route53_zone is true)"
+}
+
 ################################################################################
 # EKS
 ################################################################################
 variable "cluster_version" {
   type        = string
   description = "Cluster version to use for EKS deployment"
-  default     = "1.31"
-}
-
-variable "create_separate_data_plane_cluster" {
-  type        = bool
-  description = "Create two clusters one for data plane and one for control plane, default is keeping everything in one cluster"
-  default     = false
+  default     = "1.30"
 }
 
 variable "region" {
@@ -257,6 +260,11 @@ variable "enable_cluster_creator_admin_permissions" {
   description = "Indicates whether or not to add the cluster creator (the identity used by Terraform) as an administrator via access entry"
   type = bool
   default = true
+}
+
+variable "node_role_suffix" {
+  default = "-nodes-eks-node-group-"
+  description = "Suffix to use on the node group IAM role"
 }
 
 ################################################################################

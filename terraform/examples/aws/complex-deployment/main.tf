@@ -18,7 +18,11 @@ locals {
 
   effective_vpc_cidr_block = var.create_vpc ? module.vpc.vpc_cidr_block : data.aws_vpc.existing[0].cidr_block
 
-  vpc_dns_resolver = cidrhost(var.cidr, 2) # Calculates the +2 host of the CIDR
+  vpc_dns_resolver = cidrhost(var.cidr, 2) # Calculates the +2 host of the CIDR for VPN DNS resolving
+
+  static_node_groups = {
+    "node_group_1" = module.eks.eks_managed_node_groups["${var.name}-node-1-2"].node_group_autoscaling_group_names[0]
+  }
 }
 
 data "aws_availability_zones" "available" {}
@@ -179,15 +183,37 @@ module "vpc" {
 ################################################################################
 # EKS
 ################################################################################
-# data "aws_iam_roles" "sso_awsadministratoraccess" {
-#   name_regex = "AWSReservedSSO_AWSAdministratorAccess.*"
-# }
-
 data "aws_ami" "ubuntu-eks_1_30" {
   name_regex  = "ubuntu-eks/k8s_1.30/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
   most_recent = true
   owners      = ["099720109477"]
 }
+
+#module "node_cluster_role" {
+#  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
+#  version = "5.51.0"
+#
+#  trusted_role_services = [
+#    "ec2.amazonaws.com",
+#  ]
+#  trusted_role_actions = [
+#    "sts:AssumeRole",
+#  ]
+#
+#  create_role       = true
+#  role_name_prefix  = "${substr(var.cluster_name,0 ,(38-length(var.node_role_suffix)))}${var.node_role_suffix}"
+#  role_description  = "EKS managed node group IAM role"
+#  role_requires_mfa = false
+#
+#  force_detach_policies = true
+#
+#  custom_role_policy_arns = [
+#    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+#    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+#    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+#    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+#  ]
+#}
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -279,7 +305,6 @@ module "ebs_csi_driver_irsa" {
   tags = var.tags
 }
 
-
 module "eks_blueprints_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
   version = "1.19.0"
@@ -355,411 +380,108 @@ module "eks_blueprints_addons" {
 # GP3 default
 ################################################################################
 
-resource "kubernetes_annotations" "gp2_default" {
-  annotations = {
-    "storageclass.kubernetes.io/is-default-class" : "false"
-  }
-  api_version = "storage.k8s.io/v1"
-  kind        = "StorageClass"
-  metadata {
-    name = "gp2"
-  }
-
-  force = true
-
-  depends_on = [
-    module.eks,
-  ]
-}
-
-resource "kubernetes_storage_class" "gp3_default" {
-  metadata {
-    name = "gp3"
-    annotations = {
-      "storageclass.kubernetes.io/is-default-class" : "true"
-    }
-  }
-
-  storage_provisioner    = "ebs.csi.aws.com"
-  reclaim_policy         = "Delete"
-  allow_volume_expansion = true
-  volume_binding_mode    = "WaitForFirstConsumer"
-  parameters = {
-    fsType    = "ext4"
-    encrypted = true
-    type      = "gp3"
-  }
-
-  depends_on = [
-    kubernetes_annotations.gp2_default,
-  ]
-}
+#resource "kubernetes_annotations" "gp2_default" {
+#  annotations = {
+#    "storageclass.kubernetes.io/is-default-class" : "false"
+#  }
+#  api_version = "storage.k8s.io/v1"
+#  kind        = "StorageClass"
+#  metadata {
+#    name = "gp2"
+#  }
+#
+#  force = true
+#
+#  depends_on = [
+#    module.eks,
+#  ]
+#}
+#
+#resource "kubernetes_storage_class" "gp3_default" {
+#  metadata {
+#    name = "gp3"
+#    annotations = {
+#      "storageclass.kubernetes.io/is-default-class" : "true"
+#    }
+#  }
+#
+#  storage_provisioner    = "ebs.csi.aws.com"
+#  reclaim_policy         = "Delete"
+#  allow_volume_expansion = true
+#  volume_binding_mode    = "WaitForFirstConsumer"
+#  parameters = {
+#    fsType    = "ext4"
+#    encrypted = true
+#    type      = "gp3"
+#  }
+#
+#  depends_on = [
+#    kubernetes_annotations.gp2_default,
+#  ]
+#}
 
 ################################################################################
 # EFS
 ################################################################################
 
-module "efs" {
-  depends_on = [
-    module.eks,
-  ]
-  source  = "terraform-aws-modules/efs/aws"
-  version = "1.6.5"
-
-  name = module.eks.cluster_name
-  encrypted = true
-
-  performance_mode = "generalPurpose"
-  throughput_mode = "elastic"
-
-  create_backup_policy = false
-  enable_backup_policy = false
-
-  lifecycle_policy = {
-    transition_to_ia = "AFTER_30_DAYS"
-  }
-
-  mount_targets = { for i, r in local.calculated_private_subnets_ids : "mount_${i}" => {subnet_id : r } }
-
-  create_security_group      = true
-  security_group_description = "EFS security group for ${module.eks.cluster_name} EKS cluster"
-  security_group_vpc_id      = local.vpc_id
-  security_group_rules = {
-    vpc = {
-      # relying on the defaults provided for EFS/NFS (2049/TCP + ingress)
-      description = "NFS ingress from VPC private subnets"
-      cidr_blocks = local.private_subnet_cidr_blocks
-    }
-  }
-
-  tags = var.tags
-}
-
-resource "kubernetes_storage_class" "efs_etcd" {
-  metadata {
-    name = "efs-etcd"
-  }
-  storage_provisioner = "efs.csi.aws.com"
-  reclaim_policy      = "Delete"
-  parameters = {
-    basePath              = "/etcd"
-    directoryPerms        = "700"
-    ensureUniqueDirectory = "true"
-    fileSystemId          = module.efs.id
-    gidRangeEnd           = "2000"
-    gidRangeStart         = "1000"
-    provisioningMode      = "efs-ap"
-    reuseAccessPoint      = "false"
-    subPathPattern        = "$${.PVC.name}"
-  }
-
-  depends_on = [
-    module.eks,
-  ]
-}
-
-################################################################################
-# VPN
-################################################################################
-
-resource "tls_private_key" "ca" {
-  algorithm = "RSA"
-}
-resource "tls_self_signed_cert" "ca" {
-  private_key_pem = tls_private_key.ca.private_key_pem
-
-  subject {
-    common_name  = "${var.name}.vpn.ca"
-    organization = var.name
-  }
-  validity_period_hours = 87600
-  is_ca_certificate     = true
-  allowed_uses = [
-    "cert_signing",
-    "crl_signing",
-  ]
-}
-resource "aws_acm_certificate" "ca" {
-  private_key      = tls_private_key.ca.private_key_pem
-  certificate_body = tls_self_signed_cert.ca.cert_pem
-
-}
-resource "aws_ssm_parameter" "vpn_ca_key" {
-  name        = "/${var.name}/acm/vpn/ca_key"
-  description = "VPN CA key"
-  type        = "SecureString"
-  value       = tls_private_key.ca.private_key_pem
-
-
-}
-resource "aws_ssm_parameter" "vpn_ca_cert" {
-  name        = "/${var.name}/acm/vpn/ca_cert"
-  description = "VPN CA cert"
-  type        = "SecureString"
-  value       = tls_self_signed_cert.ca.cert_pem
-
-}
-
-resource "aws_acm_certificate" "server" {
-  private_key       = tls_private_key.server.private_key_pem
-  certificate_body  = tls_locally_signed_cert.server.cert_pem
-  certificate_chain = tls_self_signed_cert.ca.cert_pem
-}
-resource "tls_private_key" "server" {
-  algorithm = "RSA"
-}
-resource "tls_cert_request" "server" {
-  private_key_pem = tls_private_key.server.private_key_pem
-  subject {
-    common_name  = "${var.name}.vpn.server"
-    organization = var.name
-  }
-}
-resource "tls_locally_signed_cert" "server" {
-  cert_request_pem      = tls_cert_request.server.cert_request_pem
-  ca_private_key_pem    = tls_private_key.ca.private_key_pem
-  ca_cert_pem           = tls_self_signed_cert.ca.cert_pem
-  validity_period_hours = 87600
-  allowed_uses = [
-    "key_encipherment",
-    "digital_signature",
-    "server_auth",
-  ]
-}
-resource "aws_ssm_parameter" "vpn_server_key" {
-  name        = "/${var.name}/acm/vpn/server_key"
-  description = "VPN server key"
-  type        = "SecureString"
-  value       = tls_private_key.server.private_key_pem
-}
-resource "aws_ssm_parameter" "vpn_server_cert" {
-  name        = "/${var.name}/acm/vpn/server_cert"
-  description = "VPN server cert"
-  type        = "SecureString"
-  value       = tls_locally_signed_cert.server.cert_pem
-
-}
-
-resource "aws_ec2_client_vpn_endpoint" "vpn-client" {
-  description            = var.name
-  server_certificate_arn = aws_acm_certificate.server.arn
-  vpc_id                 = local.vpc_id
-  security_group_ids     = [aws_security_group.vpn.id, module.eks.cluster_primary_security_group_id]
-  client_cidr_block      = var.client_vpn_cidr_block
-  session_timeout_hours  = 12
-
-  split_tunnel = false
-  authentication_options {
-    type                       = "certificate-authentication"
-    root_certificate_chain_arn = aws_acm_certificate.client["root"].arn
-  }
-  connection_log_options {
-    enabled               = false
-  }
-
-  dns_servers = [local.vpc_dns_resolver]
-
-  tags = {
-    Name = "${var.name}"
-  }
-}
-resource "aws_ec2_client_vpn_network_association" "vpn-client" {
-  count                  = length(local.calculated_private_subnets_ids)
-  client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.vpn-client.id
-  subnet_id              = local.calculated_private_subnets_ids[count.index]
-}
-resource "aws_ec2_client_vpn_authorization_rule" "vpn-client" {
-  client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.vpn-client.id
-  target_network_cidr    = "0.0.0.0/0"
-  authorize_all_groups   = true
-  depends_on = [
-    aws_ec2_client_vpn_endpoint.vpn-client,
-    aws_ec2_client_vpn_network_association.vpn-client
-  ]
-}
-
-resource "aws_ec2_client_vpn_route" "public" {
-  count                  = length(local.calculated_private_subnets_ids)
-  client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.vpn-client.id
-  destination_cidr_block = "0.0.0.0/0"
-  target_vpc_subnet_id   = local.calculated_private_subnets_ids[count.index]
-}
-
-resource "aws_ec2_client_vpn_route" "routes" {
-  count                  = length(var.additional_routes)
-  client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.vpn-client.id
-  destination_cidr_block = var.additional_routes[count.index].destination_cidr
-  target_vpc_subnet_id   = var.additional_routes[count.index].subnet_id
-}
-
-resource "aws_s3_bucket" "vpn-config-files" {
-  bucket        = "${lower(var.name)}-vpn-config-files"
-  force_destroy = true
-  tags = {
-    Name = "${lower(var.name)}-vpn-config-files"
-  }
-}
-resource "aws_s3_bucket_public_access_block" "vpn-config-files" {
-  bucket                  = aws_s3_bucket.vpn-config-files.id
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
-# resource "aws_s3_bucket_server_side_encryption_configuration" "vpn-config-files" {
-#   bucket = aws_s3_bucket.vpn-config-files.bucket
-#   rule {
-#     apply_server_side_encryption_by_default {
-#       kms_master_key_id = ""
-#       sse_algorithm     = "AES256"
-#     }
-#     bucket_key_enabled = false
-#   }
-# }
-
-resource "aws_s3_bucket_policy" "vpn-config-files" {
-  bucket = aws_s3_bucket.vpn-config-files.id
-  policy = data.aws_iam_policy_document.vpn-config-files.json
-}
-data "aws_iam_policy_document" "vpn-config-files" {
-  statement {
-    actions = ["s3:*"]
-    effect  = "Deny"
-    resources = [
-      "arn:aws:s3:::${lower(var.name)}-vpn-config-files",
-      "arn:aws:s3:::${lower(var.name)}-vpn-config-files/*"
-    ]
-    condition {
-      test     = "Bool"
-      variable = "aws:SecureTransport"
-      values   = ["false"]
-    }
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
-  }
-}
-
-resource "aws_security_group" "vpn" {
-  name        = "${var.name}-vpn-security-group"
-  description = "${var.name}-vpn-security-group"
-  vpc_id      = local.vpc_id
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  tags = {
-    Name = "${var.name}-vpn-security-group"
-  }
-}
-
-resource "tls_private_key" "client" {
-  for_each  = var.vpn_client_list
-  algorithm = "RSA"
-}
-resource "tls_cert_request" "client" {
-  for_each        = var.vpn_client_list
-  private_key_pem = tls_private_key.client[each.value].private_key_pem
-  subject {
-    common_name  = each.value
-    organization = var.name
-  }
-}
-resource "tls_locally_signed_cert" "client" {
-  for_each              = var.vpn_client_list
-  cert_request_pem      = tls_cert_request.client[each.value].cert_request_pem
-  ca_private_key_pem    = tls_private_key.ca.private_key_pem
-  ca_cert_pem           = tls_self_signed_cert.ca.cert_pem
-  validity_period_hours = 87600
-  allowed_uses = [
-    "key_encipherment",
-    "digital_signature",
-    "client_auth",
-  ]
-}
-
-resource "aws_acm_certificate" "client" {
-  for_each          = var.vpn_client_list
-  private_key       = tls_private_key.client[each.value].private_key_pem
-  certificate_body  = tls_locally_signed_cert.client[each.value].cert_pem
-  certificate_chain = tls_self_signed_cert.ca.cert_pem
-  tags = {
-    Tier         = "Private"
-    CostType     = "AlwaysCreated"
-    BackupPolicy = "n/a"
-  }
-}
-
-resource "aws_s3_object" "vpn-config-file" {
-  for_each               = var.vpn_client_list
-  bucket                 = aws_s3_bucket.vpn-config-files.id
-  server_side_encryption = "aws:kms"
-  key                    = "${each.value}-${lower(var.name)}.ovpn"
-  content_base64 = base64encode(<<-EOT
-client
-dev tun
-proto ${aws_ec2_client_vpn_endpoint.vpn-client.transport_protocol}
-remote ${aws_ec2_client_vpn_endpoint.vpn-client.id}.prod.clientvpn.${var.region}.amazonaws.com ${aws_ec2_client_vpn_endpoint.vpn-client.vpn_port}
-remote-random-hostname
-resolv-retry infinite
-nobind
-remote-cert-tls server
-cipher AES-256-GCM
-verb 3
-
-<ca>
-${aws_ssm_parameter.vpn_ca_cert.value}
-</ca>
-
-reneg-sec 0
-
-<cert>
-${aws_ssm_parameter.vpn_client_cert[each.value].value}
-</cert>
-
-<key>
-${aws_ssm_parameter.vpn_client_key[each.value].value}
-</key>
-    EOT
-  )
-}
-
-resource "aws_ssm_parameter" "vpn_client_key" {
-  for_each    = var.vpn_client_list
-  name        = "/${var.name}/acm/vpn/${each.value}_client_key"
-  description = "VPN ${each.value} client key"
-  type        = "SecureString"
-  value       = tls_private_key.client[each.value].private_key_pem
-  tags = {
-    Name         = "VPN ${each.value} client key imported in AWS ACM"
-    Tier         = "Private"
-    CostType     = "AlwaysCreated"
-    BackupPolicy = "n/a"
-  }
-}
-resource "aws_ssm_parameter" "vpn_client_cert" {
-  for_each    = var.vpn_client_list
-  name        = "/${var.name}/acm/vpn/${each.value}_client_cert"
-  description = "VPN ${each.value} client cert"
-  type        = "SecureString"
-  value       = tls_locally_signed_cert.client[each.value].cert_pem
-  tags = {
-    Name         = "VPN ${each.value} client cert imported in AWS ACM"
-    Tier         = "Private"
-    CostType     = "AlwaysCreated"
-    BackupPolicy = "n/a"
-  }
-}
+#module "efs" {
+#  depends_on = [
+#    module.eks,
+#  ]
+#  source  = "terraform-aws-modules/efs/aws"
+#  version = "1.6.5"
+#
+#  name = module.eks.cluster_name
+#  encrypted = true
+#
+#  performance_mode = "generalPurpose"
+#  throughput_mode = "elastic"
+#
+#  create_backup_policy = false
+#  enable_backup_policy = false
+#
+#  lifecycle_policy = {
+#    transition_to_ia = "AFTER_30_DAYS"
+#  }
+#
+#  mount_targets = { for i, r in local.calculated_private_subnets_ids : "mount_${i}" => {subnet_id : r } }
+#
+#  create_security_group      = true
+#  security_group_description = "EFS security group for ${module.eks.cluster_name} EKS cluster"
+#  security_group_vpc_id      = local.vpc_id
+#  security_group_rules = {
+#    vpc = {
+#      # relying on the defaults provided for EFS/NFS (2049/TCP + ingress)
+#      description = "NFS ingress from VPC private subnets"
+#      cidr_blocks = local.private_subnet_cidr_blocks
+#    }
+#  }
+#
+#  tags = var.tags
+#}
+#
+#resource "kubernetes_storage_class" "efs_etcd" {
+#  metadata {
+#    name = "efs-etcd"
+#  }
+#  storage_provisioner = "efs.csi.aws.com"
+#  reclaim_policy      = "Delete"
+#  parameters = {
+#    basePath              = "/etcd"
+#    directoryPerms        = "700"
+#    ensureUniqueDirectory = "true"
+#    fileSystemId          = module.efs.id
+#    gidRangeEnd           = "2000"
+#    gidRangeStart         = "1000"
+#    provisioningMode      = "efs-ap"
+#    reuseAccessPoint      = "false"
+#    subPathPattern        = "$${.PVC.name}"
+#  }
+#
+#  depends_on = [
+#    module.eks,
+#  ]
+#}
 
 ################################################################################
 # Ingress configuration
@@ -777,108 +499,57 @@ resource "aws_route53_zone" "private" {
 }
 
 ################################################################################
+# VPN
+################################################################################
+
+module "vpn" {
+  source = "../../../modules/aws/vpn"
+
+  name                          = var.name
+  region                        = var.region
+  additional_security_group_ids = [module.eks.cluster_primary_security_group_id]
+  vpc_id                        = local.vpc_id
+  subnet_ids                    = local.calculated_private_subnets_ids
+  client_vpn_cidr_block         = var.client_vpn_cidr_block
+  vpc_dns_resolver              = local.vpc_dns_resolver
+
+  additional_server_dns_names = [
+    "${var.domain}",
+    "*.${var.domain}"
+  ]
+}
+
+################################################################################
 # Backend
 ################################################################################
-module "alb-backend" {
-  source  = "terraform-aws-modules/alb/aws"
-  version = "9.13.0"
+
+module "alb" {
+  source = "../../../modules/aws/alb"
 
   name               = "${var.name}-backend"
-  load_balancer_type = "application"
-  internal           = true
-  subnets            = local.calculated_private_subnets_ids
 
-  enable_deletion_protection = false
+  node_group_asg_names = local.static_node_groups
 
-  vpc_id             = local.vpc_id
-
-  # Let the ALB module create and manage its own Security Group
-  create_security_group = true
-
-  security_groups = [module.eks.node_security_group_id]
-
-  security_group_ingress_rules = {
-    all_http = {
-      from_port   = 80
-      to_port     = 80
-      ip_protocol = "tcp"
-      description = "Allow HTTP traffic"
-      cidr_ipv4   = module.vpc.vpc_cidr_block
-    }
-    all_https = {
-      from_port   = 443
-      to_port     = 443
-      ip_protocol = "tcp"
-      description = "Allow HTTPS traffic"
-      cidr_ipv4   = module.vpc.vpc_cidr_block
-    }
+  additional_security_group_ids = [module.eks.node_security_group_id]
+  vpc_id                        = local.vpc_id
+  subnet_ids                    = local.calculated_private_subnets_ids
+  vpc_cidr                      = module.vpc.vpc_cidr_block
+  certificate_arn               = module.vpn.vpn_server_certificate_arn
+  target_port                   = 30080
+  record                        = "backend.${var.domain}"
+  zone_id                       = aws_route53_zone.private[0].zone_id 
+  health_check = {
+    enabled             = true
+    path                = "/"       
+    interval            = 30     
+    timeout             = 5        
+    healthy_threshold   = 2       
+    unhealthy_threshold = 2          
+    matcher             = "200"     
   }
 
-  security_group_egress_rules = {
-    all_outbound = {
-      ip_protocol = "-1"
-      description = "Allow all outbound traffic"
-      cidr_ipv4   = "0.0.0.0/0"
-    }
-  }
-
-  listeners = {
-    ex-http-https-redirect = {
-      port     = 80
-      protocol = "HTTP"
-      redirect = {
-        port        = "443"
-        protocol    = "HTTPS"
-        status_code = "HTTP_301"
-      }
-    }
-    ex-https = {
-      port            = 443
-      protocol        = "HTTPS"
-      certificate_arn = aws_acm_certificate.server.arn
-
-      forward = {
-        target_group_key = "default"
-      }
-    }
-  }
-
-  # Define target groups as a map
-  target_groups = {
-    default = {
-      name_prefix          = "dzbk"
-      protocol             = "HTTP"
-      port                 = 30080
-      target_type          = "instance"
-      create_attachment    = false
-      load_balancing_cross_zone_enabled = true
-      health_check = {
-        enabled             = true
-        path                = "/"       
-        interval            = 30        
-        timeout             = 5         
-        healthy_threshold   = 2       
-        unhealthy_threshold = 2          
-        matcher             = "200"     
-      }
-    }
-  }
-
-  tags = var.tags
-}
-
-resource "aws_route53_record" "alb_private_dns" {
-  zone_id = aws_route53_zone.private[0].zone_id 
-  name    = "backend.${var.domain}"
-  type    = "CNAME"
-  ttl     = 300
-  records = [module.alb-backend.dns_name]
-
-  depends_on = [module.alb-backend]
-}
-
-resource "aws_autoscaling_attachment" "this" {
-  for_each               = toset(module.eks.eks_managed_node_groups["${var.name}-node-1-2"].node_group_autoscaling_group_names)
-  autoscaling_group_name = each.value
-  lb_target_group_arn   = module.alb-backend.target_groups.default.arn
+  depends_on = [
+    module.vpn,
+    module.eks
+  ]
 }
