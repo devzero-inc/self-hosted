@@ -13,7 +13,7 @@ delete:
 
 .PHONY: docs
 docs:
-	docker run --rm -it \
+	docker run --rm \
 		--workdir /docs \
 		-v $(PWD):/docs \
 		devzeroinc/readme-generator-for-helm:latest /app/bin/readme-generator \
