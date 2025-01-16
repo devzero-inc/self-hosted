@@ -1,0 +1,27 @@
+name: Control Plane Chart CI
+
+on:
+  pull_request:
+    paths:
+      - 'charts/dz-control-plane/**'
+
+jobs:
+  check-docs:
+    name: Check Documentation Generation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Generate documentation
+        working-directory: charts/dz-control-plane
+        run: make docs
+
+      - name: Check for modified files
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "Error: Documentation is not up to date. Please run 'make docs' and commit the changes."
+            git status
+            git diff
+            exit 1
+          fi
