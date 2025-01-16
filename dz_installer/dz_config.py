@@ -1,4 +1,5 @@
 import json
+from json import JSONDecodeError
 from typing import Any, List
 
 from prodict import Prodict, DICT_RESERVED_KEYS
@@ -30,7 +31,12 @@ class DZConfig(Prodict):
         return cls._instance
 
     def __init__(self):
-        super().__init__(**json.load(open(DZConfig.SETTINGS_FILE, "r")))
+        try:
+            json_data = json.load(open(DZConfig.SETTINGS_FILE, "r"))
+        except JSONDecodeError:
+            json_data = {}
+
+        super().__init__(**json_data)
 
         if self._initialized:
             return
@@ -42,11 +48,22 @@ class DZConfig(Prodict):
                 setattr(self, ns, {})
         self.save()
 
+    def __getattr__(self, item):
+        try:
+            return self[item]
+        except KeyError:
+            self[item] = Prodict()
+            return self[item]
+
+
     def save(self):
         with open(DZConfig.SETTINGS_FILE, "w") as f:
             f.write(self.as_json())
 
     def as_json(self) -> str:
-        return json.dumps(self.to_dict(exclude_none=True, is_recursive=True), indent=4)
+        data = self.to_dict(exclude_none=True, is_recursive=True)
+        # Remove the _initialized attribute
+        del data["_initialized"]
+        return json.dumps(data, indent=4)
 
 

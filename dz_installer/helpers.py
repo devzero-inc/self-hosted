@@ -35,7 +35,7 @@ def check_chart_is_installed(chart_name, namespace=None):
     try:
         output = json.loads(sh.helm(["list", "-o", "json", *ns]))
     except sh.ErrorReturnCode as err:
-        click.echo(f"Error running helm list: {err.stderr.decode("utf-8")}", err=True)
+        click.echo(f"Error running helm list: {err.stderr.decode('utf-8')}", err=True)
         raise RuntimeError("HELM_LIST_FAILED")
 
     for chart in output:
