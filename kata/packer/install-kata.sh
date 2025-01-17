@@ -39,6 +39,7 @@ cp /tmp/configuration-clh.toml /etc/kata-containers/configuration-clh.toml
 cp /tmp/configuration-qemu.toml /etc/kata-containers/configuration-qemu.toml
 cp /tmp/vmlinux /opt/kata/share/kata-containers/vmlinux-6.7-pvm
 
+mkdir -p /etc/containerd/config.d
 mv /tmp/containerd.toml /etc/containerd/config.d/devzero.toml
 
 cat <<EOF >/etc/modules-load.d/pvm.conf
