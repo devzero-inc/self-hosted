@@ -43,7 +43,7 @@ def global_config():
 def set_cloud_provider(provider):
     """Set the cloud provider for DevZero installation"""
     click.echo(f"Setting cloud provider to: {provider}")
-    cfg = DZConfig()
+    cfg = DZConfig().data
     cfg.globals.provider = provider
     cfg.save()
 
@@ -115,7 +115,7 @@ def check_control_plane_ingress():
 def check_control_plane_chart(force):
     """Helm chart: control-plane"""
     click.echo("Checking helm chart: control-plane")
-    ControlPlane().control_plane_chart(force)
+    ControlPlane().check_control_plane_chart(force)
 
 @check_control_plane.command("cert-issuer")
 def check_control_plane_cert_issuer():

@@ -1,11 +1,25 @@
 import json
 from json import JSONDecodeError
-from typing import Any, List
 
-from prodict import Prodict, DICT_RESERVED_KEYS
+from dotmap import DotMap
 
 
-class DZConfig(Prodict):
+class DZDotMap(DotMap):
+    def save(self):
+        return DZConfig().save()
+
+    def as_json(self):
+        return DZConfig().as_json()
+
+    def __delattr__(self, key):
+        try:
+            return self._map.__delitem__(key)
+        except KeyError:
+            return None
+
+
+
+class DZConfig:
     SETTINGS_FILE = 'dz_config.json'
 
     NAMESPACES = [
@@ -31,39 +45,31 @@ class DZConfig(Prodict):
         return cls._instance
 
     def __init__(self):
+        if self._initialized:
+            return
+
         try:
             json_data = json.load(open(DZConfig.SETTINGS_FILE, "r"))
         except JSONDecodeError:
             json_data = {}
 
-        super().__init__(**json_data)
-
-        if self._initialized:
-            return
+        self._data = DZDotMap(json_data)
 
         self._initialized = True
 
+        # Forces namespace creation even when empty
         for ns in DZConfig.NAMESPACES:
-            if not hasattr(self, ns):
-                setattr(self, ns, {})
+            getattr(self._data, ns)
         self.save()
 
-    def __getattr__(self, item):
-        try:
-            return self[item]
-        except KeyError:
-            self[item] = Prodict()
-            return self[item]
-
+    @property
+    def data(self):
+        return self._data
 
     def save(self):
         with open(DZConfig.SETTINGS_FILE, "w") as f:
             f.write(self.as_json())
 
     def as_json(self) -> str:
-        data = self.to_dict(exclude_none=True, is_recursive=True)
-        # Remove the _initialized attribute
-        del data["_initialized"]
+        data = self.data.toDict()
         return json.dumps(data, indent=4)
-
-

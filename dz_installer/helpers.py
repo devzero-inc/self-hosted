@@ -16,8 +16,8 @@ def red(text):
     return console.print(f"[red]{text}", end="")
 
 def get_provider():
-    cfg = DZConfig()
-    if not hasattr(cfg.globals, "provider"):
+    cfg = DZConfig().data
+    if not cfg.globals.provider:
         error("MISSING_CLOUD_PROVIDER")
 
     from dz_installer.providers.aws import AWSProvider

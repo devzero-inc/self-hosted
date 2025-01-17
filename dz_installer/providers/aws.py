@@ -70,7 +70,7 @@ class AWSProvider:
     @property
     def config(self):
         if not self._config:
-            self._config = DZConfig()
+            self._config = DZConfig().data
         return self._config
 
     def control_plane_cluster(self, force):
@@ -103,12 +103,8 @@ class AWSProvider:
 
 
             cluster_data = desc_cluster["cluster"]
-            if not self.config.aws.has_attr("vpc"):
-                self.config.aws.vpc = {}
 
             self.config.aws.vpc.id = cluster_data["resourcesVpcConfig"]["vpcId"]
-            if not hasattr(self.config.aws.vpc, "subnets"):
-                self.config.aws.vpc.subnets = {}
 
             for subnet in cluster_data["resourcesVpcConfig"]["subnetIds"]:
                 self.config.aws.vpc.subnets[subnet] = {"id": subnet}
