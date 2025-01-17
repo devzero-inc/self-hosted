@@ -143,20 +143,20 @@ gateway:
     # @param gateway.ingress.tls TLS configuration
     tls:
       ## @param gateway.ingress.tls[0].secretName TLS secret name for ingress
-      - secretName: devzero-api-tls
+    - secretName: devzero-api-tls
         ## @param gateway.ingress.tls[0].hosts List of TLS hosts for ingress
-        hosts:
-          - "api.{{ .Values.domain }}"
+      hosts:
+      - "api.{{ .Values.domain }}"
     # @param gateway.ingress.hosts Hosts configuration
     hosts:
       ## @param gateway.ingress.hosts[0].host Host name for ingress
-      - host: "api.{{ .Values.domain }}"
+    - host: "api.{{ .Values.domain }}"
         # @param gateway.ingress.hosts[0].paths List of path configurations for ingress
-        paths:
+      paths:
           ## @param gateway.ingress.hosts[0].paths[0].path Path for ingress route
-          - path: /
+      - path: /
             ## @param gateway.ingress.hosts[0].paths[0].pathType Path type for ingress route
-            pathType: Prefix
+        pathType: Prefix
 
 ## @section Backend Configuration
 backend:
@@ -389,7 +389,7 @@ hydra:
       enabled: false
     ## @param hydra.derp.urls DERP server URLs
     urls:
-      - "https://controlplane.tailscale.com/derpmap/default"
+    - "https://controlplane.tailscale.com/derpmap/default"
     ## @param hydra.derp.paths DERP paths
     paths: []
     ## @param hydra.derp.autoUpdateEnabled Enable auto-update for DERP
@@ -453,20 +453,20 @@ hydra:
     # @param hydra.ingress.tls TLS configuration for Hydra ingress
     tls:
       ## @param hydra.ingress.tls[0].secretName TLS secret name for ingress
-      - secretName: devzero-hydra-tls
+    - secretName: devzero-hydra-tls
         ## @param hydra.ingress.tls[0].hosts List of TLS hosts for ingress
-        hosts:
-          - "hydra.{{ .Values.domain }}"
+      hosts:
+      - "hydra.{{ .Values.domain }}"
     # @param hydra.ingress.hosts Hosts configuration for Hydra ingress
     hosts:
       ## @param hydra.ingress.hosts[0].host Host name for ingress
-      - host: "hydra.{{ .Values.domain }}"
+    - host: "hydra.{{ .Values.domain }}"
         # @param hydra.ingress.hosts[0].paths List of path configurations for ingress
-        paths:
+      paths:
           ## @param hydra.ingress.hosts[0].paths[0].path Path for ingress route
-          - path: /
+      - path: /
             ## @param hydra.ingress.hosts[0].paths[0].pathType Path type for ingress route
-            pathType: Prefix
+        pathType: Prefix
 
 ## @section LogSrv Configuration
 logsrv:
@@ -571,20 +571,20 @@ logsrv:
     # @param logsrv.ingress.tls TLS configuration for LogSrv ingress
     tls:
       ## @param logsrv.ingress.tls[0].secretName TLS secret name for ingress
-      - secretName: devzero-logsrv-tls
+    - secretName: devzero-logsrv-tls
         ## @param logsrv.ingress.tls[0].hosts List of TLS hosts for ingress
-        hosts:
-          - "logsrv.{{ .Values.domain }}"
+      hosts:
+      - "logsrv.{{ .Values.domain }}"
     # @param logsrv.ingress.hosts Hosts configuration for LogSrv ingress
     hosts:
       ## @param logsrv.ingress.hosts[0].host Host name for ingress
-      - host: "logsrv.{{ .Values.domain }}"
+    - host: "logsrv.{{ .Values.domain }}"
         # @param logsrv.ingress.hosts[0].paths List of path configurations for ingress
-        paths:
+      paths:
           ## @param logsrv.ingress.hosts[0].paths[0].path Path for ingress route
-          - path: /
+      - path: /
             ## @param logsrv.ingress.hosts[0].paths[0].pathType Path type for ingress route
-            pathType: Prefix
+        pathType: Prefix
 
 ## @section Polland Configuration
 polland:
@@ -599,65 +599,65 @@ polland:
     # @param polland.worker.queues Queue configurations for workers
     queues:
       ## @param polland.worker.queues[0].name Configuration for the fast queue
-      - name: fast
+    - name: fast
         ## @param polland.worker.queues[0].replicaCount Number of replicas for queue
-        replicaCount: 1
+      replicaCount: 1
         # @param polland.worker.queues[0].autoscaling Autoscaling configuration for queue
-        autoscaling:
+      autoscaling:
           ## @param polland.worker.queues[0].autoscaling.enabled Enable autoscaling for queue
-          enabled: false 
+        enabled: false
           ## @param polland.worker.queues[0].autoscaling.minReplicas Minimum autoscaling replicas for queue
-          minReplicas: 3
+        minReplicas: 3
           ## @param polland.worker.queues[0].autoscaling.maxReplicas Maximum autoscaling replicas for queue
-          maxReplicas: 5
+        maxReplicas: 5
       ## @param polland.worker.queues[1].name Configuration for the build queue
-      - name: build
+    - name: build
         ## @param polland.worker.queues[1].replicaCount Number of replicas for queue
-        replicaCount: 1
+      replicaCount: 1
         # @param polland.worker.queues[1].autoscaling Autoscaling configuration for queue
-        autoscaling:
+      autoscaling:
           ## @param polland.worker.queues[1].autoscaling.enabled Enable autoscaling for queue
-          enabled: false 
+        enabled: false
           ## @param polland.worker.queues[1].autoscaling.minReplicas Minimum autoscaling replicas for queue
-          minReplicas: 3
+        minReplicas: 3
           ## @param polland.worker.queues[1].autoscaling.maxReplicas Maximum autoscaling replicas for queue
-          maxReplicas: 5
+        maxReplicas: 5
       ## @param polland.worker.queues[2].name Configuration for the workload queue
-      - name: workload
+    - name: workload
         ## @param polland.worker.queues[2].replicaCount Number of replicas for queue
-        replicaCount: 1
+      replicaCount: 1
         # @param polland.worker.queues[2].autoscaling Autoscaling configuration for queue
-        autoscaling:
+      autoscaling:
           ## @param polland.worker.queues[2].autoscaling.enabled Enable autoscaling for queue
-          enabled: false 
+        enabled: false
           ## @param polland.worker.queues[2].autoscaling.minReplicas Minimum autoscaling replicas for queue
-          minReplicas: 3
+        minReplicas: 3
           ## @param polland.worker.queues[2].autoscaling.maxReplicas Maximum autoscaling replicas for queue
-          maxReplicas: 5
+        maxReplicas: 5
       ## @param polland.worker.queues[3].name Configuration for the cluster queue
-      - name: cluster
+    - name: cluster
         ## @param polland.worker.queues[3].replicaCount Number of replicas for queue
-        replicaCount: 1
+      replicaCount: 1
         # @param polland.worker.queues[3].autoscaling Autoscaling configuration for queue
-        autoscaling:
+      autoscaling:
           ## @param polland.worker.queues[3].autoscaling.enabled Enable autoscaling for queue
-          enabled: false 
+        enabled: false
           ## @param polland.worker.queues[3].autoscaling.minReplicas Minimum autoscaling replicas for queue
-          minReplicas: 3
+        minReplicas: 3
           ## @param polland.worker.queues[3].autoscaling.maxReplicas Maximum autoscaling replicas for queue
-          maxReplicas: 5
+        maxReplicas: 5
       ## @param polland.worker.queues[4].name Configuration for the hibernation queue
-      - name: hibernation
+    - name: hibernation
         ## @param polland.worker.queues[4].replicaCount Number of replicas for queue
-        replicaCount: 1
+      replicaCount: 1
         # @param polland.worker.queues[4].autoscaling Autoscaling configuration for queue
-        autoscaling:
+      autoscaling:
           ## @param polland.worker.queues[4].autoscaling.enabled Enable autoscaling for queue
-          enabled: false
+        enabled: false
           ## @param polland.worker.queues[4].autoscaling.minReplicas Minimum autoscaling replicas for queue
-          minReplicas: 1
+        minReplicas: 1
           ## @param polland.worker.queues[4].autoscaling.maxReplicas Maximum autoscaling replicas for queue
-          maxReplicas: 1
+        maxReplicas: 1
 
   ## @subsection Polland Beat Configuration
   beat:
@@ -929,20 +929,20 @@ pulse:
     # @param pulse.ingress.tls TLS configuration
     tls:
       ## @param pulse.ingress.tls[0].secretName TLS secret name for ingress
-      - secretName: devzero-pulse-tls
+    - secretName: devzero-pulse-tls
         ## @param pulse.ingress.tls[0].hosts List of TLS hosts for ingress
-        hosts:
-          - "pulse.{{ .Values.domain }}"
+      hosts:
+      - "pulse.{{ .Values.domain }}"
     # @param pulse.ingress.hosts Hosts configuration
     hosts:
       ## @param pulse.ingress.hosts[0].host Host name for ingress
-      - host: "pulse.{{ .Values.domain }}"
+    - host: "pulse.{{ .Values.domain }}"
         # @param pulse.ingress.hosts[0].paths List of path configurations for ingress
-        paths:
+      paths:
           ## @param pulse.ingress.hosts[0].paths[0].path Path for ingress
-          - path: /
+      - path: /
             ## @param pulse.ingress.hosts[0].paths[0].pathType Path type for ingress
-            pathType: Prefix
+        pathType: Prefix
 
 ## @section Buildqd Configuration
 buildqd:
@@ -1041,10 +1041,10 @@ buildqd:
 
     ## @param buildqd.buildkit.args Buildkit args
     args:
-      - --addr
-      - unix:///run/buildkit/buildkitd.sock
-      - --addr
-      - tcp://0.0.0.0:1234
+    - --addr
+    - unix:///run/buildkit/buildkitd.sock
+    - --addr
+    - tcp://0.0.0.0:1234
 
     ## @subsection Buildkit Resources Configuration
     resources:
@@ -1161,20 +1161,20 @@ web:
     # @param web.ingress.tls TLS configuration
     tls:
       ## @param web.ingress.tls[0].secretName TLS secret name for ingress
-      - secretName: devzero-web-tls
+    - secretName: devzero-web-tls
         ## @param web.ingress.tls[0].hosts List of TLS hosts for ingress
-        hosts:
-          - "{{ .Values.domain }}"
+      hosts:
+      - "{{ .Values.domain }}"
     # @param web.ingress.hosts Hosts configuration
     hosts:
       ## @param web.ingress.hosts[0].host Host name for ingress
-      - host: "{{ .Values.domain }}"
+    - host: "{{ .Values.domain }}"
         # @param web.ingress.hosts[0].paths List of path configurations for ingress
-        paths:
+      paths:
           ## @param web.ingress.hosts[0].paths[0].path Path for ingress
-          - path: /
+      - path: /
             ## @param web.ingress.hosts[0].paths[0].pathType Path type for ingress
-            pathType: Prefix
+        pathType: Prefix
 
 ## @section Cluster Issuer Configuration
 issuer:

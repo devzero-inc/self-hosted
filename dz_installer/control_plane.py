@@ -1,6 +1,5 @@
 import pathlib
-import sys
-
+import sh
 import click
 
 from ruamel.yaml import YAML
@@ -8,6 +7,7 @@ from dz_installer.dz_config import DZConfig
 from dz_installer.helpers import error, check_chart_is_installed
 
 yaml = YAML()
+yaml.preserve_quotes = True
 
 class ControlPlane:
 
@@ -115,3 +115,9 @@ class ControlPlane:
         #     ...
 
         yaml.dump(values, file)
+
+        try:
+            sh.helm("upgrade", "--install", "devzero", "./charts/dz-control-plane", "-n", "devzero", "--create-namespace")
+        except sh.ErrorReturnCode as err:
+            click.echo(f"Error installing control plane: {err.stderr.decode('utf-8')}", err=True)
+            self.error("INSTALL_FAILED")
