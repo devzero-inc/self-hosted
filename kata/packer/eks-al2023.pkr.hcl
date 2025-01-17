@@ -107,6 +107,7 @@ build {
     script = "./upgrade_kernel.sh"
     # Run it as root
     execute_command = "sudo {{ .Path }}"
+    expect_disconnect = true
   }
 
   provisioner "shell" {
