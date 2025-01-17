@@ -1,14 +1,16 @@
 import click
 import json
 import sh
+from rich.console import Console
 
 from dz_installer.dz_config import DZConfig
 
 
+console = Console()
+
 def get_provider():
     cfg = DZConfig()
     if not hasattr(cfg.globals, "provider"):
-        import ipdb; ipdb.set_trace(context=10)
         error("MISSING_CLOUD_PROVIDER")
 
     from dz_installer.providers.aws import AWSProvider

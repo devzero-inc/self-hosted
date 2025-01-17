@@ -7,6 +7,7 @@ import click
 from dz_installer.dz_config import DZConfig
 from dz_installer.helpers import get_provider
 from dz_installer.control_plane import ControlPlane
+from dz_installer.providers.aws import AWSProvider
 
 # Version constant
 VERSION = "1.0.0"
@@ -83,15 +84,21 @@ def control_plane_permissions(force):
     get_provider().control_plane_permissions(force)
 
 
+@control_plane.command("cluster")
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
+def control_plane_cluster(force):
+    """Runs cluster existence checks for the current cloud provider"""
+    # Temporary casting
+    provider: AWSProvider = get_provider()
+    provider.control_plane_cluster(force)
+
+
 @control_plane.command("network")
 def control_plane_network():
     """Runs network checks for the current cloud provider"""
     click.echo("Checking control plane network...")
-
-@control_plane.command("cluster")
-def control_plane_cluster():
-    """Runs cluster existence checks for the current cloud provider"""
-    click.echo("Checking control plane cluster...")
 
 
 @control_plane.command("ingress")
