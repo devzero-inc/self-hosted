@@ -97,6 +97,18 @@ files = [
 ]
 
 [[package]]
+name = "dotmap"
+version = "1.3.30"
+description = "ordered, dynamically-expandable dot-access dictionary"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "dotmap-1.3.30-py3-none-any.whl", hash = "sha256:bd9fa15286ea2ad899a4d1dc2445ed85a1ae884a42effb87c89a6ecce71243c6"},
+    {file = "dotmap-1.3.30.tar.gz", hash = "sha256:5821a7933f075fb47563417c0e92e0b7c031158b4c9a6a7e56163479b658b368"},
+]
+
+[[package]]
 name = "executing"
 version = "2.1.0"
 description = "Get the currently executing AST node of a frame, and other information"
@@ -280,17 +292,6 @@ files = [
 
 [package.dependencies]
 ptyprocess = ">=0.5"
-
-[[package]]
-name = "prodict"
-version = "0.8.20"
-description = "Prodict = Pro Dictionary with IDE friendly(auto code completion), dot-accessible attributes and more."
-optional = false
-python-versions = "^3.6"
-groups = ["main"]
-files = [
-    {file = "prodict-0.8.20.tar.gz", hash = "sha256:61b57bc617d10681e0275f46cbee20fd590cf4f0a7b7558c0c8aad8b489e1bfa"},
-]
 
 [[package]]
 name = "prompt-toolkit"
@@ -584,4 +585,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "74aac80b831ee437bb6f1f70f763b11f16f39790870375bb7b6da5285406c992"
+content-hash = "832aab36e04993abee09023eda4501ba96093b7adb9a6392c29aad662ade08f7"
