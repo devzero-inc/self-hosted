@@ -21,21 +21,6 @@ source "amazon-ebs" "ubuntu-eks" {
     volume_type = "gp3"
     delete_on_termination = true
   }
-
-  # Copy to other regions
-  ami_regions = [
-    "us-west-2",
-    "us-east-1",
-    "us-east-2",
-#     "sa-east-1", # South America (We no longer have a cluster here)
-#     "eu-north-1", # Europe (We no longer have a cluster here)
-  ]
-
-
-  ami_users = [
-    "386370506714", # Share with free-customers account
-    "433552986729", # Share with paid-customers account
-  ]
 }
 
 build {
