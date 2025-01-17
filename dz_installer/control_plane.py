@@ -4,7 +4,7 @@ import click
 
 from ruamel.yaml import YAML
 from dz_installer.dz_config import DZConfig
-from dz_installer.helpers import error, check_chart_is_installed
+from dz_installer.helpers import error, success, info, check_chart_is_installed
 
 yaml = YAML()
 yaml.preserve_quotes = True
@@ -16,13 +16,15 @@ class ControlPlane:
         error(f"CONTROL_PLANE_{error_name}_ERROR")
 
     def checks(self, force):
-        click.echo("Checking control plane...")
+        info("Checking control plane...")
 
         try:
             if check_chart_is_installed("dz-control-plane"):
-                click.echo("✓ Control plane is installed")
+                success("Control plane is installed")
                 if not force:
                     return False
+            else:
+                click.echo("Control plane is not installed")
         except RuntimeError as e:
             self.error(str(e))
             return False
@@ -78,7 +80,7 @@ class ControlPlane:
         # config.data_plane_arch = data_plane_arch
         # config.save()
 
-        click.echo("✓ Control plane is ready to be installed")
+        success("Control plane is ready to be installed")
         return True
 
     def install(self, force):
@@ -88,7 +90,7 @@ class ControlPlane:
             # return
             pass
 
-        click.echo("Installing control plane...")
+        info("Installing control plane...")
 
         config = DZConfig()
         file = pathlib.Path("./charts/dz-control-plane/values.yaml")
@@ -121,3 +123,5 @@ class ControlPlane:
         except sh.ErrorReturnCode as err:
             click.echo(f"Error installing control plane: {err.stderr.decode('utf-8')}", err=True)
             self.error("INSTALL_FAILED")
+
+        success("Control plane installed successfully")

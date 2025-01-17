@@ -18,6 +18,12 @@ def error(error_name):
     click.echo(click.style(f"Error code: {error_name}", fg="red"))
     click.get_current_context().exit(1)
 
+def success(message):
+    click.echo(click.style(f"✓ {message}", fg="green"))
+
+def info(message):
+    click.echo(click.style(f"ℹ {message}", fg="blue"))
+
 def check_chart_is_installed(chart_name, namespace=None):
     # check if helm is installed
     try:
@@ -31,7 +37,7 @@ def check_chart_is_installed(chart_name, namespace=None):
     if namespace is not None:
         ns = ["-n", namespace]
 
-    click.echo(f"Running command: helm list")
+    info(f"Running command: helm list")
     try:
         output = json.loads(sh.helm(["list", "-o", "json", *ns]))
     except sh.ErrorReturnCode as err:
