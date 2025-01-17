@@ -11,6 +11,7 @@ source "amazon-ebs" "al2023_1_29_eks" {
   ami_name      = "devzero-amazon-eks-node-al2023-x86_64-standard-1.29-{{timestamp}}"
   instance_type = "t3.2xlarge"
   region        = "us-west-1"
+  ssh_username = "ec2-user"
 
   source_ami_filter {
     filters = {
@@ -34,6 +35,7 @@ source "amazon-ebs" "al2023_1_30_eks" {
   ami_name      = "devzero-amazon-eks-node-al2023-x86_64-standard-1.30-{{timestamp}}"
   instance_type = "t3.2xlarge"
   region        = "us-west-1"
+  ssh_username = "ec2-user"
 
   source_ami_filter {
     filters = {
@@ -57,6 +59,7 @@ source "amazon-ebs" "al2023_1_31_eks" {
   ami_name      = "devzero-amazon-eks-node-al2023-x86_64-standard-1.31-{{timestamp}}"
   instance_type = "t3.2xlarge"
   region        = "us-west-1"
+  ssh_username = "ec2-user"
 
   source_ami_filter {
     filters = {
