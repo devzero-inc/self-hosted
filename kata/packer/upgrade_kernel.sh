@@ -7,28 +7,20 @@ echo "Upgrading kernel!"
 # Install the downloaded packages
 echo "Installing kernel packages..."
 yum localinstall -y /tmp/*.rpm
-grubby --info=ALL | grep "vmlinuz"
-ls -l /boot/vmlinuz-6.7.0-rc6+
 
-
-ls -al /boot
-
-sudo find / -type f -name "vmlinuz-6.7.0-rc6+" 2>/dev/null
-sudo find / -type f -name "vmlinuz-6.7.0-rc6+" 2>/dev/null
-sudo find / -type f -name "vmlinuz-6.7.0-rc6+" 2>/dev/null
+echo "*****************************************************************************"
 sudo find / -type f -name "vmlinuz-6.7.0-rc6+" 2>/dev/null
 
 sudo find /boot /lib/modules /usr/src /var/tmp -type f -name "vmlinuz*" 2>/dev/null
 
-
-
 grubby --info=ALL
+echo "*****************************************************************************"
 
-sudo grubby --add-kernel=/boot/vmlinuz-6.7.0-rc6+ --title "Amazon Linux (6.7.0-rc6+)"
+sudo grubby --add-kernel=/boot/vmlinuz-6.7.0-dz-pvm-host --title "Amazon Linux (6.7.0-rc6+)"
 
 
-grubby --set-default /boot/vmlinuz-6.7.0-rc6+
-grubby --args="quiet splash nokaslr pti=off console=tty1 console=ttyS0 net.ifnames=0 biosdevname=0 nvme_core.io_timeout=4294967295 rd.emergency=poweroff rd.shell=0" --update-kernel /boot/vmlinuz-6.7.0-rc6+
+grubby --set-default /boot/vmlinuz-6.7.0-dz-pvm-host
+grubby --args="quiet splash nokaslr pti=off console=tty1 console=ttyS0 net.ifnames=0 biosdevname=0 nvme_core.io_timeout=4294967295 rd.emergency=poweroff rd.shell=0" --update-kernel /boot/vmlinuz-6.7.0-dz-pvm-host
 tee /etc/default/grub <<"EOF"
 # Various settings which make debugging a custom kernel not a ginormous Pain In The Ass.
 # You're welcome. - Ellie
