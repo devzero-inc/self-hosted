@@ -6,14 +6,67 @@ packer {
     }
   }
 }
-source "amazon-ebs" "ubuntu-eks" {
-  ami_name      = "al2-pvm-{{timestamp}}"
+
+source "amazon-ebs" "al2023_1_29_eks" {
+  ami_name      = "devzero-amazon-eks-node-al2023-x86_64-standard-1.29-{{timestamp}}"
   instance_type = "t3.2xlarge"
   region        = "us-west-1"
-  # aws ssm get-parameter --name /aws/service/eks/optimized-ami/1.29/amazon-linux-2/recommended/image_id \
-  # --region us-west-1 --query "Parameter.Value" --output text
-  source_ami = "ami-0242b8629f67f3e22"
-  ssh_username = "ec2-user"
+
+  source_ami_filter {
+    filters = {
+      virtualization-type = "hvm"
+      name = "amazon-eks-node-al2023-x86_64-standard-1.29-*"
+      root-device-type = "ebs"
+    }
+    owners = ["602401143452"]
+    most_recent = true
+  }
+
+  launch_block_device_mappings {
+    device_name = "/dev/xvda"
+    volume_size = 50
+    volume_type = "gp3"
+    delete_on_termination = true
+  }
+}
+
+source "amazon-ebs" "al2023_1_30_eks" {
+  ami_name      = "devzero-amazon-eks-node-al2023-x86_64-standard-1.30-{{timestamp}}"
+  instance_type = "t3.2xlarge"
+  region        = "us-west-1"
+
+  source_ami_filter {
+    filters = {
+      virtualization-type = "hvm"
+      name = "amazon-eks-node-al2023-x86_64-standard-1.30-*"
+      root-device-type = "ebs"
+    }
+    owners = ["602401143452"]
+    most_recent = true
+  }
+
+  launch_block_device_mappings {
+    device_name = "/dev/xvda"
+    volume_size = 50
+    volume_type = "gp3"
+    delete_on_termination = true
+  }
+}
+
+source "amazon-ebs" "al2023_1_31_eks" {
+  ami_name      = "devzero-amazon-eks-node-al2023-x86_64-standard-1.31-{{timestamp}}"
+  instance_type = "t3.2xlarge"
+  region        = "us-west-1"
+
+  source_ami_filter {
+    filters = {
+      virtualization-type = "hvm"
+      name = "amazon-eks-node-al2023-x86_64-standard-1.31-*"
+      root-device-type = "ebs"
+    }
+    owners = ["602401143452"]
+    most_recent = true
+  }
 
   launch_block_device_mappings {
     device_name = "/dev/xvda"
@@ -26,7 +79,9 @@ source "amazon-ebs" "ubuntu-eks" {
 build {
   name = "upgrade-kernel"
   sources = [
-    "source.amazon-ebs.ubuntu-eks"
+    "source.amazon-ebs.al2023_1_29_eks",
+    "source.amazon-ebs.al2023_1_30_eks",
+    "source.amazon-ebs.al2023_1_31_eks",
   ]
 
   provisioner "file" {
