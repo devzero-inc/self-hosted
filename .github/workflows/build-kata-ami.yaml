@@ -47,7 +47,5 @@ jobs:
       - name: Run Build Script
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }} 
-        run: |
-          chmod +x ./kata/packer/build-ami.sh
-          ./kata/packer/build-ami.sh
+        run: ./kata/packer/build-ami.sh
 
