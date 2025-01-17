@@ -142,13 +142,13 @@ build {
     name = "Install Kata containers"
     script = "./install-kata.sh"
     execute_command = "sudo {{ .Path }}"
-    expect_disconnect = false
+    expect_disconnect = true
   }
 
   provisioner "shell" {
     name              = "Configure various machine settings"
     script            = "./config.sh"
     execute_command   = "sudo {{ .Path }}"
-    expect_disconnect = false
+    expect_disconnect = true
   }
 }
