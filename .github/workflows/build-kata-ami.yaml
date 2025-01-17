@@ -3,7 +3,6 @@ name: Build Kata AMI
 on:
   push: 
     branches: 
-      - garvit/ci-pipeline
       - main
   workflow_dispatch:
 
