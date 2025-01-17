@@ -112,10 +112,10 @@ def control_plane_ingress():
 @click.option(
     "--force", is_flag=True, help="Force run checks even if already checked before"
 )
-def helm_check_control_plane(force):
+def control_plane_chart(force):
     """Helm chart: control-plane"""
     click.echo("Checking helm chart: control-plane")
-    ControlPlane().checks(force)
+    ControlPlane().control_plane_chart(force)
 
 @control_plane.command("cert-issuer")
 def helm_check_cert_issuer():

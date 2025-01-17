@@ -15,7 +15,7 @@ class ControlPlane:
     def error(error_name):
         error(f"CONTROL_PLANE_{error_name}_ERROR")
 
-    def checks(self, force):
+    def control_plane_chart(self, force):
         info("Checking control plane...")
 
         try:
@@ -84,7 +84,7 @@ class ControlPlane:
         return True
 
     def install(self, force):
-        can_install = self.checks(force)
+        can_install = self.control_plane_chart(force)
 
         if not can_install and not force:
             # return
