@@ -83,7 +83,7 @@ class ControlPlane:
         success("Control plane is ready to be installed")
         return True
 
-    def install(self, force):
+    def install_control_plane_chart(self, force):
         can_install = self.control_plane_chart(force)
 
         if not can_install and not force:

@@ -64,140 +64,140 @@ def check_all():
 
 # Control plane commands
 @check.group("control-plane", cls=OrderedGroup)
-def control_plane():
+def check_control_plane():
     """Runs control plane checks for the current cloud provider"""
     pass
 
 
-@control_plane.command("all")
-def control_plane_all():
+@check_control_plane.command("all")
+def check_control_plane_all():
     """Runs all control-plane checks"""
     click.echo("Running all control plane checks...")
 
 
-@control_plane.command("permissions")
+@check_control_plane.command("permissions")
 @click.option(
     "--force", is_flag=True, help="Force run checks even if already checked before"
 )
-def control_plane_permissions(force):
+def check_control_plane_permissions(force):
     """Runs permission checks for the current cloud provider"""
-    get_provider().control_plane_permissions(force)
+    get_provider().check_control_plane_permissions(force)
 
 
-@control_plane.command("cluster")
+@check_control_plane.command("cluster")
 @click.option(
     "--force", is_flag=True, help="Force run checks even if already checked before"
 )
-def control_plane_cluster(force):
+def check_control_plane_cluster(force):
     """Runs cluster existence checks for the current cloud provider"""
     # Temporary casting
     provider: AWSProvider = get_provider()
     provider.control_plane_cluster(force)
 
 
-@control_plane.command("network")
-def control_plane_network():
+@check_control_plane.command("network")
+def check_control_plane_network():
     """Runs network checks for the current cloud provider"""
     click.echo("Checking control plane network...")
 
 
-@control_plane.command("ingress")
-def control_plane_ingress():
+@check_control_plane.command("ingress")
+def check_control_plane_ingress():
     """Runs cluster existence checks kubernetes ingresses"""
     click.echo("Checking control plane ingress...")
 
 
 # Control plane Helm chart checks
-@control_plane.command("chart")
+@check_control_plane.command("chart")
 @click.option(
     "--force", is_flag=True, help="Force run checks even if already checked before"
 )
-def control_plane_chart(force):
+def check_control_plane_chart(force):
     """Helm chart: control-plane"""
     click.echo("Checking helm chart: control-plane")
     ControlPlane().control_plane_chart(force)
 
-@control_plane.command("cert-issuer")
-def helm_check_cert_issuer():
+@check_control_plane.command("cert-issuer")
+def check_control_plane_cert_issuer():
     """Helm chart: cert-issuer"""
     click.echo("Checking helm chart: cert-issuer")
 
 # Data plane commands
 @check.group("data-plane", cls=OrderedGroup)
-def data_plane():
+def check_data_plane():
     """Runs data plane checks for the current cloud provider"""
     pass
 
 
-@data_plane.command("all")
-def data_plane_all():
+@check_data_plane.command("all")
+def check_data_plane_all():
     """Runs all data-plane checks"""
     click.echo("Running all data plane checks...")
 
 
-@data_plane.command("permissions")
-def data_plane_permissions():
+@check_data_plane.command("permissions")
+def check_data_plane_permissions():
     """Runs permission checks for the current cloud provider"""
     click.echo("Checking data plane permissions...")
 
 
-@data_plane.command("network")
-def data_plane_network():
+@check_data_plane.command("network")
+def check_data_plane_network():
     """Runs network checks for the current cloud provider"""
     click.echo("Checking data plane network...")
 
 
-@data_plane.command("cluster")
-def data_plane_cluster():
+@check_data_plane.command("cluster")
+def check_data_plane_cluster():
     """Runs cluster existence checks for the current cloud provider"""
     click.echo("Checking data plane cluster...")
 
 
-@data_plane.command("ingress")
-def data_plane_ingress():
+@check_data_plane.command("ingress")
+def check_data_plane_ingress():
     """Runs cluster existence checks kubernetes ingresses"""
     click.echo("Checking data plane ingress...")
 
 
 # Data plane Helm chart checks
-@data_plane.command("rook-ceph")
-def helm_check_rook_ceph():
+@check_data_plane.command("rook-ceph")
+def check_data_plane_rook_ceph():
     """Helm chart: rook-ceph"""
     click.echo("Checking helm chart: rook-ceph")
 
 
-@data_plane.command("rook-ceph-cluster")
-def helm_check_rook_ceph_cluster():
+@check_data_plane.command("rook-ceph-cluster")
+def check_data_plane_rook_ceph_cluster():
     """Helm chart: rook-ceph-cluster"""
     click.echo("Checking helm chart: rook-ceph-cluster")
 
 
-@data_plane.command("ingress-nginx")
-def helm_check_ingress_nginx():
+@check_data_plane.command("ingress-nginx")
+def check_data_plane_ingress_nginx():
     """Helm chart: ingress-nginx"""
     click.echo("Checking helm chart: ingress-nginx")
 
 
-@data_plane.command("cert-manager")
-def helm_check_cert_manager():
+@check_data_plane.command("cert-manager")
+def check_data_plane_cert_manager():
     """Helm chart: cert-manager"""
     click.echo("Checking helm chart: cert-manager")
 
 
-@data_plane.command("cedana")
-def helm_check_cedana():
+@check_data_plane.command("cedana")
+def check_data_plane_cedana():
     """Helm chart: cedana"""
     click.echo("Checking helm chart: cedana")
 
 
-@data_plane.command("metacontroller")
-def helm_check_metacontroller():
+@check_data_plane.command("metacontroller")
+def check_data_plane_metacontroller():
     """Helm chart: metacontroller"""
     click.echo("Checking helm chart: metacontroller")
 
 
-@data_plane.command("prometheus")
-def helm_check_prometheus():
+@check_data_plane.command("prometheus")
+def check_data_plane_prometheus():
     """Helm chart: prometheus"""
     click.echo("Checking helm chart: prometheus")
 
@@ -231,10 +231,10 @@ def install_control_plane_all():
 @click.option(
     "--force", is_flag=True, help="Force run checks even if already checked before"
 )
-def helm_install_control_plane(force):
+def install_control_plane_chart(force):
     """Helm chart: control-plane"""
     click.echo("Checking helm chart: control-plane")
-    ControlPlane().install(force)
+    ControlPlane().install_control_plane_chart(force)
 
 if __name__ == "__main__":
     cli()
