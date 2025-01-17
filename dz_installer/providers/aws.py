@@ -1,13 +1,9 @@
-import datetime
-
 import boto3
 import click
-from dateutil.tz import tzlocal
-from rich import json
 
 from dz_installer.constants import AWS_CONTROL_PLANE_PERMISSIONS
 from dz_installer.dz_config import DZConfig
-from dz_installer.helpers import error, console
+from dz_installer.helpers import error, green, red
 
 
 class AWSProvider:
@@ -37,6 +33,7 @@ class AWSProvider:
 
         failed_permissions = []
 
+        permission_name = None
         try:
             # Simulate the policy to check if user has permission
             response = iam.simulate_principal_policy(
@@ -121,9 +118,9 @@ class AWSProvider:
 
             subnet_ids = [*self.config.aws.vpc.subnets.keys()]
 
-            click.echo(console.print(f"[green] Found VPC_ID: {self.config.aws.vpc.id}"))
-            click.echo(console.print(f"[green] Found security groups: {self.config.aws.vpc.security_groups}"))
-            click.echo(console.print(f"[green] Found subnets: {subnet_ids}"))
+            click.echo(green(f"Found VPC_ID: {self.config.aws.vpc.id}"))
+            click.echo(green(f"Found security groups: {self.config.aws.vpc.security_groups}"))
+            click.echo(green(f"Found subnets: {subnet_ids}"))
 
             click.echo("Checking if those subnets are public or private...")
             ec2 = boto3.client("ec2", region_name="us-west-1")
@@ -171,14 +168,14 @@ class AWSProvider:
                             if tag['Value'] in ["owned", "shared"]:
                                 has_k8s_cluster_tag = True
                             else:
-                                click.echo(console.print(f"[red]Subnet {subnet_id} has {k8s_cluster_tag_name} tag but it is not set to 'owned' or 'shared'"))
+                                click.echo(red(f"Subnet {subnet_id} has {k8s_cluster_tag_name} tag but it is not set to 'owned' or 'shared'"))
 
                     self.config.aws.vpc.subnets[subnet_id]["has_kubernetes_tags"] = has_k8s_role_tag and has_k8s_cluster_tag
 
                     if has_k8s_role_tag and has_k8s_cluster_tag:
-                        click.echo(console.print(f"[green]Subnet {subnet_id} has both kubernetes.io/role/elb and {k8s_cluster_tag_name} tags"))
+                        click.echo(green(f"Subnet {subnet_id} has both kubernetes.io/role/elb and {k8s_cluster_tag_name} tags"))
                     else:
-                        click.echo(console.print(f"[red]Subnet {subnet_id} is missing one or both of the required tags (kubernetes.io/role/elb and {k8s_cluster_tag_name})"))
+                        click.echo(red(f"Subnet {subnet_id} is missing one or both of the required tags (kubernetes.io/role/elb and {k8s_cluster_tag_name})"))
 
                 else:
                     click.echo(f"Subnet {subnet_id} seems to be private as it is not connected to the internet gateway")
@@ -195,13 +192,13 @@ class AWSProvider:
                             if tag['Value'] in ["owned", "shared"]:
                                 has_k8s_cluster_tag = True
                             else:
-                                click.echo(f"[red]Subnet {subnet_id} has {k8s_cluster_tag_name} tag but it is not set to 'owned' or 'shared'")
+                                click.echo(red(f"Subnet {subnet_id} has {k8s_cluster_tag_name} tag but it is not set to 'owned' or 'shared'"))
 
                     self.config.aws.vpc.subnets[subnet_id]["has_kubernetes_tags"] = has_k8s_role_tag and has_k8s_cluster_tag
                     if has_k8s_role_tag and has_k8s_cluster_tag:
-                        click.echo(console.print(f"[green]Subnet {subnet_id} has both kubernetes.io/role/internal-elb and {k8s_cluster_tag_name} tags"))
+                        click.echo(green(f"Subnet {subnet_id} has both kubernetes.io/role/internal-elb and {k8s_cluster_tag_name} tags"))
                     else:
-                        click.echo(console.print(f"[red]Subnet {subnet_id} is missing one or both of the required tags (kubernetes.io/role/internal-elb and {k8s_cluster_tag_name})"))
+                        click.echo(red(f"Subnet {subnet_id} is missing one or both of the required tags (kubernetes.io/role/internal-elb and {k8s_cluster_tag_name})"))
 
             self.config.save()
 

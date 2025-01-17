@@ -8,6 +8,13 @@ from dz_installer.dz_config import DZConfig
 
 console = Console()
 
+
+def green(text):
+    return console.print(f"[green]{text}", end="")
+
+def red(text):
+    return console.print(f"[red]{text}", end="")
+
 def get_provider():
     cfg = DZConfig()
     if not hasattr(cfg.globals, "provider"):
