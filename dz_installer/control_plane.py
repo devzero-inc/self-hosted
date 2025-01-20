@@ -4,7 +4,7 @@ import click
 
 from ruamel.yaml import YAML
 from dz_installer.dz_config import DZConfig
-from dz_installer.helpers import error, success, info, check_chart_is_installed
+from dz_installer.helpers import error, success, info, check_chart_is_installed, get_nested_value
 
 yaml = YAML()
 yaml.preserve_quotes = True
@@ -129,3 +129,42 @@ class ControlPlane:
             self.error("INSTALL_FAILED")
 
         success("Control plane installed successfully")
+
+    def check_control_plane_cert_issuer(self):
+        info("Checking certificate issuer for control plane...")
+
+        try:
+            file = pathlib.Path("./charts/dz-control-plane/values.yaml")
+            values = yaml.load(file)
+
+            issuer_path = ["issuer", "enabled"]
+            cert_manager_path = ["gateway", "ingress", "annotations", "cert-manager.io/cluster-issuer"]
+
+            issuer_enabled = get_nested_value(values, issuer_path, False)
+            cert_issuer = get_nested_value(values, cert_manager_path, None)
+
+            if issuer_enabled:
+                success("Cluster issuer is enabled in the control plane chart")
+
+                # Print the actual issuer details if present
+                issuer_name_path = ["issuer", "acme"]
+                issuer_name = get_nested_value(values, issuer_name_path, None)
+
+                if issuer_name:
+                    success(f"Certificate issuer configured: {issuer_name}")
+
+            elif cert_issuer:
+                success(f"Certificate issuer is set: {cert_issuer}")
+
+            else:
+                click.echo("No certificate issuer found in the control plane chart")
+                return False
+
+            return True
+
+        except FileNotFoundError:
+            error("VALUES_FILE_NOT_FOUND")
+            return False
+        except Exception as e:
+            error(str(e))
+            return False

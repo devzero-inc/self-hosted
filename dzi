@@ -81,7 +81,7 @@ def check_control_plane_all():
 )
 def check_control_plane_permissions(force):
     """Runs permission checks for the current cloud provider"""
-    get_provider().check_control_plane_permissions(force)
+    get_provider().control_plane_permissions(force)
 
 
 @check_control_plane.command("cluster")
@@ -121,6 +121,7 @@ def check_control_plane_chart(force):
 def check_control_plane_cert_issuer():
     """Helm chart: cert-issuer"""
     click.echo("Checking helm chart: cert-issuer")
+    ControlPlane().check_control_plane_cert_issuer()
 
 # Data plane commands
 @check.group("data-plane", cls=OrderedGroup)

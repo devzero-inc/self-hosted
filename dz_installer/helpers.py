@@ -57,3 +57,12 @@ def check_chart_is_installed(chart_name, namespace=None):
         if chart['chart'].startswith(chart_name):
             return True
     return False
+
+def get_nested_value(dictionary, keys, default=None):
+    """Utility function to get nested values from a dictionary"""
+    for key in keys:
+        if isinstance(dictionary, dict) and key in dictionary:
+            dictionary = dictionary[key]
+        else:
+            return default
+    return dictionary
