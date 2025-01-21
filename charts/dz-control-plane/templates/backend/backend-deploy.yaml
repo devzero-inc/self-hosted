@@ -107,6 +107,11 @@ spec:
                 secretKeyRef:
                   name: auth-secret
                   key: private.key
+            - name: VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: vault-unseal-keys
+                  key: root-token
       volumes:
         - name: config
           configMap:

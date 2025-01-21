@@ -1,18 +1,26 @@
+## @section Devzero
 devzero:
+  ## @param devzero.teamId Team identifier
   teamId: ""
+  ## @param devzero.region Base Region
   region: ""
+  ## @section Vault
   vault:
+    ## @param devzero.vault.server Vault server
     server: "https://csi.devzero.io"
 
+## @section Node Labeler
 nodeLabeler:
+  ## @param nodeLabeler.enabled Is node labeler enabled
   enabled: true
 
+## @section Credentials Configuration
 credentials:
-  registry:
-  username:
-  password:
-  email:
-
-
-
-
+  ## @param credentials.registry Container registry URL
+  registry: ""
+  ## @param credentials.username Registry username
+  username: ""
+  ## @param credentials.password Registry password
+  password: ""
+  ## @param credentials.email Registry email address
+  email: ""

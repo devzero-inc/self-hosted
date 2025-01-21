@@ -21,3 +21,9 @@ docs:
 		--values values.yaml \
 		--schema values.schema.json
 
+.PHONY: add-docker-creds
+add-docker-creds:
+	kubectl create secret docker-registry regcred \
+	--docker-username=$(DOCKERHUB_USERNAME) \
+	--docker-password=$(DOCKERHUB_TOKEN) \
+	-n devzero --dry-run=client -o yaml | kubectl apply -f -

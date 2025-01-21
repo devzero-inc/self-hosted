@@ -15,7 +15,7 @@
         "domain": {
             "type": "string",
             "description": "Domain name for the installation",
-            "default": "domain.example"
+            "default": "devzero.internal"
         },
         "credentials": {
             "type": "object",
@@ -85,6 +85,26 @@
                     "type": "string",
                     "description": "Tag for local workspace image",
                     "default": "base-latest"
+                },
+                "baseImages": {
+                    "type": "object",
+                    "properties": {
+                        "sysboxBase": {
+                            "type": "string",
+                            "description": "Base image for sysbox deployment",
+                            "default": "public.ecr.aws/v1i4e1r2/ubuntu-devbox-base:base-2024-12-17--06-31--c705618e0d55"
+                        },
+                        "kataBase": {
+                            "type": "string",
+                            "description": "Base image for kata deployment",
+                            "default": "public.ecr.aws/v1i4e1r2/kata-devbox-base:base-2025-01-13--18-11--7bb0a987f303"
+                        },
+                        "cliImage": {
+                            "type": "string",
+                            "description": "Base image for cli deployment",
+                            "default": "public.ecr.aws/v1i4e1r2/dzcmd:24434f9"
+                        }
+                    }
                 }
             }
         },
@@ -409,7 +429,7 @@
                         "url": {
                             "type": "string",
                             "description": "MongoDB connection URL",
-                            "default": "mongodb://devzero:backend@devzero-mongodb-0.devzero-mongodb-headless:27017/backend?directConnection=true"
+                            "default": "mongodb://devzero:backend@mongodb-0.mongodb-headless:27017/backend?directConnection=true"
                         }
                     }
                 },
@@ -429,7 +449,7 @@
                         "queue": {
                             "type": "string",
                             "description": "LogSrv queue URL",
-                            "default": "http://devzero-elasticmq:9324/queue/logsrv.fifo"
+                            "default": "http://elasticmq:9324/queue/logsrv.fifo"
                         },
                         "region": {
                             "type": "string",
@@ -1051,7 +1071,7 @@
                         "url": {
                             "type": "string",
                             "description": "Queue URL for LogSrv",
-                            "default": "http://devzero-elasticmq:9324/queue/logsrv.fifo"
+                            "default": "http://elasticmq:9324/queue/logsrv.fifo"
                         }
                     }
                 },
@@ -1491,12 +1511,17 @@
                         "LOGSRV_DEFAULT_QUEUE": {
                             "type": "string",
                             "description": "Default LogSrv queue URL",
-                            "default": "http://devzero-elasticmq:9324/queue/logsrv.fifo"
+                            "default": "http://elasticmq:9324/queue/logsrv.fifo"
                         },
                         "LOGSRV_DEFAULT_REGION": {
                             "type": "string",
                             "description": "Default LogSrv region",
                             "default": "elasticmq"
+                        },
+                        "DOCKER_REGISTRY": {
+                            "type": "string",
+                            "description": "Use custom docker registry",
+                            "default": "docker-registry:5000"
                         }
                     }
                 },
@@ -1943,7 +1968,7 @@
                         "queue": {
                             "type": "string",
                             "description": "Queue URL for LogSrv",
-                            "default": "http://devzero-elasticmq:9324/queue/logsrv.fifo"
+                            "default": "http://elasticmq:9324/queue/logsrv.fifo"
                         },
                         "region": {
                             "type": "string",
@@ -2214,20 +2239,15 @@
                 "env": {
                     "type": "object",
                     "properties": {
-                        "NEXT_AUTH_ENABLE_CREDENTIALS_PROVIDER": {
-                            "type": "string",
-                            "description": "Enable credentials provider for NextAuth",
-                            "default": "true"
-                        },
-                        "NEXT_PUBLIC_BYPASS_AUTH0_FLOW": {
-                            "type": "string",
-                            "description": "Bypass Auth0 flow for Next.js",
-                            "default": "true"
-                        },
                         "NEXT_PUBLIC_SELF_HOSTED": {
                             "type": "string",
                             "description": "Self-hosted mode for Next.js",
                             "default": "true"
+                        },
+                        "NODE_TLS_REJECT_UNAUTHORIZED": {
+                            "type": "string",
+                            "description": "ignore SSL mode for Next.js",
+                            "default": "0"
                         }
                     }
                 },
