@@ -762,6 +762,9 @@ polland:
     ## @param polland.env.LOGSRV_DEFAULT_REGION Default LogSrv region
     LOGSRV_DEFAULT_REGION: "elasticmq"
 
+    ## @param polland.env.DOCKER_REGISTRY Use custom docker registry
+    DOCKER_REGISTRY: "docker-registry:5000"
+
   ## @subsection Polland Autoscaling Configuration
   autoscaling:
     ## @param polland.autoscaling.enabled Enable autoscaling for Polland
