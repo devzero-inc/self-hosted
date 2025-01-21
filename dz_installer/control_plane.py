@@ -89,8 +89,7 @@ class ControlPlane:
         can_install = self.check_control_plane_chart(force)
 
         if not can_install and not force:
-            # return
-            pass
+            return
 
         info("Installing control plane...")
 

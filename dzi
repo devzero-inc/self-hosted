@@ -233,7 +233,7 @@ def install_control_plane_all():
 )
 def install_control_plane_chart(force):
     """Helm chart: control-plane"""
-    click.echo("Checking helm chart: control-plane")
+    click.echo("Installing helm chart: control-plane")
     ControlPlane().install_control_plane_chart(force)
 
 if __name__ == "__main__":
