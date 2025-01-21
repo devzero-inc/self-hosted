@@ -80,6 +80,26 @@
                     "type": "string",
                     "description": "Tag for local workspace image",
                     "default": "base-latest"
+                },
+                "baseImages": {
+                    "type": "object",
+                    "properties": {
+                        "sysboxBase": {
+                            "type": "string",
+                            "description": "Base image for sysbox deployment",
+                            "default": "public.ecr.aws/v1i4e1r2/ubuntu-devbox-base:base-2024-12-17--06-31--c705618e0d55"
+                        },
+                        "kataBase": {
+                            "type": "string",
+                            "description": "Base image for kata deployment",
+                            "default": "public.ecr.aws/v1i4e1r2/kata-devbox-base:base-2025-01-13--18-11--7bb0a987f303"
+                        },
+                        "cliImage": {
+                            "type": "string",
+                            "description": "Base image for cli deployment",
+                            "default": "public.ecr.aws/v1i4e1r2/dzcmd:24434f9"
+                        }
+                    }
                 }
             }
         },

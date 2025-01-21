@@ -45,6 +45,14 @@
 | `workspace.image`    | Base image for workspaces     | `public.ecr.aws/v1i4e1r2/devzero-devbox-base` |
 | `workspace.localTag` | Tag for local workspace image | `base-latest`                                 |
 
+### Base Image Configuration
+
+| Name                              | Description                      | Value                                                                             |
+| --------------------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
+| `workspace.baseImages.sysboxBase` | Base image for sysbox deployment | `public.ecr.aws/v1i4e1r2/ubuntu-devbox-base:base-2024-12-17--06-31--c705618e0d55` |
+| `workspace.baseImages.kataBase`   | Base image for kata deployment   | `public.ecr.aws/v1i4e1r2/kata-devbox-base:base-2025-01-13--18-11--7bb0a987f303`   |
+| `workspace.baseImages.cliImage`   | Base image for cli deployment    | `public.ecr.aws/v1i4e1r2/dzcmd:24434f9`                                           |
+
 ### Global Configuration
 
 | Name                    | Description            | Value |
