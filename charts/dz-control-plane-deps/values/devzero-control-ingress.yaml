@@ -1,0 +1,21 @@
+# https://github.com/kubernetes/ingress-nginx/blob/helm-chart-4.11.3/charts/ingress-nginx/values.yaml
+
+controller:
+  replicaCount: 3
+  service:
+    type: LoadBalancer
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+      service.beta.kubernetes.io/aws-load-balancer-type: "external"
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+      service.beta.kubernetes.io/aws-load-balancer-name: "devzero-control-ingress"
+
+  ingressClass: devzero-control-ingress
+  ingressClassByName: true
+  ingressClassResource:
+    name: devzero-control-ingress
+    controllerValue: devzero.io/devzero-control-ingress
+  extraArgs:
+    # default-ssl-certificate: "cert-manager/cert-manager-webhook-tls"
+    enable-ssl-passthrough: "true"
