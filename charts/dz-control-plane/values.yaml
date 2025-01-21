@@ -415,6 +415,7 @@ hydra:
     #         }
     #     }
     #   }
+    ## @param hydra.derp.autoUpdateEnabled endable derp map updates
     autoUpdateEnabled: true
     ## @param hydra.derp.updateFrequency Update frequency for DERP
     updateFrequency: "24h"
