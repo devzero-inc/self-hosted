@@ -1,0 +1,66 @@
+{
+    "title": "Chart Values",
+    "type": "object",
+    "properties": {
+        "devzero": {
+            "type": "object",
+            "properties": {
+                "teamId": {
+                    "type": "string",
+                    "description": "Team identifier",
+                    "default": ""
+                },
+                "region": {
+                    "type": "string",
+                    "description": "Base Region",
+                    "default": ""
+                },
+                "vault": {
+                    "type": "object",
+                    "properties": {
+                        "server": {
+                            "type": "string",
+                            "description": "Vault server",
+                            "default": "https://csi.devzero.io"
+                        }
+                    }
+                }
+            }
+        },
+        "nodeLabeler": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Is node labeler enabled",
+                    "default": true
+                }
+            }
+        },
+        "credentials": {
+            "type": "object",
+            "properties": {
+                "registry": {
+                    "type": "string",
+                    "description": "Container registry URL",
+                    "default": ""
+                },
+                "username": {
+                    "type": "string",
+                    "description": "Registry username",
+                    "default": ""
+                },
+                "password": {
+                    "type": "string",
+                    "description": "Registry password",
+                    "default": ""
+                },
+                "email": {
+                    "type": "string",
+                    "description": "Registry email address",
+                    "default": ""
+                }
+            }
+        }
+    }
+}
