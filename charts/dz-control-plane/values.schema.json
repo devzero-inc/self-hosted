@@ -20,10 +20,15 @@
         "credentials": {
             "type": "object",
             "properties": {
+                "enable": {
+                    "type": "boolean",
+                    "description": "Enable docker hub credentials",
+                    "default": true
+                },
                 "registry": {
                     "type": "string",
                     "description": "Container registry URL",
-                    "default": ""
+                    "default": "docker.io"
                 },
                 "username": {
                     "type": "string",
@@ -812,15 +817,9 @@
                                 "type": "string"
                             }
                         },
-                        "paths": {
-                            "type": "array",
-                            "description": "DERP paths",
-                            "default": [],
-                            "items": {}
-                        },
                         "autoUpdateEnabled": {
                             "type": "boolean",
-                            "description": "Enable auto-update for DERP",
+                            "description": "endable derp map updates",
                             "default": true
                         },
                         "updateFrequency": {

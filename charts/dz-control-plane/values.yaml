@@ -392,9 +392,30 @@ hydra:
     ## @param hydra.derp.urls DERP server URLs
     urls:
     - "https://controlplane.tailscale.com/derpmap/default"
-    ## @param hydra.derp.paths DERP paths
-    paths: []
-    ## @param hydra.derp.autoUpdateEnabled Enable auto-update for DERP
+    # for a custom derp server, include the following after deploying the server
+    # customderp: |
+    #   {
+    #       "Regions": {
+    #         "901": {
+    #           "RegionID": 901,
+    #           "RegionCode": "nyc", // can be set to anything, keep human readable
+    #           "RegionName": "New York City", // change to derp server deployment geolocation
+    #           "Latitude": 40.7128, // change to derp server deployment geolocation
+    #           "Longitude": -74.006, // change to derp server deployment geolocation
+    #           "Nodes": [
+    #             {
+    #               "Name": "901a", 
+    #               "RegionID": 901,
+    #               "HostName": "your.hostname.com", // for private IP deployments, use the server IP
+    #               "IPv4": "1.1.1.1",
+    #               "IPv6": "1608:f740:f::ab",
+    #               "InsecureForTests": true // set this true for private IP deploys, false otherwise
+    #             }
+    #           ]
+    #         }
+    #     }
+    #   }
+    ## @param hydra.derp.autoUpdateEnabled endable derp map updates
     autoUpdateEnabled: true
     ## @param hydra.derp.updateFrequency Update frequency for DERP
     updateFrequency: "24h"
