@@ -113,6 +113,8 @@ module "eks_blueprints_addons" {
   cluster_version   = data.aws_eks_cluster.cluster-data.version
   oidc_provider_arn = data.aws_iam_openid_connect_provider.this.arn
 
+  enable_aws_load_balancer_controller = true
+
   observability_tag = null
 
   eks_addons = {
