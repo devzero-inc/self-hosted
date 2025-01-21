@@ -409,7 +409,7 @@ hydra:
     #               "HostName": "your.hostname.com", // for private IP deployments, use the server IP
     #               "IPv4": "1.1.1.1",
     #               "IPv6": "1608:f740:f::ab",
-    #               "InsecureForTests": true // set this true for private IP deploys
+    #               "InsecureForTests": true // set this true for private IP deploys, false otherwise
     #             }
     #           ]
     #         }
