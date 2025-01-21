@@ -21,12 +21,13 @@
 
 ### Credentials Configuration
 
-| Name                   | Description            | Value |
-| ---------------------- | ---------------------- | ----- |
-| `credentials.registry` | Container registry URL | `""`  |
-| `credentials.username` | Registry username      | `""`  |
-| `credentials.password` | Registry password      | `""`  |
-| `credentials.email`    | Registry email address | `""`  |
+| Name                   | Description                   | Value       |
+| ---------------------- | ----------------------------- | ----------- |
+| `credentials.enable`   | Enable docker hub credentials | `true`      |
+| `credentials.registry` | Container registry URL        | `docker.io` |
+| `credentials.username` | Registry username             | `""`        |
+| `credentials.password` | Registry password             | `""`        |
+| `credentials.email`    | Registry email address        | `""`        |
 
 ### Image Configuration
 
@@ -178,8 +179,7 @@
 | `hydra.cidr.v4`                                                            | IPv4 CIDR range                                       | `100.64.0.0/10`                                                                                                        |
 | `hydra.derp.server.enabled`                                                | Enable DERP server                                    | `false`                                                                                                                |
 | `hydra.derp.urls`                                                          | DERP server URLs                                      | `["https://controlplane.tailscale.com/derpmap/default"]`                                                               |
-| `hydra.derp.paths`                                                         | DERP paths                                            | `[]`                                                                                                                   |
-| `hydra.derp.autoUpdateEnabled`                                             | Enable auto-update for DERP                           | `true`                                                                                                                 |
+| `hydra.derp.autoUpdateEnabled`                                             | endable derp map updates                              | `true`                                                                                                                 |
 | `hydra.derp.updateFrequency`                                               | Update frequency for DERP                             | `24h`                                                                                                                  |
 | `hydra.autoscaling.enabled`                                                | Enable autoscaling for Hydra                          | `false`                                                                                                                |
 | `hydra.autoscaling.minReplicas`                                            | Minimum autoscaling replicas for Hydra                | `1`                                                                                                                    |
