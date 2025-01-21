@@ -12,3 +12,15 @@ controller:
       service.beta.kubernetes.io/aws-load-balancer-name: "devzero-control-ingress"
       service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-0ff309e849436c07d,subnet-08893ce11283c7570
       service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-west-1:484907513542:certificate/af37082f-be0d-4b56-9576-67038816a8de
+
+    targetPorts:
+      https: http
+
+  ingressClass: devzero-control-ingress
+  ingressClassByName: true
+  ingressClassResource:
+    name: devzero-control-ingress
+    controllerValue: devzero.io/devzero-control-ingress
+  extraArgs:
+    enable-ssl-passthrough: "true"
+

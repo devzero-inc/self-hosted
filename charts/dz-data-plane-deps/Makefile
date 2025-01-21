@@ -72,3 +72,19 @@ install-prometheus:
 .PHONY: delete-prometheus
 delete-prometheus:
 	helm delete prometheus -n devzero --ignore-not-found
+
+
+.PHONY: install-devzero-data-ingress
+install-devzero-data-ingress:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=devzero-data-ingress \
+		REPO_NAME=ingress-nginx \
+		REPO_URL=https://kubernetes.github.io/ingress-nginx \
+		REPO_APP_NAME=ingress-nginx \
+		VERSION=4.11.3 \
+		NAMESPACE=devzero-data-ingress
+
+.PHONY: delete-devzero-data-ingress
+delete-devzero-data-ingress:
+	helm delete devzero-data-ingress -n devzero-data-ingress  --ignore-not-found
+	kubectl delete namespace devzero-data-ingress --ignore-not-found=true

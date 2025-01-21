@@ -4,6 +4,7 @@ include ../Makefile.common
 install:
 	@$(MAKE) install-cert-manager
 	@$(MAKE) install-ingress-nginx
+	@#$(MAKE) install-devzero-control-ingress
 	@$(MAKE) install-mysql-pulse
 	@$(MAKE) install-mongodb
 	@$(MAKE) install-redis
@@ -22,6 +23,7 @@ install:
 delete:
 	@$(MAKE) delete-cert-manager
 	@$(MAKE) delete-ingress-nginx
+	@#$(MAKE) delete-devzero-control-ingress
 	@$(MAKE) delete-mysql-pulse
 	@$(MAKE) delete-mongodb
 	@$(MAKE) delete-redis
@@ -67,6 +69,24 @@ install-ingress-nginx:
 delete-ingress-nginx:
 	helm delete ingress-nginx -n ingress-nginx  --ignore-not-found
 	kubectl delete namespace ingress-nginx --ignore-not-found=true
+
+
+.PHONY: install-devzero-control-ingress
+install-devzero-control-ingress:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=devzero-control-ingress \
+		REPO_NAME=ingress-nginx \
+		REPO_URL=https://kubernetes.github.io/ingress-nginx \
+		REPO_APP_NAME=ingress-nginx \
+		VERSION=4.11.3 \
+		NAMESPACE=devzero-control-ingress
+
+.PHONY: delete-devzero-control-ingress
+delete-devzero-control-ingress:
+	helm delete devzero-control-ingress -n devzero-control-ingress  --ignore-not-found
+	kubectl delete namespace devzero-control-ingress --ignore-not-found=true
+
+
 
 .PHONY: install-mysql-pulse
 install-mysql-pulse:
