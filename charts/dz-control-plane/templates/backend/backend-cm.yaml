@@ -25,8 +25,9 @@ data:
     polland_url: "http://{{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}:{{ .Values.polland.service.port }}"
     default_cli_version: latest
     default_cli_install_dir: /usr/local/bin
-    hydra_url: https://hydra.{{ .Values.domain }}
+    hydra_url: "http://{{ include "devzero.resourceName" (dict "ctx" . "component" "hydra") }}:{{ .Values.hydra.service.port }}"
     control_plane_url: https://api.{{ .Values.domain }}
+    login_server_url: https://hydra.{{ .Values.domain }}
     hydra_api_key: {{ .Values.backend.hydra.apiKey }}
     download_cli_script_url: "https://get.devzero.io"
     default_subnet_selector:
@@ -69,7 +70,7 @@ data:
     self_hosted: true
     license_key: {{ .Values.backend.licenseKey }}
     arch: {{ .Values.backend.arch }}
-    docker_registry: "registry.{{.Values.domain}}/devzero-devbox-base"
+    docker_registry: "docker-registry:5000/devzero-devbox-base"
     service_keys:
       cortex: {{ .Values.backend.cortex.key }}
     vaulted_auth_private_key: ""
@@ -77,12 +78,15 @@ data:
     cli_session_url_template: https://{{ .Values.domain }}/dashboard/settings/user-settings?cli-session-id=%s
     auto_hibernation_enabled: {{ .Values.backend.hibernation.enabled }}
     cost_prometheus_url: {{ .Values.backend.mimir.url }}
+    base_images:
+      sysbox_base: public.ecr.aws/v1i4e1r2/ubuntu-devbox-base:base-2024-12-17--06-31--c705618e0d55
+      kase_base: public.ecr.aws/v1i4e1r2/kata-devbox-base:base-2025-01-13--18-11--7bb0a987f303
+      cli_image: public.ecr.aws/v1i4e1r2/dzcmd:24434f9
     default_dz_base_image_tag: base-latest
-    vault_endpoint: "https://vault-internal-customers.devzero.dev/"
-    vault_auth_method: "k8s"
-    vault_token: ""
-    vault_store_mount_point: ""
-    vault_auth_secret_mount_point: ""
+    vault_endpoint: "http://vault:8200"
+    vault_auth_method: "token"
+    vault_store_mount_point: "devzero"
+    vault_auth_secret_mount_point: "vault-csi-production-writer"
     vault_auth_role: "customer-secret-writer"
     github_app_install_url: ""
     github_app_client_id: ""

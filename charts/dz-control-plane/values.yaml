@@ -14,7 +14,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 ## @param domain Domain name for the installation
-domain: "domain.example"
+domain: "devzero.internal"
 
 ## @section Credentials Configuration
 credentials:
@@ -200,7 +200,7 @@ backend:
   ## @subsection Backend MongoDB Configuration
   mongo:
     ## @param backend.mongo.url MongoDB connection URL
-    url: "mongodb://devzero:backend@devzero-mongodb-0.devzero-mongodb-headless:27017/backend?directConnection=true"
+    url: "mongodb://devzero:backend@mongodb-0.mongodb-headless:27017/backend?directConnection=true"
 
   ## @subsection Backend Hydra Configuration
   hydra:
@@ -210,7 +210,7 @@ backend:
   ## @subsection Backend LogSrv Configuration
   logsrv:
     ## @param backend.logsrv.queue LogSrv queue URL
-    queue: http://devzero-elasticmq:9324/queue/logsrv.fifo
+    queue: http://elasticmq:9324/queue/logsrv.fifo
     ## @param backend.logsrv.region LogSrv region
     region: "elasticmq"
 
@@ -503,7 +503,7 @@ logsrv:
   ## @subsection LogSrv Queue Configuration
   queue:
     ## @param logsrv.queue.url Queue URL for LogSrv
-    url: http://devzero-elasticmq:9324/queue/logsrv.fifo
+    url: http://elasticmq:9324/queue/logsrv.fifo
 
   ## @subsection LogSrv Postgres Configuration
   postgres:
@@ -758,7 +758,7 @@ polland:
     ## @param polland.env.VAULT_SECRETS_MOUNT_POINT Vault secrets mount point
     VAULT_SECRETS_MOUNT_POINT: "vault-csi-production-writer"
     ## @param polland.env.LOGSRV_DEFAULT_QUEUE Default LogSrv queue URL
-    LOGSRV_DEFAULT_QUEUE: "http://devzero-elasticmq:9324/queue/logsrv.fifo"
+    LOGSRV_DEFAULT_QUEUE: "http://elasticmq:9324/queue/logsrv.fifo"
     ## @param polland.env.LOGSRV_DEFAULT_REGION Default LogSrv region
     LOGSRV_DEFAULT_REGION: "elasticmq"
 
@@ -970,7 +970,7 @@ buildqd:
   ## @subsection Buildqd LogSrv Configuration
   logsrv:
     ## @param buildqd.logsrv.queue Queue URL for LogSrv
-    queue: http://devzero-elasticmq:9324/queue/logsrv.fifo
+    queue: http://elasticmq:9324/queue/logsrv.fifo
     ## @param buildqd.logsrv.region Region for LogSrv
     region: elasticmq
 
@@ -1100,12 +1100,10 @@ web:
 
   ## @subsection Web Environment Configuration
   env:
-    ## @param web.env.NEXT_AUTH_ENABLE_CREDENTIALS_PROVIDER Enable credentials provider for NextAuth
-    NEXT_AUTH_ENABLE_CREDENTIALS_PROVIDER: "true"
-    ## @param web.env.NEXT_PUBLIC_BYPASS_AUTH0_FLOW Bypass Auth0 flow for Next.js
-    NEXT_PUBLIC_BYPASS_AUTH0_FLOW: "true"
     ## @param web.env.NEXT_PUBLIC_SELF_HOSTED Self-hosted mode for Next.js
     NEXT_PUBLIC_SELF_HOSTED: "true"
+    ## @param web.env.NODE_TLS_REJECT_UNAUTHORIZED ignore SSL mode for Next.js
+    NODE_TLS_REJECT_UNAUTHORIZED: "0"
 
   ## @subsection Web Autoscaling Configuration
   autoscaling:

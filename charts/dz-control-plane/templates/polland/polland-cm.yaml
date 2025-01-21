@@ -11,7 +11,7 @@ metadata:
 data:
   BASE_POLLAND_URL: "http://0.0.0.0:{{ .Values.polland.service.port }}"
   VAULT_ENDPOINT: "https://vault.{{ .Values.domain }}/"
-  DOCKER_REGISTRY: "registry.{{ .Values.domain }}"
+  DOCKER_REGISTRY: "docker-registry:5000"
   VCLUSTER_DOMAIN: "{{.Values.domain}}"
   SELF_HOSTED: "true"
   {{- $ctx := . -}}

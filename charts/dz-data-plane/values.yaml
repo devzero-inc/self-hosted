@@ -7,12 +7,13 @@ devzero:
 nodeLabeler:
   enabled: true
 
+## @section Credentials Configuration
 credentials:
-  registry:
-  username:
-  password:
-  email:
-
-
-
-
+  ## @param credentials.registry Container registry URL
+  registry: ""
+  ## @param credentials.username Registry username
+  username: ""
+  ## @param credentials.password Registry password
+  password: ""
+  ## @param credentials.email Registry email address
+  email: ""
