@@ -12,7 +12,7 @@ cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
 
 # VPC
 create_vpc               = true
-create_vpn               = true
+create_vpn               = false
 cidr                     = "10.8.0.0/16"
 availability_zones_count = 3
 client_vpn_cidr_block    = "10.9.0.0/22"
@@ -29,3 +29,4 @@ vpn_client_list = [ "root" ]
 # vpc_id = "MY_VPC_ID"
 # public_subnet_ids = ["MY_SUBNET_ID_1", "MY_SUBNET_ID_2"]
 # private_subnet_ids = ["MY_SUBNET_ID_3", "MY_SUBNET_ID_3"]
+# security_group_ids = ["MY_SECURITY_GROUP_ID"]
