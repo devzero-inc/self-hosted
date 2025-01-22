@@ -183,31 +183,31 @@ data "aws_ami" "ubuntu-eks_1_30" {
   owners      = ["099720109477"]
 }
 
-#module "node_cluster_role" {
-#  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
-#  version = "5.51.0"
-#
-#  trusted_role_services = [
-#    "ec2.amazonaws.com",
-#  ]
-#  trusted_role_actions = [
-#    "sts:AssumeRole",
-#  ]
-#
-#  create_role       = true
-#  role_name_prefix  = "${substr(var.cluster_name,0 ,(38-length(var.node_role_suffix)))}${var.node_role_suffix}"
-#  role_description  = "EKS managed node group IAM role"
-#  role_requires_mfa = false
-#
-#  force_detach_policies = true
-#
-#  custom_role_policy_arns = [
-#    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-#    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-#    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-#    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-#  ]
-#}
+module "node_cluster_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
+  version = "5.51.0"
+
+  trusted_role_services = [
+    "ec2.amazonaws.com",
+  ]
+  trusted_role_actions = [
+    "sts:AssumeRole",
+  ]
+
+  create_role       = true
+  role_name_prefix  = "${substr(var.name,0 ,(38-length(var.node_role_suffix)))}${var.node_role_suffix}"
+  role_description  = "EKS managed node group IAM role"
+  role_requires_mfa = false
+
+  force_detach_policies = true
+
+  custom_role_policy_arns = [
+    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+  ]
+}
 
 #data "aws_iam_roles" "sso_awsadministratoraccess" {
 #  name_regex = "AWSReservedSSO_AWSAdministratorAccess.*"
@@ -248,6 +248,9 @@ module "eks" {
       key_name       = var.nodes_key_name
 
       ami_id = data.aws_ami.ubuntu-eks_1_30.image_id
+
+      create_iam_role = false
+      iam_role_arn    = module.node_cluster_role.iam_role_arn
 
       min_size     = var.desired_node_size
       max_size     = var.max_node_size
