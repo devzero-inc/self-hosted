@@ -3,6 +3,7 @@ locals {
 
   calculated_public_subnets_ids = length(var.public_subnet_ids) > 0 ? var.public_subnet_ids : module.vpc.public_subnets
   calculated_private_subnets_ids = length(var.private_subnet_ids) > 0 ? var.private_subnet_ids : module.vpc.private_subnets
+  calculated_security_group_ids = length(var.security_group_ids) > 0 ? var.security_group_ids : [module.vpc.default_security_group_id]
 
   vpc_id = var.create_vpc ? module.vpc.vpc_id : var.vpc_id
 
@@ -90,6 +91,11 @@ resource "null_resource" "validations" {
     precondition {
       condition     = !(var.create_vpc == false && length(var.public_subnet_ids) == 0)
       error_message = "The variable public_subnets must be set if create_vpc is false"
+    }
+
+    precondition {
+      condition     = !(var.create_vpc == false && length(var.security_group_ids) == 0)
+      error_message = "The variable security_group_ids must be set if create_vpc is false"
     }
   }
 }
@@ -217,7 +223,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.31.6"
 
-  cluster_name    = "${var.cluster_name}-cluster"
+  cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
 
   # Use the provided VPC ID directly if create_vpc is false
@@ -231,6 +237,10 @@ module "eks" {
 
   cluster_additional_security_group_ids = var.security_group_ids
 
+  cluster_enabled_log_types = [
+    "audit", "api", "authenticator", "controllerManager", "scheduler"
+  ]
+
   kms_key_administrators = concat(
     var.kms_key_administrators, 
     #[
@@ -238,7 +248,7 @@ module "eks" {
     #]
   )
 
-  kms_key_aliases               = ["${var.cluster_name}-cluster"]
+  kms_key_aliases               = [var.cluster_name]
   kms_key_enable_default_policy = var.kms_key_enable_default_policy
 
   eks_managed_node_groups = {
@@ -257,6 +267,21 @@ module "eks" {
       desired_size = var.desired_node_size
 
       enable_bootstrap_user_data = true
+
+      post_bootstrap_user_data = <<-EOT
+          #!/bin/bash
+          set -o xtrace
+          # Backup the original config.toml
+          cp /etc/containerd/config.toml /etc/containerd/config.toml.bak
+
+          echo '' >> /etc/containerd/config.toml
+          echo '[plugins."io.containerd.grpc.v1.cri".registry.configs."docker-registry.devzero.svc.cluster.local:5000".tls]'  >> /etc/containerd/config.toml
+          echo '  insecure_skip_verify = true'  >> /etc/containerd/config.toml
+
+          # Restart containerd to apply the changes
+          systemctl restart containerd
+      EOT
+
       bootstrap_extra_args       = "--kubelet-extra-args '--runtime-request-timeout=\"15m\"'"
 
       block_device_mappings = {
