@@ -1229,30 +1229,3 @@ vault:
     enabled: true
     ## @param vault.job.address Vault address for job
     address: "vault:8200"
-
-  ## @subsection Vault Ingress Configuration
-  ingress:
-    ## @param vault.ingress.enabled Enable Vault ingress
-    enabled: false
-
-## @section Mimir Configuration
-mimir:
-  ## @subsection Mimir Ingress Configuration
-  ingress:
-    ## @param mimir.ingress.enabled Enable Mimir ingress
-    enabled: false
-
-## @section Grafana Configuration
-grafana:
-  ## @subsection Grafana Ingress Configuration
-  ingress:
-    ## @param grafana.ingress.enabled Enable Grafana ingress
-    enabled: false
-
-## @section Registry Configuration
-registry:
-  ## @subsection Registry Ingress Configuration
-  ingress:
-    ## @param registry.ingress.enabled Enable Registry ingress
-    enabled: false
-

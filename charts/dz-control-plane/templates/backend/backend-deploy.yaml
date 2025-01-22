@@ -112,6 +112,11 @@ spec:
                 secretKeyRef:
                   name: vault-unseal-keys
                   key: root-token
+            - name: GLOBAL_FEATURES_GRAFANA_PASSWORD
+              valueFrom:
+                  secretKeyRef:
+                    name: grafana
+                    key: admin-password
       volumes:
         - name: config
           configMap:

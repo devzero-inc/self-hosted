@@ -59,12 +59,13 @@ data:
     global_features:
       grafana:
         enabled: {{ .Values.backend.grafana.enabled }}
-        url: https://grafana.{{ .Values.domain }}
+        url: grafana:80
         datasource_id: {{ .Values.backend.grafana.datasourceId }}
         dora_datasource_id: {{ .Values.backend.grafana.doraDatasourceId }}
         oda_datasource_id: {{ .Values.backend.grafana.odaDatasourceId }}
-        password: {{ .Values.backend.grafana.password }}
+        password: ""
         user: "admin"
+        use_http: true
       dxi:
         enabled: {{ .Values.backend.grafana.enabled }}
     self_hosted: true

@@ -28,35 +28,51 @@ persistence:
   size: "10Gi"
   finalizers:
     - "kubernetes.io/pvc-protection"
-additionalDataSources:
-  - name: mimir
-    access: proxy
-    orgId: 1
-    version: 1
-    type: prometheus
-    uid: "mimir"
-    url: https://{{ printf "%s-mimir-nginx.svc" .Release.Name }}:80
-  - name: pulse
-    access: proxy
-    orgId: 1
-    version: 1
-    uid: "pulse"
-    type: mysql
-    url: https://{{ printf "%s-mysql-pulse.svc" .Release.Name }}:3306
-    user: "pulse"
-    secureJsonData:
-      password: "pulse"
-    jsonData:
-      database: "pulse"
-  - name: timescale
-    access: proxy
-    orgId: 1
-    version: 1
-    uid: "timescale"
-    type: "postgres"
-    url: https://{{ printf "%s-0.svc" .Release.Name }}:5432
-    user: "tsdbadmin"
-    secureJsonData:
-      password: "pulse"
-    jsonData:
-      database: "tsdb"
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: mimir
+        access: proxy
+        orgId: 1
+        version: 1
+        type: prometheus
+        uid: "mimir"
+        url: http://mimir-distributed-nginx:80
+      - name: pulse
+        access: proxy
+        orgId: 1
+        version: 1
+        uid: "pulse"
+        type: mysql
+        url: mysql-pulse-headless:3306
+        user: "pulse"
+        secureJsonData:
+          password: "pulse"
+        jsonData:
+          database: "pulse"
+      - name: timescale
+        access: proxy
+        orgId: 1
+        version: 1
+        uid: "timescale"
+        type: "postgres"
+        url: http://timescaledb-single:5432
+        user: "postgres"
+        secureJsonData:
+          password: "pulse"
+        jsonData:
+          database: "postgres"
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  path: /
+  hosts:
+    - grafana.devzero.internal
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  tls:
+    - secretName: devzero-registry-tls
+      hosts:
+        - grafana.devzero.internal
