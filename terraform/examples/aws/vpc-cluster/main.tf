@@ -229,6 +229,8 @@ module "eks" {
   cluster_endpoint_public_access_cidrs = var.cluster_endpoint_public_access ? var.cluster_endpoint_public_access_cidrs : []
   cluster_endpoint_private_access      = true # TODO: we should check this a bit more, private should always be enabled? 
 
+  cluster_additional_security_group_ids = var.security_group_ids
+
   kms_key_administrators = concat(
     var.kms_key_administrators, 
     #[
