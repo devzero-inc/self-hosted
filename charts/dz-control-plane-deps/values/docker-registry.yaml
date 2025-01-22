@@ -3,8 +3,12 @@
 ingress:
   # -- Specify if the Docker registry Ingress is enabled
   enabled: false
-  # -- Ingress Class Name. May be required for k8s >= 1.18
-  ingressClassName: "nginx"
+  # -- Class Name. May be required for k8s >= 1.18
+  className: nginx
+  path: /
+  # -- Hosts
+  hosts:
+    - registry.example.com
   # -- Annotations
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
@@ -15,9 +19,3 @@ ingress:
     - secretName: devzero-registry-tls
       hosts:
         - registry.example.com
-  # -- Hosts
-  hosts:
-    - host: registry.example.com
-      paths:
-        - path: /
-          pathType: Prefix
