@@ -1522,6 +1522,11 @@
                             "type": "string",
                             "description": "Use custom docker registry",
                             "default": "docker-registry:5000"
+                        },
+                        "DEVBOX_INGRESS_CLASS_NAME": {
+                            "type": "string",
+                            "description": "Use custom nginx ingress controller",
+                            "default": "devzero-data-ingress"
                         }
                     }
                 },

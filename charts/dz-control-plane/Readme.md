@@ -324,6 +324,7 @@
 | `polland.env.LOGSRV_DEFAULT_QUEUE`                      | Default LogSrv queue URL                         | `http://elasticmq:9324/queue/logsrv.fifo` |
 | `polland.env.LOGSRV_DEFAULT_REGION`                     | Default LogSrv region                            | `elasticmq`                               |
 | `polland.env.DOCKER_REGISTRY`                           | Use custom docker registry                       | `docker-registry:5000`                    |
+| `polland.env.DEVBOX_INGRESS_CLASS_NAME`                 | Use custom nginx ingress controller              | `devzero-data-ingress`                    |
 | `polland.autoscaling.enabled`                           | Enable autoscaling for Polland                   | `false`                                   |
 | `polland.autoscaling.minReplicas`                       | Minimum autoscaling replicas for Polland         | `1`                                       |
 | `polland.autoscaling.maxReplicas`                       | Maximum autoscaling replicas for Polland         | `3`                                       |
