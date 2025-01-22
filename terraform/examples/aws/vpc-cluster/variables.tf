@@ -161,7 +161,7 @@ variable "domain" {
 
 variable "use_existing_route53_zone" {
   type    = bool
-  default = false
+  default = true
   description = "If true, skip creating a new Route53 zone and use an existing zone_id instead"
 }
 

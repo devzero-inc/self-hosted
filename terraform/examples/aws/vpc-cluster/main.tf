@@ -3,7 +3,6 @@ locals {
 
   calculated_public_subnets_ids = length(var.public_subnet_ids) > 0 ? var.public_subnet_ids : module.vpc.public_subnets
   calculated_private_subnets_ids = length(var.private_subnet_ids) > 0 ? var.private_subnet_ids : module.vpc.private_subnets
-  calculated_security_group_ids = length(var.security_group_ids) > 0 ? var.security_group_ids : [module.vpc.default_security_group_id]
 
   vpc_id = var.create_vpc ? module.vpc.vpc_id : var.vpc_id
 
@@ -18,7 +17,7 @@ locals {
 
   effective_vpc_cidr_block = var.create_vpc ? module.vpc.vpc_cidr_block : data.aws_vpc.existing[0].cidr_block
 
-  vpc_dns_resolver = cidrhost(var.cidr, 2) # Calculates the +2 host of the CIDR for VPN DNS resolving
+  vpc_dns_resolver = cidrhost(local.effective_vpc_cidr_block, 2) # Calculates the +2 host of the CIDR for VPN DNS resolving
 
   static_node_groups = {
     "node_group_1" = module.eks.eks_managed_node_groups["${var.name}-nodes"].node_group_autoscaling_group_names[0]
@@ -91,11 +90,6 @@ resource "null_resource" "validations" {
     precondition {
       condition     = !(var.create_vpc == false && length(var.public_subnet_ids) == 0)
       error_message = "The variable public_subnets must be set if create_vpc is false"
-    }
-
-    precondition {
-      condition     = !(var.create_vpc == false && length(var.security_group_ids) == 0)
-      error_message = "The variable security_group_ids must be set if create_vpc is false"
     }
   }
 }
@@ -215,9 +209,9 @@ data "aws_ami" "ubuntu-eks_1_30" {
 #  ]
 #}
 
-data "aws_iam_roles" "sso_awsadministratoraccess" {
-  name_regex = "AWSReservedSSO_AWSAdministratorAccess.*"
-}
+#data "aws_iam_roles" "sso_awsadministratoraccess" {
+#  name_regex = "AWSReservedSSO_AWSAdministratorAccess.*"
+#}
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -237,9 +231,9 @@ module "eks" {
 
   kms_key_administrators = concat(
     var.kms_key_administrators, 
-    [
-      one(data.aws_iam_roles.sso_awsadministratoraccess.arns)
-    ]
+    #[
+    #  one(data.aws_iam_roles.sso_awsadministratoraccess.arns)
+    #]
   )
 
   kms_key_aliases               = ["${var.name}-cluster"]
@@ -337,33 +331,33 @@ module "vpn" {
 # Example of using custom ALB, and pointing it to the cluster node port
 ################################################################################
 
-module "alb" {
-  source = "../../../modules/aws/alb"
-
-  name               = "${var.name}-backend"
-
-  node_group_asg_names = local.static_node_groups
-
-  additional_security_group_ids = [module.eks.node_security_group_id]
-  vpc_id                        = local.vpc_id
-  subnet_ids                    = local.calculated_private_subnets_ids
-  vpc_cidr                      = local.effective_vpc_cidr_block
-  certificate_arn               = module.vpn[0].vpn_server_certificate_arn
-  target_port                   = 30080
-  record                        = "backend.${var.domain}"
-  zone_id                       = local.effective_zone_id
-  health_check = {
-    enabled             = true
-    path                = "/"       
-    interval            = 30     
-    timeout             = 5        
-    healthy_threshold   = 2       
-    unhealthy_threshold = 2          
-    matcher             = "200"     
-  }
-
-  depends_on = [
-    module.vpn,
-    module.eks
-  ]
-}
+#module "alb" {
+#  source = "../../../modules/aws/alb"
+#
+#  name               = "${var.name}-backend"
+#
+#  node_group_asg_names = local.static_node_groups
+#
+#  additional_security_group_ids = [module.eks.node_security_group_id]
+#  vpc_id                        = local.vpc_id
+#  subnet_ids                    = local.calculated_private_subnets_ids
+#  vpc_cidr                      = local.effective_vpc_cidr_block
+#  certificate_arn               = module.vpn[0].vpn_server_certificate_arn
+#  target_port                   = 30080
+#  record                        = "backend.${var.domain}"
+#  zone_id                       = local.effective_zone_id
+#  health_check = {
+#    enabled             = true
+#    path                = "/"       
+#    interval            = 30     
+#    timeout             = 5        
+#    healthy_threshold   = 2       
+#    unhealthy_threshold = 2          
+#    matcher             = "200"     
+#  }
+#
+#  depends_on = [
+#    module.vpn,
+#    module.eks
+#  ]
+#}
