@@ -1,5 +1,5 @@
 region = "us-west-1"
-name   = "roblox-env"
+cluster_name   = "roblox-env"
 domain = "devzero.internal"
 
 # EKS
