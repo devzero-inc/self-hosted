@@ -230,6 +230,20 @@ module "eks" {
 
       enable_bootstrap_user_data = true
 
+      pre_bootstrap_user_data = <<-EOT
+          #!/bin/bash
+          set -o xtrace
+          # Backup the original config.toml
+          cp /etc/containerd/config.toml /etc/containerd/config.toml.bak
+
+          echo '' >> /etc/containerd/config.toml
+          echo '[plugins."io.containerd.grpc.v1.cri".registry.configs."docker-registry.devzero.svc.cluster.local:5000".tls]'  >> /etc/containerd/config.toml
+          echo '  insecure_skip_verify = true'  >> /etc/containerd/config.toml
+
+          # Restart containerd to apply the changes
+          systemctl restart containerd
+      EOT
+
       block_device_mappings = {
         sda = {
           device_name = "/dev/sda1"
