@@ -27,3 +27,7 @@ add-docker-creds:
 	--docker-username=$(DOCKERHUB_USERNAME) \
 	--docker-password=$(DOCKERHUB_TOKEN) \
 	-n devzero --dry-run=client -o yaml | kubectl apply -f -
+
+	kubectl patch serviceaccount default \
+	-p '{"imagePullSecrets": [{"name": "regcred"}]}' \
+	--namespace=devzero
