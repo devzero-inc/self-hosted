@@ -29,6 +29,11 @@ output "private_subnet_ids" {
   value       = local.calculated_private_subnets_ids
 }
 
+output "nonroutable_subnet_ids" {
+  description = "List of nonroutable subnet IDs"
+  value       = local.calculated_nonroutable_subnets_ids
+}
+
 output "vpc_cidr_block" {
   description = "The CIDR block of the VPC"
   value       = local.effective_vpc_cidr_block

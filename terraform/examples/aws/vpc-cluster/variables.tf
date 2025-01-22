@@ -74,6 +74,16 @@ variable "private_subnet_ids" {
   }
 }
 
+variable "nonroutable_subnet_ids" {
+  description = "Nonroutable subnets. Required if create_vpc is false"
+  type        = list(string)
+  default = []
+  validation {
+    condition = alltrue([for subnet in var.nonroutable_subnet_ids : startswith(subnet, "subnet-")])
+    error_message = "AWS subnets ids must start with `subnet-`"
+  }
+}
+
 variable "create_igw" {
   description = "Controls if an Internet Gateway is created for public subnets and the related routes that connect them."
   type        = bool

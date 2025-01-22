@@ -3,15 +3,19 @@ locals {
 
   calculated_public_subnets_ids = length(var.public_subnet_ids) > 0 ? var.public_subnet_ids : module.vpc.public_subnets
   calculated_private_subnets_ids = length(var.private_subnet_ids) > 0 ? var.private_subnet_ids : module.vpc.private_subnets
+  calculated_nonroutable_subnets_ids = length(var.nonroutable_subnet_ids) > 0 ? var.nonroutable_subnet_ids : module.vpc.database_subnets
 
   vpc_id = var.create_vpc ? module.vpc.vpc_id : var.vpc_id
 
   calculated_public_subnets_cidrs = [for k, v in local.azs : cidrsubnet(var.cidr, 4, k)]
   calculated_private_subnets_cidrs = [for k, v in local.azs : cidrsubnet(var.cidr, 4, k + 6)]
+  calculated_nonroutable_subnets_cidrs = [for k, v in local.azs : cidrsubnet(var.cidr, 4, k + 12)]
 
   private_subnet_cidr_blocks = var.create_vpc ? module.vpc.private_subnets_cidr_blocks : [for subnet in data.aws_subnet.private_subnets : subnet.cidr_block]
 
   public_subnet_cidr_blocks = var.create_vpc ? module.vpc.public_subnets_cidr_blocks : [for subnet in data.aws_subnet.public_subnets : subnet.cidr_block]
+
+  nonrouteable_subnet_cidr_blocks = var.create_vpc ? module.vpc.database_subnets_cidr_blocks : [for subnet in data.aws_subnet.database_subnets : subnet.cidr_block]
 
   effective_zone_id = var.use_existing_route53_zone ? var.existing_zone_id : aws_route53_zone.private[0].zone_id
 
@@ -91,12 +95,22 @@ resource "null_resource" "validations" {
       condition     = !(var.create_vpc == false && length(var.public_subnet_ids) == 0)
       error_message = "The variable public_subnets must be set if create_vpc is false"
     }
+
+    precondition {
+      condition     = !(var.create_vpc == false && length(var.nonroutable_subnet_ids) == 0)
+      error_message = "The variable nonroutable_subnets must be set if create_vpc is false"
+    }
   }
 }
 
 ################################################################################
 # VPC
 ################################################################################
+data "aws_subnet" "database_subnets" {
+  for_each = var.create_vpc ? toset([]) : toset(var.nonroutable_subnet_ids)
+  id       = each.value
+}
+
 data "aws_subnet" "private_subnets" {
   for_each = var.create_vpc ? toset([]) : toset(var.private_subnet_ids)
   id       = each.value
@@ -125,9 +139,15 @@ module "vpc" {
   cidr = var.cidr
 
   # subnets
-  azs             = local.azs
-  public_subnets  = local.calculated_public_subnets_cidrs
-  private_subnets = local.calculated_private_subnets_cidrs
+  azs              = local.azs
+  public_subnets   = local.calculated_public_subnets_cidrs
+  private_subnets  = local.calculated_private_subnets_cidrs
+  database_subnets = local.calculated_nonroutable_subnets_cidrs
+
+  create_database_subnet_group       = false
+  create_database_subnet_route_table = true
+  create_database_nat_gateway_route  = true
+  database_subnet_suffix = "nonroutable"
 
   public_subnet_tags  = var.additional_public_subnet_tags
   private_subnet_tags = var.additional_private_subnet_tags
@@ -252,6 +272,8 @@ module "eks" {
       min_size     = var.desired_node_size
       max_size     = var.max_node_size
       desired_size = var.desired_node_size
+
+      subnet_ids = local.calculated_nonroutable_subnets_ids
 
       enable_bootstrap_user_data = true
       bootstrap_extra_args       = "--kubelet-extra-args '--runtime-request-timeout=\"15m\"'"
