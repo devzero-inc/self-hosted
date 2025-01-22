@@ -1,5 +1,5 @@
 region = "us-west-1"
-name   = "devzero"
+cluster_name   = "devzero"
 domain = "devzero.internal"
 
 # EKS

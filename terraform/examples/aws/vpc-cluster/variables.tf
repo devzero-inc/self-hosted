@@ -1,12 +1,12 @@
 ################################################################################
 # Common
 ################################################################################
-variable "name" {
+variable "cluster_name" {
   type        = string
   description = "Name prefix to be used by resources"
   default     = "devzero"
   validation {
-    condition = length(var.name) < 39
+    condition = length(var.cluster_name) < 39
     error_message = "The name must be less than 39 characters"
   }
 }

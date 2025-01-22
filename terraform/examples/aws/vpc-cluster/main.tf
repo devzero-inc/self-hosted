@@ -20,7 +20,7 @@ locals {
   vpc_dns_resolver = cidrhost(local.effective_vpc_cidr_block, 2) # Calculates the +2 host of the CIDR for VPN DNS resolving
 
   static_node_groups = {
-    "node_group_1" = module.eks.eks_managed_node_groups["${var.name}-nodes"].node_group_autoscaling_group_names[0]
+    "node_group_1" = module.eks.eks_managed_node_groups["${var.cluster_name}-nodes"].node_group_autoscaling_group_names[0]
   }
 }
 
@@ -121,7 +121,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.17.0"
 
-  name = "${var.name}-vpc"
+  name = "${var.cluster_name}-vpc"
   cidr = var.cidr
 
   # subnets
@@ -195,7 +195,7 @@ module "node_cluster_role" {
   ]
 
   create_role       = true
-  role_name_prefix  = "${substr(var.name,0 ,(38-length(var.node_role_suffix)))}${var.node_role_suffix}"
+  role_name_prefix  = "${substr(var.cluster_name,0 ,(38-length(var.node_role_suffix)))}${var.node_role_suffix}"
   role_description  = "EKS managed node group IAM role"
   role_requires_mfa = false
 
@@ -217,7 +217,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.31.6"
 
-  cluster_name    = "${var.name}-cluster"
+  cluster_name    = "${var.cluster_name}-cluster"
   cluster_version = var.cluster_version
 
   # Use the provided VPC ID directly if create_vpc is false
@@ -238,12 +238,12 @@ module "eks" {
     #]
   )
 
-  kms_key_aliases               = ["${var.name}-cluster"]
+  kms_key_aliases               = ["${var.cluster_name}-cluster"]
   kms_key_enable_default_policy = var.kms_key_enable_default_policy
 
   eks_managed_node_groups = {
-    "${var.name}-nodes" = {
-      name           = "${var.name}-nodes"
+    "${var.cluster_name}-nodes" = {
+      name           = "${var.cluster_name}-nodes"
       instance_types = [var.worker_instance_type]
       key_name       = var.nodes_key_name
 
@@ -316,7 +316,7 @@ module "vpn" {
 
   source = "../../../modules/aws/vpn"
 
-  name                          = var.name
+  name                          = var.cluster_name
   region                        = var.region
   additional_security_group_ids = [module.eks.cluster_primary_security_group_id]
   vpc_id                        = local.vpc_id
