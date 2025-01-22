@@ -1,5 +1,5 @@
 region = "us-west-1"
-name   = "roblox-env"
+name   = "devzero"
 domain = "devzero.internal"
 
 # EKS
@@ -12,16 +12,17 @@ cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
 
 # VPC
 create_vpc               = true
-create_vpn               = true
+create_vpn               = false
 cidr                     = "10.8.0.0/16"
 availability_zones_count = 3
+client_vpn_cidr_block    = "10.9.0.0/22"
+
 create_igw               = true
 one_nat_gateway_per_az   = true
 single_nat_gateway       = false
 enable_nat_gateway       = true
-client_vpn_cidr_block    = "10.9.0.0/22"
 
-vpn_client_list = [ "root", "mauro", "zvonimir", "everton" ]
+vpn_client_list = [ "root" ]
 
 # Existing VPC
 # create_vpc = false
