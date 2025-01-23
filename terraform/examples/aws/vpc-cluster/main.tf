@@ -21,9 +21,6 @@ locals {
   vpc_dns_resolver = cidrhost(local.effective_vpc_cidr_block, 2)
   # Calculates the +2 host of the CIDR for VPN DNS resolving
 
-  #   static_node_groups = {
-  #     "node_group_1" = module.eks.eks_managed_node_groups["${var.cluster_name}-nodes"].node_group_autoscaling_group_names[0]
-  #   }
 }
 
 data "aws_availability_zones" "available" {}
@@ -244,6 +241,8 @@ module "eks" {
 module "ubuntu_node_group" {
   source = "../../../modules/aws/ubuntu_node_group"
 
+  count = var.enable_ubuntu_node_group ? 1 : 0
+
   cluster_name = module.eks.cluster_name
 
   instance_type = var.instance_type
@@ -299,37 +298,43 @@ resource "aws_route53_zone" "private" {
   tags = var.tags
 }
 
-
 ################################################################################
 # Example of using custom ALB, and pointing it to the cluster node port
 ################################################################################
-# module "alb" {
-#   source = "../../../modules/aws/alb"
-#   count  = var.create_alb ? 1 : 0
-#
-#   name = "${var.cluster_name}-service"
-#
-#   node_group_asg_names = local.static_node_groups
-#
-#   additional_security_group_ids = [module.eks.node_security_group_id]
-#   vpc_id          = local.vpc_id
-#   subnet_ids      = local.calculated_private_subnets_ids
-#   vpc_cidr        = local.effective_vpc_cidr_block
-#   certificate_arn = var.create_vpn ? module.vpn[0].vpn_server_certificate_arn : null
-#   target_port     = 30080
-#   record          = "service.${var.domain}"
-#   zone_id         = local.effective_zone_id
-#   health_check = {
-#     enabled             = true
-#     path                = "/"
-#     interval            = 30
-#     timeout             = 5
-#     healthy_threshold   = 2
-#     unhealthy_threshold = 2
-#     matcher             = "200"
-#   }
-#
-#   depends_on = [
-#     module.eks
-#   ]
-# }
+module "alb" {
+  source = "../../../modules/aws/alb"
+  count  = var.create_alb ? 1 : 0
+
+  name = "${substr(var.cluster_name, 0, (32 - length("-service")))}-service"
+
+  node_group_asg_names = merge({
+    # Other ASG names to be added to this ALB
+    },
+    # If ubuntu node group is enabled, add it to the ALB
+    var.enable_ubuntu_node_group ? {
+      "ubuntu_node_group" = module.ubuntu_node_group[0].node_group.node_group_autoscaling_group_names[0]
+    } : {}
+  )
+
+  additional_security_group_ids = [module.eks.node_security_group_id]
+  vpc_id                        = local.vpc_id
+  subnet_ids                    = local.calculated_private_subnets_ids
+  vpc_cidr                      = local.effective_vpc_cidr_block
+  certificate_arn               = var.create_vpn ? module.vpn[0].vpn_server_certificate_arn : null
+  target_port                   = 30080
+  record                        = "service.${var.domain}"
+  zone_id                       = local.effective_zone_id
+  health_check = {
+    enabled             = true
+    path                = "/"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    matcher             = "200"
+  }
+
+  depends_on = [
+    module.eks
+  ]
+}
