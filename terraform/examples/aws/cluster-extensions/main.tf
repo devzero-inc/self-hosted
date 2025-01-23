@@ -4,8 +4,6 @@ data "aws_availability_zones" "available" {}
 # Providers
 ################################################################################
 
-provider "tls" {}
-
 provider "aws" {
   region = var.region
 }

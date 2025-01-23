@@ -15,6 +15,7 @@ cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
 # VPN
 create_vpn            = false
 client_vpn_cidr_block = "10.9.0.0/22"
+vpn_client_list = ["root"]
 
 # VPC
 create_vpc               = true
@@ -22,11 +23,9 @@ cidr                     = "10.8.0.0/16"
 availability_zones_count = 3
 
 create_igw             = true
-one_nat_gateway_per_az = true
-single_nat_gateway     = false
 enable_nat_gateway     = true
-
-vpn_client_list = ["root"]
+one_nat_gateway_per_az = false
+single_nat_gateway     = true
 
 # Existing VPC
 # create_vpc = false
