@@ -216,7 +216,7 @@ module "eks" {
     ]
   )
 
-  # We need this to create an initial role to be added to KMS key
+  # Cluster IAM role
   create_iam_role = true
   # Hack to help fixing length the name of the iam role for long named clusters
   iam_role_name = "${substr(var.cluster_name, 0, (37 - length("-cluster")))}-cluster"
