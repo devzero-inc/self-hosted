@@ -259,6 +259,11 @@ variable "instance_type" {
 }
 
 
+variable "enable_ubuntu_node_group" {
+  description = "Enable ubuntu node groups"
+  type        = bool
+  default     = true
+}
 
 
 ################################################################################
