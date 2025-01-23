@@ -6,8 +6,8 @@ variable "cluster_name" {
   description = "Name prefix to be used by resources"
   default     = "devzero"
   validation {
-    condition = length(var.cluster_name) < 39
-    error_message = "The name must be less than 39 characters"
+    condition     = length(var.cluster_name) < 39
+    error_message = "The name must be less than 39 characters. Current length is ${length(var.cluster_name)} characters."
   }
 }
 
@@ -29,9 +29,9 @@ variable "create_vpc" {
 variable "vpc_id" {
   description = "The ID of the VPC that the cluster will be deployed in (required if create_vpc is false)"
   type        = string
-  default = null
+  default     = null
   validation {
-    condition = (var.vpc_id != null && can(startswith(var.vpc_id, "vpc-")) || var.vpc_id == null)
+    condition     = (var.vpc_id != null && can(startswith(var.vpc_id, "vpc-")) || var.vpc_id == null)
     error_message = "AWS VPC ids must start with `vpc-`"
   }
 }
@@ -39,7 +39,7 @@ variable "vpc_id" {
 variable "cidr" {
   type        = string
   description = "Cidr block"
-  default = null
+  default     = null
 }
 
 variable "availability_zones_count" {
@@ -57,9 +57,9 @@ variable "availability_zones" {
 variable "public_subnet_ids" {
   description = "Public subnets. Optionally create public subnets"
   type        = list(string)
-  default = []
+  default     = []
   validation {
-    condition = alltrue([for subnet in var.public_subnet_ids : startswith(subnet, "subnet-")])
+    condition     = alltrue([for subnet in var.public_subnet_ids : startswith(subnet, "subnet-")])
     error_message = "AWS subnets ids must start with `subnet-`"
   }
 }
@@ -67,9 +67,9 @@ variable "public_subnet_ids" {
 variable "private_subnet_ids" {
   description = "Private subnets. Required if create_vpc is false"
   type        = list(string)
-  default = []
+  default     = []
   validation {
-    condition = alltrue([for subnet in var.private_subnet_ids : startswith(subnet, "subnet-")])
+    condition     = alltrue([for subnet in var.private_subnet_ids : startswith(subnet, "subnet-")])
     error_message = "AWS subnets ids must start with `subnet-`"
   }
 }
@@ -78,24 +78,6 @@ variable "create_igw" {
   description = "Controls if an Internet Gateway is created for public subnets and the related routes that connect them."
   type        = bool
   default     = true
-}
-
-variable "instance_tenancy" {
-  description = "A tenancy option for instances launched into the VPC"
-  type        = string
-  default     = "default"
-}
-
-variable "additional_public_subnet_tags" {
-  description = "Additional tags for the public subnets"
-  type        = map(string)
-  default     = {}
-}
-
-variable "additional_private_subnet_tags" {
-  description = "Additional tags for the private subnets"
-  type        = map(string)
-  default     = {}
 }
 
 variable "enable_nat_gateway" {
@@ -116,9 +98,8 @@ variable "one_nat_gateway_per_az" {
   default     = true
 }
 
-variable "manage_default_network_acl" {
-  description = "Should be true to adopt and manage Default Network ACL"
-  type        = bool
+variable "enable_dhcp_options" {
+  description = "Should be true if you want to specify a DHCP options set with a custom domain name, DNS servers, NTP servers, netbios servers, and/or netbios server type"
   default     = true
 }
 
@@ -139,8 +120,8 @@ variable "additional_routes" {
 }
 
 variable "client_vpn_cidr_block" {
-  type    = string
-  default = "10.9.0.0/22"
+  type        = string
+  default     = "10.9.0.0/22"
   description = "CIDR for Client VPN IP addresses"
 }
 
@@ -160,14 +141,14 @@ variable "domain" {
 }
 
 variable "use_existing_route53_zone" {
-  type    = bool
-  default = true
+  type        = bool
+  default     = true
   description = "If true, skip creating a new Route53 zone and use an existing zone_id instead"
 }
 
 variable "existing_zone_id" {
-  type      = string
-  default   = null
+  type        = string
+  default     = null
   description = "The existing Route53 zone ID (if use_existing_route53_zone is true)"
 }
 
@@ -185,21 +166,6 @@ variable "region" {
   description = "AWS region"
 }
 
-variable "worker_instance_type" {
-  type        = string
-  description = "Node instance type"
-}
-
-variable "desired_node_size" {
-  type        = number
-  description = "Desired node size"
-}
-
-variable "max_node_size" {
-  type        = number
-  description = "Max node size"
-}
-
 variable "subnet_ids" {
   description = "Subnets"
   type        = list(string)
@@ -214,25 +180,20 @@ variable "security_group_ids" {
 
 variable "disk_size" {
   description = "Nodes disk size in GiB"
-  type = number
-  default = 200
+  type        = number
+  default     = 200
 }
 
 variable "kms_key_enable_default_policy" {
   description = "Enable default KMS key policy"
-  type = bool
-  default = true
+  type        = bool
+  default     = true
 }
 
 variable "kms_key_administrators" {
   description = "A list of IAM ARNs for [key administrators](https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-default.html#key-policy-default-allow-administrators). If no value is provided, the current caller identity is used to ensure at least one key admin is available"
   type        = list(string)
   default     = []
-}
-
-variable "nodes_key_name" {
-  description = "Nodes Kay Pair name"
-  default     = ""
 }
 
 variable "cluster_identity_providers" {
@@ -247,22 +208,64 @@ variable "eks_access_entries" {
 
 variable "cluster_endpoint_public_access" {
   description = "Enable cluster autoscaler"
-  type = bool
-  default = true
+  type        = bool
+  default     = true
 }
 
 variable "cluster_endpoint_public_access_cidrs" {
   description = "List of CIDR blocks which can access the Amazon EKS public API server endpoint"
-  default = null
+  default     = null
 }
 
 variable "enable_cluster_creator_admin_permissions" {
   description = "Indicates whether or not to add the cluster creator (the identity used by Terraform) as an administrator via access entry"
-  type = bool
-  default = true
+  type        = bool
+  default     = true
 }
 
 variable "node_role_suffix" {
-  default = "-nodes-eks-node-group-"
+  default     = "-nodes-eks-node-group-"
   description = "Suffix to use on the node group IAM role"
+}
+
+variable "add_current_user_to_kms" {
+  description = "Adds the current terraform user as an admin of EKS KMS key"
+  type        = bool
+  default     = true
+}
+
+variable "min_size" {
+  type        = number
+  description = "Min node size"
+  default     = 4
+}
+
+variable "desired_size" {
+  type        = number
+  description = "Desired node size"
+  default     = 4
+}
+
+variable "max_size" {
+  type        = number
+  description = "Max node size"
+  default     = 4
+}
+
+variable "instance_type" {
+  type        = string
+  description = "Node instance type"
+  default     = "m5.4xlarge"
+}
+
+
+
+
+################################################################################
+# Example of using custom ALB, and pointing it to the cluster node port
+################################################################################
+variable "create_alb" {
+  description = "Create custom ALB pointing to the cluster node port"
+  type        = bool
+  default     = false
 }
