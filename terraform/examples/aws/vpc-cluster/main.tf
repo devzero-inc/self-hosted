@@ -100,6 +100,32 @@ resource "null_resource" "validations" {
   }
 }
 
+
+################################################################################
+# VPN
+################################################################################
+
+module "vpn" {
+  count = var.create_vpn ? 1 : 0
+
+  source = "../../../modules/aws/vpn"
+
+  name                          = var.cluster_name
+  region                        = var.region
+  additional_security_group_ids = [module.eks.cluster_primary_security_group_id]
+  vpc_id                        = local.vpc_id
+  subnet_ids                    = local.calculated_private_subnets_ids
+  client_vpn_cidr_block         = var.client_vpn_cidr_block
+  vpc_dns_resolver              = local.vpc_dns_resolver
+
+  vpn_client_list               = var.vpn_client_list
+
+  additional_server_dns_names = [
+    "${var.domain}",
+    "*.${var.domain}"
+  ]
+}
+
 ################################################################################
 # VPC
 ################################################################################
@@ -332,30 +358,6 @@ resource "aws_route53_zone" "private" {
   tags = var.tags
 }
 
-################################################################################
-# VPN
-################################################################################
-
-module "vpn" {
-  count = var.create_vpn ? 1 : 0
-
-  source = "../../../modules/aws/vpn"
-
-  name                          = var.cluster_name
-  region                        = var.region
-  additional_security_group_ids = [module.eks.cluster_primary_security_group_id]
-  vpc_id                        = local.vpc_id
-  subnet_ids                    = local.calculated_private_subnets_ids
-  client_vpn_cidr_block         = var.client_vpn_cidr_block
-  vpc_dns_resolver              = local.vpc_dns_resolver
-
-  vpn_client_list               = var.vpn_client_list
-
-  additional_server_dns_names = [
-    "${var.domain}",
-    "*.${var.domain}"
-  ]
-}
 
 ################################################################################
 # Example of using custom ALB, and pointing it to the cluster node port
