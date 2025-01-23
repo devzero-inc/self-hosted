@@ -1,11 +1,3 @@
-locals {
-  private_subnet_cidr_blocks = [for subnet in data.aws_subnet.private_subnets : subnet.cidr_block]
-
-  public_subnet_cidr_blocks = [for subnet in data.aws_subnet.public_subnets : subnet.cidr_block]
-
-  effective_vpc_cidr_block = data.aws_vpc.existing.cidr_block
-}
-
 data "aws_availability_zones" "available" {}
 
 ################################################################################
@@ -18,68 +10,35 @@ provider "aws" {
   region = var.region
 }
 
-data "aws_eks_cluster" "cluster-data" {
+data "aws_eks_cluster" "this" {
   name = var.cluster_name
 }
 
 data "aws_eks_cluster_auth" "cluster-auth" {
-  name = data.aws_eks_cluster.cluster-data.id
+  name = data.aws_eks_cluster.this.id
 }
 
 data "aws_iam_openid_connect_provider" "this" {
-  url = data.aws_eks_cluster.cluster-data.identity[0].oidc[0].issuer
+  url = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
 }
 
 provider "kubernetes" {
-  host                   = data.aws_eks_cluster.cluster-data.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster-data.certificate_authority[0].data)
+  host                   = data.aws_eks_cluster.this.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.cluster-auth.token
 }
 
 provider "helm" {
   kubernetes {
-    host                   = data.aws_eks_cluster.cluster-data.endpoint
-    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster-data.certificate_authority[0].data)
+    host                   = data.aws_eks_cluster.this.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.cluster-auth.token
   }
 }
 
-
-################################################################################
-# Common resources
-################################################################################
-
-resource "null_resource" "validations" {
-  lifecycle {
-    precondition {
-      condition     = !(var.vpc_id == null)
-      error_message = "The variable vpc_id must be set"
-    }
-
-    precondition {
-      condition     = !(length(var.private_subnet_ids) == 0)
-      error_message = "The variable private_subnets must be set"
-    }
-
-    precondition {
-      condition     = !(length(var.public_subnet_ids) == 0)
-      error_message = "The variable public_subnets must be set"
-    }
-  }
-}
-
-data "aws_subnet" "private_subnets" {
-  for_each = toset(var.private_subnet_ids)
+data "aws_subnet" "cluster_subnets" {
+  for_each = toset(data.aws_eks_cluster.this.vpc_config[0].subnet_ids)
   id       = each.value
-}
-
-data "aws_subnet" "public_subnets" {
-  for_each = toset(var.public_subnet_ids)
-  id       = each.value
-}
-
-data "aws_vpc" "existing" {
-  id    = var.vpc_id
 }
 
 ################################################################################
@@ -89,10 +48,10 @@ module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.51.0"
 
-  role_name_prefix = "${data.aws_eks_cluster.cluster-data.id}-ebs-csi-driver-"
+  role_name_prefix = "${substr(data.aws_eks_cluster.this.name, 0, (38 - length("-cluster")))}-cluster"
 
   attach_ebs_csi_policy = true
-  policy_name_prefix    = data.aws_eks_cluster.cluster-data.id
+  policy_name_prefix    = data.aws_eks_cluster.this.id
 
   oidc_providers = {
     main = {
@@ -108,9 +67,9 @@ module "eks_blueprints_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
   version = "1.19.0"
 
-  cluster_name      = data.aws_eks_cluster.cluster-data.id
-  cluster_endpoint  = data.aws_eks_cluster.cluster-data.endpoint
-  cluster_version   = data.aws_eks_cluster.cluster-data.version
+  cluster_name      = data.aws_eks_cluster.this.id
+  cluster_endpoint  = data.aws_eks_cluster.this.endpoint
+  cluster_version   = data.aws_eks_cluster.this.version
   oidc_provider_arn = data.aws_iam_openid_connect_provider.this.arn
 
   enable_aws_load_balancer_controller = true
@@ -225,7 +184,7 @@ module "efs" {
   source  = "terraform-aws-modules/efs/aws"
   version = "1.6.5"
 
-  name = data.aws_eks_cluster.cluster-data.id
+  name = data.aws_eks_cluster.this.id
   encrypted = true
 
   performance_mode = "generalPurpose"
@@ -238,16 +197,16 @@ module "efs" {
     transition_to_ia = "AFTER_30_DAYS"
   }
 
-  mount_targets = { for i, r in var.private_subnet_ids : "mount_${i}" => {subnet_id : r } }
+  mount_targets = { for i, r in data.aws_eks_cluster.this.vpc_config[0].subnet_ids : "mount_${i}" => {subnet_id : r } }
 
   create_security_group      = true
-  security_group_description = "EFS security group for ${data.aws_eks_cluster.cluster-data.id} EKS cluster"
-  security_group_vpc_id      = var.vpc_id
+  security_group_description = "EFS security group for ${data.aws_eks_cluster.this.id} EKS cluster"
+  security_group_vpc_id      = data.aws_eks_cluster.this.vpc_config[0].vpc_id
   security_group_rules = {
     vpc = {
       # relying on the defaults provided for EFS/NFS (2049/TCP + ingress)
       description = "NFS ingress from VPC private subnets"
-      cidr_blocks = local.private_subnet_cidr_blocks
+      cidr_blocks = [for subnet in data.aws_subnet.cluster_subnets : subnet.cidr_block]
     }
   }
 
