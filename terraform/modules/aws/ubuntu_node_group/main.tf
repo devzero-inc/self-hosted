@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 data "aws_eks_cluster" "this" {
-  name = "roblox-env"
+  name = var.cluster_name
 }
 
 data "aws_ami" "ubuntu-eks_1_30" {
