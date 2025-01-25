@@ -1521,7 +1521,7 @@
                         "DOCKER_REGISTRY": {
                             "type": "string",
                             "description": "Use custom docker registry",
-                            "default": "docker-registry:5000"
+                            "default": "docker-registry.devzero.svc.cluster.local:5000"
                         },
                         "DEVBOX_INGRESS_CLASS_NAME": {
                             "type": "string",
@@ -2448,61 +2448,6 @@
                             "type": "string",
                             "description": "Vault address for job",
                             "default": "vault:8200"
-                        }
-                    }
-                },
-                "ingress": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean",
-                            "description": "Enable Vault ingress",
-                            "default": false
-                        }
-                    }
-                }
-            }
-        },
-        "mimir": {
-            "type": "object",
-            "properties": {
-                "ingress": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean",
-                            "description": "Enable Mimir ingress",
-                            "default": false
-                        }
-                    }
-                }
-            }
-        },
-        "grafana": {
-            "type": "object",
-            "properties": {
-                "ingress": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean",
-                            "description": "Enable Grafana ingress",
-                            "default": false
-                        }
-                    }
-                }
-            }
-        },
-        "registry": {
-            "type": "object",
-            "properties": {
-                "ingress": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean",
-                            "description": "Enable Registry ingress",
-                            "default": false
                         }
                     }
                 }

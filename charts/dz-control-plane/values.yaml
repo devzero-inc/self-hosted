@@ -794,7 +794,7 @@ polland:
     LOGSRV_DEFAULT_REGION: "elasticmq"
 
     ## @param polland.env.DOCKER_REGISTRY Use custom docker registry
-    DOCKER_REGISTRY: "docker-registry:5000"
+    DOCKER_REGISTRY: "docker-registry.devzero.svc.cluster.local:5000"
 
     ## @param polland.env.DEVBOX_INGRESS_CLASS_NAME Use custom nginx ingress controller
     DEVBOX_INGRESS_CLASS_NAME: "devzero-data-ingress"
