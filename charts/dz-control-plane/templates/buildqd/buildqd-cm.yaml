@@ -182,7 +182,7 @@ data:
     #[registry."yourmirror.local:5000"]
     #http = true
     
-    [registry."docker-registry:5000"]
+    [registry."docker-registry.devzero.svc.cluster.local:5000"]
     http = true
 
     # Frontend control

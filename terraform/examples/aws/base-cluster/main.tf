@@ -149,6 +149,14 @@ module "vpc" {
   public_subnets  = local.calculated_public_subnets_cidrs
   private_subnets = local.calculated_private_subnets_cidrs
 
+  public_subnet_tags = {
+    "kubernetes.io/role/elb" = "1"
+  }
+
+  private_subnet_tags = {
+    "kubernetes.io/role/internal-elb" = "1"
+  }
+
   # nat gateways
   enable_nat_gateway     = var.enable_nat_gateway
   single_nat_gateway     = var.single_nat_gateway
