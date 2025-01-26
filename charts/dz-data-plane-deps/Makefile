@@ -6,7 +6,7 @@ install:
 
 .PHONY: delete
 delete:
-	@$(MAKE)  delete-devzer-data-ingress
+	@$(MAKE)  delete-devzero-data-ingress
 
 .PHONY: install-devzero-data-ingress
 install-devzero-data-ingress:
