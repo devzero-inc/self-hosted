@@ -72,15 +72,15 @@ def check_control_plane():
 
 
 @check_control_plane.command("all")
-def check_control_plane_all():
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
+def check_control_plane_all(force):
     """Runs all control-plane checks"""
     click.echo("Running all control plane checks...")
-    check_control_plane_permissions()
-    check_control_plane_cluster()
-    check_control_plane_network()
-    check_control_plane_ingress()
-    check_control_plane_chart()
-    check_control_plane_cert_issuer()
+    provider: AWSProvider = get_provider()
+    provider.control_plane_permissions(force)
+    provider.control_plane_cluster(force)
 
 
 @check_control_plane.command("permissions")
@@ -89,7 +89,8 @@ def check_control_plane_all():
 )
 def check_control_plane_permissions(force):
     """Runs permission checks for the current cloud provider"""
-    get_provider().check_control_plane_permissions(force)
+    provider: AWSProvider = get_provider()
+    provider.control_plane_permissions(force)
 
 
 @check_control_plane.command("cluster")

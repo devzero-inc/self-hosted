@@ -31,13 +31,18 @@ class AWSProvider:
         # Check all required control plane permissions
         iam = boto3.client("iam")
 
+        arn = identity["Arn"]
+        if "assumed-role" in arn:
+            role = iam.get_role(RoleName=arn.split(":assumed-role/")[1].split("/")[0])
+            arn = role["Role"]["Arn"]
+
         failed_permissions = []
 
         permission_name = None
         try:
             # Simulate the policy to check if user has permission
             response = iam.simulate_principal_policy(
-                PolicySourceArn=identity["Arn"],
+                PolicySourceArn=arn,
                 ActionNames=AWS_CONTROL_PLANE_PERMISSIONS,
             )
 
