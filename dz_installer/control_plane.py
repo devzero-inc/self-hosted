@@ -3,12 +3,16 @@ import sh
 import click
 import subprocess
 
+from kubernetes import client, config
+from kubernetes.client import V1IngressClass
 from ruamel.yaml import YAML
 from dz_installer.dz_config import DZConfig
 from dz_installer.helpers import error, success, info, check_chart_is_installed, get_nested_value
 
 yaml = YAML()
 yaml.preserve_quotes = True
+
+config.load_kube_config()
 
 class ControlPlane:
 
@@ -90,8 +94,7 @@ class ControlPlane:
         can_install = self.check_control_plane_chart(force)
 
         if not can_install and not force:
-            # return
-            pass
+            return
 
         info("Installing control plane...")
 
@@ -164,3 +167,24 @@ class ControlPlane:
         except Exception as e:
             error(str(e))
             return False
+          
+    def check_control_plane_ingress(self, 
+                                   ):
+        info("Checking control plane ingress...")
+
+        control_plane_cfg = DZConfig().data.control_plane
+        api = client.NetworkingV1Api()
+
+        ingress_classes: list[V1IngressClass] = api.list_ingress_class().items
+
+        options = []
+        for ingress_class in ingress_classes:
+            options.append(ingress_class.metadata.name)
+
+        if not control_plane_cfg.ingress or force:
+            if not options:
+                control_plane_cfg.ingress.install = click.confirm("No ingress classes found. Do you want to install an ingress controller?", default=True)
+                control_plane_cfg.save()
+            else:
+                control_plane_cfg.ingress.cls = click.prompt("Please select an ingress class for the control plane", type=click.Choice(options, case_sensitive=False), default=options[0])
+                control_plane_cfg.save()

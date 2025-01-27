@@ -44,3 +44,32 @@ If using a namespace other than `devzero-self-hosted`, set the namespace:
 --set namespace=<NAMESPACE>
 ```
 
+## Parameters
+
+### Devzero
+
+| Name             | Description     | Value |
+| ---------------- | --------------- | ----- |
+| `devzero.teamId` | Team identifier | `""`  |
+| `devzero.region` | Base Region     | `""`  |
+
+### Vault
+
+| Name                   | Description  | Value                    |
+| ---------------------- | ------------ | ------------------------ |
+| `devzero.vault.server` | Vault server | `https://csi.devzero.io` |
+
+### Node Labeler
+
+| Name                  | Description             | Value  |
+| --------------------- | ----------------------- | ------ |
+| `nodeLabeler.enabled` | Is node labeler enabled | `true` |
+
+### Credentials Configuration
+
+| Name                   | Description            | Value |
+| ---------------------- | ---------------------- | ----- |
+| `credentials.registry` | Container registry URL | `""`  |
+| `credentials.username` | Registry username      | `""`  |
+| `credentials.password` | Registry password      | `""`  |
+| `credentials.email`    | Registry email address | `""`  |

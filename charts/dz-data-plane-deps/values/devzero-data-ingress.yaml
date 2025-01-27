@@ -9,7 +9,13 @@ controller:
       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
       service.beta.kubernetes.io/aws-load-balancer-type: "external"
       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
-      service.beta.kubernetes.io/aws-load-balancer-name: "devzero-ingress-nginx"
-  # extraArgs:
-  #   default-ssl-certificate: "cert-manager/cert-manager-webhook-tls"
-  #   enable-ssl-passthrough: "true"
+      service.beta.kubernetes.io/aws-load-balancer-name: "devzero-data-ingress"
+
+  ingressClass: devzero-data-ingress
+  ingressClassByName: true
+  ingressClassResource:
+    name: devzero-data-ingress
+    controllerValue: devzero.io/devzero-data-ingress
+  extraArgs:
+    # default-ssl-certificate: "cert-manager/cert-manager-webhook-tls"
+    enable-ssl-passthrough: "true"

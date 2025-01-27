@@ -30,3 +30,14 @@ variable "enable_cluster_autoscaler" {
   type = bool
   default = false
 }
+
+
+################################################################################
+# EFS
+################################################################################
+
+variable "enable_efs" {
+  description = "Enable EFS"
+  type = bool
+  default = true
+}

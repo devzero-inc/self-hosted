@@ -10,9 +10,9 @@ data:
     use_sentry: false
     redis_address: {{ .Values.buildqd.redis.url }}
     metrics_address: 0.0.0.0:{{ .Values.buildqd.service.metricsPort }}
-    polland_address: http://dz-control-plane-polland:{{ .Values.polland.service.port }}
+    polland_address: http://{{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}:{{ .Values.polland.service.port }}
     buildkit_address: localhost:1234 
-    backend_address: http://dz-control-plane-backend:{{ .Values.backend.service.port }}/internal/
+    backend_address: http://{{ include "devzero.resourceName" (dict "ctx" . "component" "backend") }}:{{ .Values.backend.service.port }}/internal/
     logsrv_default_queue: {{ .Values.buildqd.logsrv.queue }}
     logsrv_default_region: {{ .Values.buildqd.logsrv.region }}
     max_workers: 1
@@ -182,7 +182,7 @@ data:
     #[registry."yourmirror.local:5000"]
     #http = true
     
-    [registry."dz-control-plane-docker-registry:5000"]
+    [registry."docker-registry.devzero.svc.cluster.local:5000"]
     http = true
 
     # Frontend control

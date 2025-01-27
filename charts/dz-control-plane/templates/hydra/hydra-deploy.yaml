@@ -83,6 +83,11 @@ spec:
             - mountPath: /etc/headscale/self_hosted.yaml
               name: config
               subPath: self_hosted.yaml
+            {{- if .Values.hydra.derp.customderp }}
+            - mountPath: /etc/headscale/custom_derp.json
+              name: config
+              subPath: custom_derp.json
+            {{- end }}
           env:
             - name: HEADSCALE_CONFIG
               value: "/etc/headscale/self_hosted.yaml"

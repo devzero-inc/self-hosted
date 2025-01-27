@@ -4,6 +4,7 @@
 
 *.tfstate*
 .terraform
+.terraform.lock.hcl
 
 # Downloaded helm charts
 **/charts/**.tgz

@@ -13,20 +13,21 @@
 
 ### Chart Configuration
 
-| Name               | Description                                      | Value            |
-| ------------------ | ------------------------------------------------ | ---------------- |
-| `nameOverride`     | String to override the chart's name              | `""`             |
-| `fullnameOverride` | String to override the chart's computed fullname | `""`             |
-| `domain`           | Domain name for the installation                 | `domain.example` |
+| Name               | Description                                      | Value              |
+| ------------------ | ------------------------------------------------ | ------------------ |
+| `nameOverride`     | String to override the chart's name              | `""`               |
+| `fullnameOverride` | String to override the chart's computed fullname | `""`               |
+| `domain`           | Domain name for the installation                 | `devzero.internal` |
 
 ### Credentials Configuration
 
-| Name                   | Description            | Value |
-| ---------------------- | ---------------------- | ----- |
-| `credentials.registry` | Container registry URL | `""`  |
-| `credentials.username` | Registry username      | `""`  |
-| `credentials.password` | Registry password      | `""`  |
-| `credentials.email`    | Registry email address | `""`  |
+| Name                   | Description                   | Value       |
+| ---------------------- | ----------------------------- | ----------- |
+| `credentials.enable`   | Enable docker hub credentials | `true`      |
+| `credentials.registry` | Container registry URL        | `docker.io` |
+| `credentials.username` | Registry username             | `""`        |
+| `credentials.password` | Registry password             | `""`        |
+| `credentials.email`    | Registry email address        | `""`        |
 
 ### Image Configuration
 
@@ -44,6 +45,14 @@
 | -------------------- | ----------------------------- | --------------------------------------------- |
 | `workspace.image`    | Base image for workspaces     | `public.ecr.aws/v1i4e1r2/devzero-devbox-base` |
 | `workspace.localTag` | Tag for local workspace image | `base-latest`                                 |
+
+### Base Image Configuration
+
+| Name                              | Description                      | Value                                                                             |
+| --------------------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
+| `workspace.baseImages.sysboxBase` | Base image for sysbox deployment | `public.ecr.aws/v1i4e1r2/ubuntu-devbox-base:base-2024-12-17--06-31--c705618e0d55` |
+| `workspace.baseImages.kataBase`   | Base image for kata deployment   | `public.ecr.aws/v1i4e1r2/kata-devbox-base:base-2025-01-13--18-11--7bb0a987f303`   |
+| `workspace.baseImages.cliImage`   | Base image for cli deployment    | `public.ecr.aws/v1i4e1r2/dzcmd:24434f9`                                           |
 
 ### Global Configuration
 
@@ -99,59 +108,59 @@
 
 ### Backend Configuration
 
-| Name                                                    | Description                                           | Value                                                                                                      |
-| ------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `backend.replicas`                                      | Number of replicas for Backend                        | `1`                                                                                                        |
-| `backend.imageName`                                     | Image name for Backend service                        | `backend`                                                                                                  |
-| `backend.schedulerName`                                 | Optionally set the scheduler for pods                 | `""`                                                                                                       |
-| `backend.priorityClassName`                             | Optionally set the name of the PriorityClass for pods | `""`                                                                                                       |
-| `backend.nodeSelector`                                  | NodeSelector to pin pods to certain set of nodes      | `{}`                                                                                                       |
-| `backend.affinity`                                      | Pod affinity settings                                 | `{}`                                                                                                       |
-| `backend.tolerations`                                   | Pod tolerations                                       | `[]`                                                                                                       |
-| `backend.podLabels`                                     | Pod labels                                            | `{}`                                                                                                       |
-| `backend.podAnnotations`                                | Pod annotations                                       | `{}`                                                                                                       |
-| `backend.annotations`                                   | Annotations                                           | `{}`                                                                                                       |
-| `backend.redis.url`                                     | Redis URL for Backend                                 | `redis://redis-headless:6379/1`                                                                            |
-| `backend.redis.password`                                | Redis password for Backend                            | `""`                                                                                                       |
-| `backend.mongo.url`                                     | MongoDB connection URL                                | `mongodb://devzero:backend@devzero-mongodb-0.devzero-mongodb-headless:27017/backend?directConnection=true` |
-| `backend.hydra.apiKey`                                  | API key for Hydra service                             | `""`                                                                                                       |
-| `backend.logsrv.queue`                                  | LogSrv queue URL                                      | `http://devzero-elasticmq:9324/queue/logsrv.fifo`                                                          |
-| `backend.logsrv.region`                                 | LogSrv region                                         | `elasticmq`                                                                                                |
-| `backend.github.appId`                                  | GitHub App ID                                         | `""`                                                                                                       |
-| `backend.github.appPrivateKey`                          | GitHub App Private Key                                | `""`                                                                                                       |
-| `backend.mimir.url`                                     | Mimir service URL                                     | `http://mimir:8080/prometheus`                                                                             |
-| `backend.hibernation.enabled`                           | Enable hibernation feature                            | `false`                                                                                                    |
-| `backend.sendgrid.apiKey`                               | SendGrid API Key                                      | `test-key`                                                                                                 |
-| `backend.grafana.enabled`                               | Enable Grafana integration                            | `true`                                                                                                     |
-| `backend.grafana.datasourceId`                          | Main datasource ID                                    | `mimir`                                                                                                    |
-| `backend.grafana.doraDatasourceId`                      | DORA metrics datasource ID                            | `pulse`                                                                                                    |
-| `backend.grafana.odaDatasourceId`                       | ODA metrics datasource ID                             | `timescale`                                                                                                |
-| `backend.grafana.password`                              | Grafana password                                      | `prom-operator`                                                                                            |
-| `backend.storage.allowedTeam`                           | Allowed team ID for storage access                    | `team-example-id`                                                                                          |
-| `backend.storage.ceph.clusterId`                        | Ceph cluster ID                                       | `""`                                                                                                       |
-| `backend.storage.ceph.filesystemName`                   | Ceph filesystem name                                  | `cephfs`                                                                                                   |
-| `backend.storage.ceph.filesystemPath`                   | Ceph filesystem path                                  | `cephfs`                                                                                                   |
-| `backend.storage.ceph.monitorAddress`                   | Ceph monitor address                                  | `/volumes/cache`                                                                                           |
-| `backend.storage.ceph.userCredentials`                  | Ceph user credentials                                 | `""`                                                                                                       |
-| `backend.storage.ceph.username`                         | Ceph username                                         | `vuser`                                                                                                    |
-| `backend.mainTeamId`                                    | Main team ID                                          | `""`                                                                                                       |
-| `backend.licenseKey`                                    | License key                                           | `""`                                                                                                       |
-| `backend.arch`                                          | Architecture type                                     | `amd64`                                                                                                    |
-| `backend.cortex.key`                                    | Cortex key                                            | `""`                                                                                                       |
-| `backend.autoscaling.enabled`                           | Enable autoscaling for Backend                        | `false`                                                                                                    |
-| `backend.autoscaling.minReplicas`                       | Minimum autoscaling replicas for Backend              | `1`                                                                                                        |
-| `backend.autoscaling.maxReplicas`                       | Maximum autoscaling replicas for Backend              | `3`                                                                                                        |
-| `backend.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilisation percentage for Backend         | `60`                                                                                                       |
-| `backend.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilisation percentage for Backend      | `80`                                                                                                       |
-| `backend.resources.limits.cpu`                          | CPU resource limits for Backend                       | `1000m`                                                                                                    |
-| `backend.resources.limits.memory`                       | Memory resource limits for Backend                    | `1Gi`                                                                                                      |
-| `backend.resources.requests.cpu`                        | CPU resource requests for Backend                     | `100m`                                                                                                     |
-| `backend.resources.requests.memory`                     | Memory resource requests for Backend                  | `128Mi`                                                                                                    |
-| `backend.service.port`                                  | Port of the Backend service                           | `8443`                                                                                                     |
-| `backend.service.metricsPort`                           | Port of the Backend Metrics service                   | `9090`                                                                                                     |
-| `backend.service.type`                                  | Type of the Backend service                           | `ClusterIP`                                                                                                |
-| `backend.service.annotations`                           | Annotations for the Backend service                   | `{}`                                                                                                       |
-| `backend.service.labels`                                | Labels for the Backend service                        | `{}`                                                                                                       |
+| Name                                                    | Description                                           | Value                                                                                      |
+| ------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `backend.replicas`                                      | Number of replicas for Backend                        | `1`                                                                                        |
+| `backend.imageName`                                     | Image name for Backend service                        | `backend`                                                                                  |
+| `backend.schedulerName`                                 | Optionally set the scheduler for pods                 | `""`                                                                                       |
+| `backend.priorityClassName`                             | Optionally set the name of the PriorityClass for pods | `""`                                                                                       |
+| `backend.nodeSelector`                                  | NodeSelector to pin pods to certain set of nodes      | `{}`                                                                                       |
+| `backend.affinity`                                      | Pod affinity settings                                 | `{}`                                                                                       |
+| `backend.tolerations`                                   | Pod tolerations                                       | `[]`                                                                                       |
+| `backend.podLabels`                                     | Pod labels                                            | `{}`                                                                                       |
+| `backend.podAnnotations`                                | Pod annotations                                       | `{}`                                                                                       |
+| `backend.annotations`                                   | Annotations                                           | `{}`                                                                                       |
+| `backend.redis.url`                                     | Redis URL for Backend                                 | `redis://redis-headless:6379/1`                                                            |
+| `backend.redis.password`                                | Redis password for Backend                            | `""`                                                                                       |
+| `backend.mongo.url`                                     | MongoDB connection URL                                | `mongodb://devzero:backend@mongodb-0.mongodb-headless:27017/backend?directConnection=true` |
+| `backend.hydra.apiKey`                                  | API key for Hydra service                             | `""`                                                                                       |
+| `backend.logsrv.queue`                                  | LogSrv queue URL                                      | `http://elasticmq:9324/queue/logsrv.fifo`                                                  |
+| `backend.logsrv.region`                                 | LogSrv region                                         | `elasticmq`                                                                                |
+| `backend.github.appId`                                  | GitHub App ID                                         | `""`                                                                                       |
+| `backend.github.appPrivateKey`                          | GitHub App Private Key                                | `""`                                                                                       |
+| `backend.mimir.url`                                     | Mimir service URL                                     | `http://mimir:8080/prometheus`                                                             |
+| `backend.hibernation.enabled`                           | Enable hibernation feature                            | `false`                                                                                    |
+| `backend.sendgrid.apiKey`                               | SendGrid API Key                                      | `test-key`                                                                                 |
+| `backend.grafana.enabled`                               | Enable Grafana integration                            | `true`                                                                                     |
+| `backend.grafana.datasourceId`                          | Main datasource ID                                    | `mimir`                                                                                    |
+| `backend.grafana.doraDatasourceId`                      | DORA metrics datasource ID                            | `pulse`                                                                                    |
+| `backend.grafana.odaDatasourceId`                       | ODA metrics datasource ID                             | `timescale`                                                                                |
+| `backend.grafana.password`                              | Grafana password                                      | `prom-operator`                                                                            |
+| `backend.storage.allowedTeam`                           | Allowed team ID for storage access                    | `team-example-id`                                                                          |
+| `backend.storage.ceph.clusterId`                        | Ceph cluster ID                                       | `""`                                                                                       |
+| `backend.storage.ceph.filesystemName`                   | Ceph filesystem name                                  | `cephfs`                                                                                   |
+| `backend.storage.ceph.filesystemPath`                   | Ceph filesystem path                                  | `cephfs`                                                                                   |
+| `backend.storage.ceph.monitorAddress`                   | Ceph monitor address                                  | `/volumes/cache`                                                                           |
+| `backend.storage.ceph.userCredentials`                  | Ceph user credentials                                 | `""`                                                                                       |
+| `backend.storage.ceph.username`                         | Ceph username                                         | `vuser`                                                                                    |
+| `backend.mainTeamId`                                    | Main team ID                                          | `""`                                                                                       |
+| `backend.licenseKey`                                    | License key                                           | `""`                                                                                       |
+| `backend.arch`                                          | Architecture type                                     | `amd64`                                                                                    |
+| `backend.cortex.key`                                    | Cortex key                                            | `""`                                                                                       |
+| `backend.autoscaling.enabled`                           | Enable autoscaling for Backend                        | `false`                                                                                    |
+| `backend.autoscaling.minReplicas`                       | Minimum autoscaling replicas for Backend              | `1`                                                                                        |
+| `backend.autoscaling.maxReplicas`                       | Maximum autoscaling replicas for Backend              | `3`                                                                                        |
+| `backend.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilisation percentage for Backend         | `60`                                                                                       |
+| `backend.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilisation percentage for Backend      | `80`                                                                                       |
+| `backend.resources.limits.cpu`                          | CPU resource limits for Backend                       | `1000m`                                                                                    |
+| `backend.resources.limits.memory`                       | Memory resource limits for Backend                    | `1Gi`                                                                                      |
+| `backend.resources.requests.cpu`                        | CPU resource requests for Backend                     | `100m`                                                                                     |
+| `backend.resources.requests.memory`                     | Memory resource requests for Backend                  | `128Mi`                                                                                    |
+| `backend.service.port`                                  | Port of the Backend service                           | `8443`                                                                                     |
+| `backend.service.metricsPort`                           | Port of the Backend Metrics service                   | `9090`                                                                                     |
+| `backend.service.type`                                  | Type of the Backend service                           | `ClusterIP`                                                                                |
+| `backend.service.annotations`                           | Annotations for the Backend service                   | `{}`                                                                                       |
+| `backend.service.labels`                                | Labels for the Backend service                        | `{}`                                                                                       |
 
 ### Hydra Configuration
 
@@ -178,8 +187,7 @@
 | `hydra.cidr.v4`                                                            | IPv4 CIDR range                                       | `100.64.0.0/10`                                                                                                        |
 | `hydra.derp.server.enabled`                                                | Enable DERP server                                    | `false`                                                                                                                |
 | `hydra.derp.urls`                                                          | DERP server URLs                                      | `["https://controlplane.tailscale.com/derpmap/default"]`                                                               |
-| `hydra.derp.paths`                                                         | DERP paths                                            | `[]`                                                                                                                   |
-| `hydra.derp.autoUpdateEnabled`                                             | Enable auto-update for DERP                           | `true`                                                                                                                 |
+| `hydra.derp.autoUpdateEnabled`                                             | endable derp map updates                              | `true`                                                                                                                 |
 | `hydra.derp.updateFrequency`                                               | Update frequency for DERP                             | `24h`                                                                                                                  |
 | `hydra.autoscaling.enabled`                                                | Enable autoscaling for Hydra                          | `false`                                                                                                                |
 | `hydra.autoscaling.minReplicas`                                            | Minimum autoscaling replicas for Hydra                | `1`                                                                                                                    |
@@ -219,7 +227,7 @@
 | `logsrv.podLabels`                                                          | Pod labels for LogSrv                | `{}`                                                                                                                   |
 | `logsrv.podAnnotations`                                                     | Pod annotations for LogSrv           | `{}`                                                                                                                   |
 | `logsrv.annotations`                                                        | Annotations for LogSrv               | `{}`                                                                                                                   |
-| `logsrv.queue.url`                                                          | Queue URL for LogSrv                 | `http://devzero-elasticmq:9324/queue/logsrv.fifo`                                                                      |
+| `logsrv.queue.url`                                                          | Queue URL for LogSrv                 | `http://elasticmq:9324/queue/logsrv.fifo`                                                                              |
 | `logsrv.postgres.url`                                                       | PostgreSQL URL for LogSrv            | `postgresql://logsrv:logsrv@postgres-logsrv-postgresql-hl:5432/logsrv`                                                 |
 | `logsrv.postgres.password`                                                  | PostgreSQL password for LogSrv       | `logsrv`                                                                                                               |
 | `logsrv.refreshJwksTimer`                                                   | JWKS refresh timer in seconds        | `3600`                                                                                                                 |
@@ -249,86 +257,88 @@
 
 ### Polland Configuration
 
-| Name                                                    | Description                                      | Value                                             |
-| ------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------- |
-| `polland.worker.replicas`                               | Number of replicas for Polland Worker            | `3`                                               |
-| `polland.worker.terminationGracePeriodSeconds`          | Termination grace period in seconds              | `3600`                                            |
-| `polland.worker.queues[0].name`                         | Configuration for the fast queue                 | `fast`                                            |
-| `polland.worker.queues[0].replicaCount`                 | Number of replicas for queue                     | `1`                                               |
-| `polland.worker.queues[0].autoscaling.enabled`          | Enable autoscaling for queue                     | `false`                                           |
-| `polland.worker.queues[0].autoscaling.minReplicas`      | Minimum autoscaling replicas for queue           | `3`                                               |
-| `polland.worker.queues[0].autoscaling.maxReplicas`      | Maximum autoscaling replicas for queue           | `5`                                               |
-| `polland.worker.queues[1].name`                         | Configuration for the build queue                | `build`                                           |
-| `polland.worker.queues[1].replicaCount`                 | Number of replicas for queue                     | `1`                                               |
-| `polland.worker.queues[1].autoscaling.enabled`          | Enable autoscaling for queue                     | `false`                                           |
-| `polland.worker.queues[1].autoscaling.minReplicas`      | Minimum autoscaling replicas for queue           | `3`                                               |
-| `polland.worker.queues[1].autoscaling.maxReplicas`      | Maximum autoscaling replicas for queue           | `5`                                               |
-| `polland.worker.queues[2].name`                         | Configuration for the workload queue             | `workload`                                        |
-| `polland.worker.queues[2].replicaCount`                 | Number of replicas for queue                     | `1`                                               |
-| `polland.worker.queues[2].autoscaling.enabled`          | Enable autoscaling for queue                     | `false`                                           |
-| `polland.worker.queues[2].autoscaling.minReplicas`      | Minimum autoscaling replicas for queue           | `3`                                               |
-| `polland.worker.queues[2].autoscaling.maxReplicas`      | Maximum autoscaling replicas for queue           | `5`                                               |
-| `polland.worker.queues[3].name`                         | Configuration for the cluster queue              | `cluster`                                         |
-| `polland.worker.queues[3].replicaCount`                 | Number of replicas for queue                     | `1`                                               |
-| `polland.worker.queues[3].autoscaling.enabled`          | Enable autoscaling for queue                     | `false`                                           |
-| `polland.worker.queues[3].autoscaling.minReplicas`      | Minimum autoscaling replicas for queue           | `3`                                               |
-| `polland.worker.queues[3].autoscaling.maxReplicas`      | Maximum autoscaling replicas for queue           | `5`                                               |
-| `polland.worker.queues[4].name`                         | Configuration for the hibernation queue          | `hibernation`                                     |
-| `polland.worker.queues[4].replicaCount`                 | Number of replicas for queue                     | `1`                                               |
-| `polland.worker.queues[4].autoscaling.enabled`          | Enable autoscaling for queue                     | `false`                                           |
-| `polland.worker.queues[4].autoscaling.minReplicas`      | Minimum autoscaling replicas for queue           | `1`                                               |
-| `polland.worker.queues[4].autoscaling.maxReplicas`      | Maximum autoscaling replicas for queue           | `1`                                               |
-| `polland.beat.replicas`                                 | Number of replicas for Polland Beat              | `1`                                               |
-| `polland.flower.replicas`                               | Number of replicas for Polland Flower            | `1`                                               |
-| `polland.flower.service.port`                           | Port for Flower service                          | `5555`                                            |
-| `polland.flower.service.type`                           | Type of Flower service                           | `ClusterIP`                                       |
-| `polland.celeryExporter.replicas`                       | Number of replicas for Celery Exporter           | `1`                                               |
-| `polland.replicas`                                      | Number of replicas for Polland                   | `1`                                               |
-| `polland.imageName`                                     | Image name for Polland                           | `polland`                                         |
-| `polland.schedulerName`                                 | Scheduler name for Polland pods                  | `""`                                              |
-| `polland.priorityClassName`                             | Priority class name for Polland pods             | `""`                                              |
-| `polland.nodeSelector`                                  | Node selector for Polland pods                   | `{}`                                              |
-| `polland.affinity`                                      | Affinity settings for Polland pods               | `{}`                                              |
-| `polland.tolerations`                                   | Tolerations for Polland pods                     | `[]`                                              |
-| `polland.podLabels`                                     | Pod labels for Polland                           | `{}`                                              |
-| `polland.podAnnotations`                                | Pod annotations for Polland                      | `{}`                                              |
-| `polland.annotations`                                   | Annotations for Polland                          | `{}`                                              |
-| `polland.env.USE_POSTGRES_DB`                           | Use PostgreSQL database                          | `true`                                            |
-| `polland.env.POSTGRES_PORT`                             | PostgreSQL port                                  | `5432`                                            |
-| `polland.env.POSTGRES_DB`                               | PostgreSQL database name                         | `polland`                                         |
-| `polland.env.POSTGRES_USER`                             | PostgreSQL user                                  | `polland`                                         |
-| `polland.env.POSTGRES_PASSWORD`                         | PostgreSQL password                              | `polland`                                         |
-| `polland.env.POSTGRES_HOST`                             | PostgreSQL host                                  | `postgres-polland-postgresql-hl`                  |
-| `polland.env.REDIS_URL`                                 | Redis URL                                        | `redis://redis-headless:6379/0`                   |
-| `polland.env.USE_DOCKER`                                | Use Docker                                       | `yes`                                             |
-| `polland.env.CONN_MAX_AGE`                              | Connection max age                               | `60`                                              |
-| `polland.env.DJANGO_ALLOWED_HOSTS`                      | Allowed hosts for Django                         | `*`                                               |
-| `polland.env.DJANGO_SETTINGS_MODULE`                    | Django settings module                           | `config.settings.production`                      |
-| `polland.env.DJANGO_SECRET_KEY`                         | Django secret key                                | `super_secret_key`                                |
-| `polland.env.CELERY_FLOWER_USER`                        | Celery Flower user                               | `devzero`                                         |
-| `polland.env.CELERY_FLOWER_PASSWORD`                    | Celery Flower password                           | `devzero`                                         |
-| `polland.env.SELF_HOSTED`                               | Self-hosted mode                                 | `True`                                            |
-| `polland.env.USE_INSECURE_REGISTRY`                     | Use insecure registry                            | `True`                                            |
-| `polland.env.USE_ECR_REGISTRY`                          | Use ECR registry                                 | `False`                                           |
-| `polland.env.USE_LOCAL_LOGSRV`                          | Use local LogSrv                                 | `True`                                            |
-| `polland.env.VAULT_AUTH_METHOD`                         | Vault auth method                                | `kubernetes`                                      |
-| `polland.env.VAULT_SECRETS_MOUNT_POINT`                 | Vault secrets mount point                        | `vault-csi-production-writer`                     |
-| `polland.env.LOGSRV_DEFAULT_QUEUE`                      | Default LogSrv queue URL                         | `http://devzero-elasticmq:9324/queue/logsrv.fifo` |
-| `polland.env.LOGSRV_DEFAULT_REGION`                     | Default LogSrv region                            | `elasticmq`                                       |
-| `polland.autoscaling.enabled`                           | Enable autoscaling for Polland                   | `false`                                           |
-| `polland.autoscaling.minReplicas`                       | Minimum autoscaling replicas for Polland         | `1`                                               |
-| `polland.autoscaling.maxReplicas`                       | Maximum autoscaling replicas for Polland         | `3`                                               |
-| `polland.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilisation percentage for Polland    | `60`                                              |
-| `polland.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilisation percentage for Polland | `80`                                              |
-| `polland.resources.limits.cpu`                          | CPU resource limits for Polland                  | `1000m`                                           |
-| `polland.resources.limits.memory`                       | Memory resource limits for Polland               | `1Gi`                                             |
-| `polland.resources.requests.cpu`                        | CPU resource requests for Polland                | `100m`                                            |
-| `polland.resources.requests.memory`                     | Memory resource requests for Polland             | `128Mi`                                           |
-| `polland.service.port`                                  | Port of the Polland service                      | `8000`                                            |
-| `polland.service.metricsPort`                           | Port of the Polland Metrics service              | `9090`                                            |
-| `polland.service.type`                                  | Type of the Polland service                      | `ClusterIP`                                       |
-| `polland.service.annotations`                           | Annotations for the Polland service              | `{}`                                              |
-| `polland.service.labels`                                | Labels for the Polland service                   | `{}`                                              |
+| Name                                                    | Description                                      | Value                                            |
+| ------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------ |
+| `polland.worker.replicas`                               | Number of replicas for Polland Worker            | `3`                                              |
+| `polland.worker.terminationGracePeriodSeconds`          | Termination grace period in seconds              | `3600`                                           |
+| `polland.worker.queues[0].name`                         | Configuration for the fast queue                 | `fast`                                           |
+| `polland.worker.queues[0].replicaCount`                 | Number of replicas for queue                     | `1`                                              |
+| `polland.worker.queues[0].autoscaling.enabled`          | Enable autoscaling for queue                     | `false`                                          |
+| `polland.worker.queues[0].autoscaling.minReplicas`      | Minimum autoscaling replicas for queue           | `3`                                              |
+| `polland.worker.queues[0].autoscaling.maxReplicas`      | Maximum autoscaling replicas for queue           | `5`                                              |
+| `polland.worker.queues[1].name`                         | Configuration for the build queue                | `build`                                          |
+| `polland.worker.queues[1].replicaCount`                 | Number of replicas for queue                     | `1`                                              |
+| `polland.worker.queues[1].autoscaling.enabled`          | Enable autoscaling for queue                     | `false`                                          |
+| `polland.worker.queues[1].autoscaling.minReplicas`      | Minimum autoscaling replicas for queue           | `3`                                              |
+| `polland.worker.queues[1].autoscaling.maxReplicas`      | Maximum autoscaling replicas for queue           | `5`                                              |
+| `polland.worker.queues[2].name`                         | Configuration for the workload queue             | `workload`                                       |
+| `polland.worker.queues[2].replicaCount`                 | Number of replicas for queue                     | `1`                                              |
+| `polland.worker.queues[2].autoscaling.enabled`          | Enable autoscaling for queue                     | `false`                                          |
+| `polland.worker.queues[2].autoscaling.minReplicas`      | Minimum autoscaling replicas for queue           | `3`                                              |
+| `polland.worker.queues[2].autoscaling.maxReplicas`      | Maximum autoscaling replicas for queue           | `5`                                              |
+| `polland.worker.queues[3].name`                         | Configuration for the cluster queue              | `cluster`                                        |
+| `polland.worker.queues[3].replicaCount`                 | Number of replicas for queue                     | `1`                                              |
+| `polland.worker.queues[3].autoscaling.enabled`          | Enable autoscaling for queue                     | `false`                                          |
+| `polland.worker.queues[3].autoscaling.minReplicas`      | Minimum autoscaling replicas for queue           | `3`                                              |
+| `polland.worker.queues[3].autoscaling.maxReplicas`      | Maximum autoscaling replicas for queue           | `5`                                              |
+| `polland.worker.queues[4].name`                         | Configuration for the hibernation queue          | `hibernation`                                    |
+| `polland.worker.queues[4].replicaCount`                 | Number of replicas for queue                     | `1`                                              |
+| `polland.worker.queues[4].autoscaling.enabled`          | Enable autoscaling for queue                     | `false`                                          |
+| `polland.worker.queues[4].autoscaling.minReplicas`      | Minimum autoscaling replicas for queue           | `1`                                              |
+| `polland.worker.queues[4].autoscaling.maxReplicas`      | Maximum autoscaling replicas for queue           | `1`                                              |
+| `polland.beat.replicas`                                 | Number of replicas for Polland Beat              | `1`                                              |
+| `polland.flower.replicas`                               | Number of replicas for Polland Flower            | `1`                                              |
+| `polland.flower.service.port`                           | Port for Flower service                          | `5555`                                           |
+| `polland.flower.service.type`                           | Type of Flower service                           | `ClusterIP`                                      |
+| `polland.celeryExporter.replicas`                       | Number of replicas for Celery Exporter           | `1`                                              |
+| `polland.replicas`                                      | Number of replicas for Polland                   | `1`                                              |
+| `polland.imageName`                                     | Image name for Polland                           | `polland`                                        |
+| `polland.schedulerName`                                 | Scheduler name for Polland pods                  | `""`                                             |
+| `polland.priorityClassName`                             | Priority class name for Polland pods             | `""`                                             |
+| `polland.nodeSelector`                                  | Node selector for Polland pods                   | `{}`                                             |
+| `polland.affinity`                                      | Affinity settings for Polland pods               | `{}`                                             |
+| `polland.tolerations`                                   | Tolerations for Polland pods                     | `[]`                                             |
+| `polland.podLabels`                                     | Pod labels for Polland                           | `{}`                                             |
+| `polland.podAnnotations`                                | Pod annotations for Polland                      | `{}`                                             |
+| `polland.annotations`                                   | Annotations for Polland                          | `{}`                                             |
+| `polland.env.USE_POSTGRES_DB`                           | Use PostgreSQL database                          | `true`                                           |
+| `polland.env.POSTGRES_PORT`                             | PostgreSQL port                                  | `5432`                                           |
+| `polland.env.POSTGRES_DB`                               | PostgreSQL database name                         | `polland`                                        |
+| `polland.env.POSTGRES_USER`                             | PostgreSQL user                                  | `polland`                                        |
+| `polland.env.POSTGRES_PASSWORD`                         | PostgreSQL password                              | `polland`                                        |
+| `polland.env.POSTGRES_HOST`                             | PostgreSQL host                                  | `postgres-polland-postgresql-hl`                 |
+| `polland.env.REDIS_URL`                                 | Redis URL                                        | `redis://redis-headless:6379/0`                  |
+| `polland.env.USE_DOCKER`                                | Use Docker                                       | `yes`                                            |
+| `polland.env.CONN_MAX_AGE`                              | Connection max age                               | `60`                                             |
+| `polland.env.DJANGO_ALLOWED_HOSTS`                      | Allowed hosts for Django                         | `*`                                              |
+| `polland.env.DJANGO_SETTINGS_MODULE`                    | Django settings module                           | `config.settings.production`                     |
+| `polland.env.DJANGO_SECRET_KEY`                         | Django secret key                                | `super_secret_key`                               |
+| `polland.env.CELERY_FLOWER_USER`                        | Celery Flower user                               | `devzero`                                        |
+| `polland.env.CELERY_FLOWER_PASSWORD`                    | Celery Flower password                           | `devzero`                                        |
+| `polland.env.SELF_HOSTED`                               | Self-hosted mode                                 | `True`                                           |
+| `polland.env.USE_INSECURE_REGISTRY`                     | Use insecure registry                            | `True`                                           |
+| `polland.env.USE_ECR_REGISTRY`                          | Use ECR registry                                 | `False`                                          |
+| `polland.env.USE_LOCAL_LOGSRV`                          | Use local LogSrv                                 | `True`                                           |
+| `polland.env.VAULT_AUTH_METHOD`                         | Vault auth method                                | `kubernetes`                                     |
+| `polland.env.VAULT_SECRETS_MOUNT_POINT`                 | Vault secrets mount point                        | `vault-csi-production-writer`                    |
+| `polland.env.LOGSRV_DEFAULT_QUEUE`                      | Default LogSrv queue URL                         | `http://elasticmq:9324/queue/logsrv.fifo`        |
+| `polland.env.LOGSRV_DEFAULT_REGION`                     | Default LogSrv region                            | `elasticmq`                                      |
+| `polland.env.DOCKER_REGISTRY`                           | Use custom docker registry                       | `docker-registry.devzero.svc.cluster.local:5000` |
+| `polland.env.DEVBOX_INGRESS_CLASS_NAME`                 | Use custom nginx ingress controller              | `devzero-data-ingress`                           |
+| `polland.autoscaling.enabled`                           | Enable autoscaling for Polland                   | `false`                                          |
+| `polland.autoscaling.minReplicas`                       | Minimum autoscaling replicas for Polland         | `1`                                              |
+| `polland.autoscaling.maxReplicas`                       | Maximum autoscaling replicas for Polland         | `3`                                              |
+| `polland.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilisation percentage for Polland    | `60`                                             |
+| `polland.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilisation percentage for Polland | `80`                                             |
+| `polland.resources.limits.cpu`                          | CPU resource limits for Polland                  | `1000m`                                          |
+| `polland.resources.limits.memory`                       | Memory resource limits for Polland               | `1Gi`                                            |
+| `polland.resources.requests.cpu`                        | CPU resource requests for Polland                | `100m`                                           |
+| `polland.resources.requests.memory`                     | Memory resource requests for Polland             | `128Mi`                                          |
+| `polland.service.port`                                  | Port of the Polland service                      | `8000`                                           |
+| `polland.service.metricsPort`                           | Port of the Polland Metrics service              | `9090`                                           |
+| `polland.service.type`                                  | Type of the Polland service                      | `ClusterIP`                                      |
+| `polland.service.annotations`                           | Annotations for the Polland service              | `{}`                                             |
+| `polland.service.labels`                                | Labels for the Polland service                   | `{}`                                             |
 
 ### Pulse Configuration
 
@@ -392,7 +402,7 @@
 | `buildqd.nodeSelector`                                  | Node selector for Buildqd pods                   | `{}`                                                                             |
 | `buildqd.affinity`                                      | Affinity settings for Buildqd pods               | `{}`                                                                             |
 | `buildqd.tolerations`                                   | Tolerations for Buildqd pods                     | `[]`                                                                             |
-| `buildqd.logsrv.queue`                                  | Queue URL for LogSrv                             | `http://devzero-elasticmq:9324/queue/logsrv.fifo`                                |
+| `buildqd.logsrv.queue`                                  | Queue URL for LogSrv                             | `http://elasticmq:9324/queue/logsrv.fifo`                                        |
 | `buildqd.logsrv.region`                                 | Region for LogSrv                                | `elasticmq`                                                                      |
 | `buildqd.redis.url`                                     | Redis URL for Buildqd                            | `redis://redis-headless:6379/0`                                                  |
 | `buildqd.autoscaling.enabled`                           | Enable autoscaling for Buildqd                   | `false`                                                                          |
@@ -435,9 +445,8 @@
 | `web.podLabels`                                                          | Pod labels for Web                                  | `{}`                                                                                                                   |
 | `web.podAnnotations`                                                     | Pod annotations for Web                             | `{}`                                                                                                                   |
 | `web.annotations`                                                        | Annotations for Web                                 | `{}`                                                                                                                   |
-| `web.env.NEXT_AUTH_ENABLE_CREDENTIALS_PROVIDER`                          | Enable credentials provider for NextAuth            | `true`                                                                                                                 |
-| `web.env.NEXT_PUBLIC_BYPASS_AUTH0_FLOW`                                  | Bypass Auth0 flow for Next.js                       | `true`                                                                                                                 |
 | `web.env.NEXT_PUBLIC_SELF_HOSTED`                                        | Self-hosted mode for Next.js                        | `true`                                                                                                                 |
+| `web.env.NODE_TLS_REJECT_UNAUTHORIZED`                                   | ignore SSL mode for Next.js                         | `0`                                                                                                                    |
 | `web.autoscaling.enabled`                                                | Enable autoscaling for Web                          | `false`                                                                                                                |
 | `web.autoscaling.minReplicas`                                            | Minimum autoscaling replicas for Web                | `1`                                                                                                                    |
 | `web.autoscaling.maxReplicas`                                            | Maximum autoscaling replicas for Web                | `3`                                                                                                                    |
@@ -471,26 +480,7 @@
 
 ### Vault Configuration
 
-| Name                    | Description           | Value        |
-| ----------------------- | --------------------- | ------------ |
-| `vault.job.enabled`     | Enable Vault job      | `true`       |
-| `vault.job.address`     | Vault address for job | `vault:8200` |
-| `vault.ingress.enabled` | Enable Vault ingress  | `false`      |
-
-### Mimir Configuration
-
-| Name                    | Description          | Value   |
-| ----------------------- | -------------------- | ------- |
-| `mimir.ingress.enabled` | Enable Mimir ingress | `false` |
-
-### Grafana Configuration
-
-| Name                      | Description            | Value   |
-| ------------------------- | ---------------------- | ------- |
-| `grafana.ingress.enabled` | Enable Grafana ingress | `false` |
-
-### Registry Configuration
-
-| Name                       | Description             | Value   |
-| -------------------------- | ----------------------- | ------- |
-| `registry.ingress.enabled` | Enable Registry ingress | `false` |
+| Name                | Description           | Value        |
+| ------------------- | --------------------- | ------------ |
+| `vault.job.enabled` | Enable Vault job      | `true`       |
+| `vault.job.address` | Vault address for job | `vault:8200` |
