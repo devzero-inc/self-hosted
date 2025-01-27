@@ -107,6 +107,8 @@ def check_control_plane_cluster(force):
 def check_control_plane_network():
     """Runs network checks for the current cloud provider"""
     click.echo("Checking control plane network...")
+    provider: AWSProvider = get_provider()
+    provider.control_plane_network()
 
 
 @check_control_plane.command("ingress")

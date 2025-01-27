@@ -150,5 +150,20 @@ class ControlPlane:
                 control_plane_cfg.ingress.install = click.confirm("No ingress classes found. Do you want to install an ingress controller?", default=True)
                 control_plane_cfg.save()
             else:
-                control_plane_cfg.ingress.cls = click.prompt("Please select an ingress class for the control plane", type=click.Choice(options, case_sensitive=False), default=options[0])
+                options.append("new")
+                control_plane_cfg.ingress.cls = click.prompt("Please select an existing ingress class for the control plane. Use new if you want devzero to create a new one", type=click.Choice(options, case_sensitive=False), default=options[0])
                 control_plane_cfg.save()
+
+        if not control_plane_cfg.ingress.install and not control_plane_cfg.ingress.cls:
+            click.echo("Cannot proceed without an ingress class")
+            self.error("INGRESS_CLASS_NOT_FOUND")
+        success("Control plane ingress checks passed")
+
+    def check_control_plane_cert_manager(self, force):
+        info("Checking control plane cert-manager...")
+
+        control_plane_cfg = DZConfig().data.control_plane
+        api = client.AppsV1Api()
+
+        cluster_issuer
+

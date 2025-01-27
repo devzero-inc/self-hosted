@@ -383,3 +383,6 @@ class AWSProvider:
             )
             click.echo("You need to create a VPC first.")
             self.error("VPC_DOES_NOT_EXIST")
+
+    def control_plane_network(self, force):
+        pass
