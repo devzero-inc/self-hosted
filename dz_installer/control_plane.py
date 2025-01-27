@@ -137,6 +137,11 @@ class ControlPlane:
         info("Checking control plane ingress...")
 
         control_plane_cfg = DZConfig().data.control_plane
+
+        if control_plane_cfg.ingress.cls and not force:
+            click.echo("Ingress configuration already exists, skipping...")
+            return
+
         api = client.NetworkingV1Api()
 
         ingress_classes: list[V1IngressClass] = api.list_ingress_class().items
@@ -145,25 +150,59 @@ class ControlPlane:
         for ingress_class in ingress_classes:
             options.append(ingress_class.metadata.name)
 
-        if not control_plane_cfg.ingress or force:
-            if not options:
-                control_plane_cfg.ingress.install = click.confirm("No ingress classes found. Do you want to install an ingress controller?", default=True)
-                control_plane_cfg.save()
-            else:
-                options.append("new")
-                control_plane_cfg.ingress.cls = click.prompt("Please select an existing ingress class for the control plane. Use new if you want devzero to create a new one", type=click.Choice(options, case_sensitive=False), default=options[0])
-                control_plane_cfg.save()
+        if not options:
+            control_plane_cfg.ingress.install = click.confirm("No ingress classes found. Do you want to install an ingress controller?", default=True)
+        else:
+            options.append("new")
+            control_plane_cfg.ingress.cls = click.prompt("Please select an existing ingress class for the control plane. Use new if you want devzero to install nginx ingress controller", type=click.Choice(options, case_sensitive=False), default=options[0])
+
+        control_plane_cfg.save()
 
         if not control_plane_cfg.ingress.install and not control_plane_cfg.ingress.cls:
             click.echo("Cannot proceed without an ingress class")
             self.error("INGRESS_CLASS_NOT_FOUND")
-        success("Control plane ingress checks passed")
+        success("Control plane ingress checks")
 
     def check_control_plane_cert_manager(self, force):
-        info("Checking control plane cert-manager...")
+        info("Checking control plane certificates...")
 
         control_plane_cfg = DZConfig().data.control_plane
-        api = client.AppsV1Api()
+        global_cfg = DZConfig().data.globals
 
-        cluster_issuer
+        if (control_plane_cfg.cert_manager.install or control_plane_cfg.cert_manager.external) and not force:
+            click.echo("Certificate configuration already exists, skipping...")
+            return
 
+        api = client.CustomObjectsApi()
+
+        group = "cert-manager.io"
+        version = "v1"
+        plural = "clusterissuers"
+
+        issuers = []
+        try:
+            # Fetch all ClusterIssuer objects
+            cluster_issuers = api.list_cluster_custom_object(group, version, plural)
+            for ci in cluster_issuers.get("items", []):
+                issuers.append(ci["metadata"]["name"])
+        except client.ApiException:
+            pass
+
+        if not issuers:
+            click.echo("No cluster issuers found")
+            control_plane_cfg.cert_manager.install = click.confirm("Do you want to install cert-manager to provision certificates in-cluster?", default=True)
+
+            if not control_plane_cfg.cert_manager.install:
+                control_plane_cfg.cert_manager.external = click.confirm("Do you want to use an externally provisioned certificate?", default=True)
+
+                if not control_plane_cfg.cert_manager.external:
+                    click.echo("Cannot proceed without a certificate")
+                    self.error("CERTIFICATE_NOT_PROVIDED")
+
+                if global_cfg.provider == "aws":
+                    control_plane_cfg.cert_manager.cert_arn = click.prompt("Please provide the ARN of the certificate to use for the control plane", prompt_suffix="\n")
+        else:
+            control_plane_cfg.cert_manager.issuer = click.prompt("Please select an existing ClusterIssuer for the control plane. Use new if you want devzero to create a new ClusterIssuer", type=click.Choice(issuers), default=issuers[0])
+
+        control_plane_cfg.save()
+        success("Control plane certificates checks")

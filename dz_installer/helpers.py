@@ -31,7 +31,7 @@ def success(message):
     click.echo(click.style(f"✓ {message}", fg="green"))
 
 def info(message):
-    click.echo(click.style(f"ℹ {message}", fg="blue"))
+    click.echo(click.style(f"ℹ {message}", fg="cyan"))
 
 def check_chart_is_installed(chart_name, namespace=None):
     # check if helm is installed
