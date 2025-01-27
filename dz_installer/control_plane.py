@@ -135,6 +135,9 @@ class ControlPlane:
         success("Control plane installed successfully")
 
     def check_control_plane_cert_issuer(self):
+        info("Checking certificate issuer for control plane...")
+
+    def check_control_plane_ingress_cert_issuer(self):
         info("Checking ingress certificate issuer for control plane...")
 
         try:

@@ -8,7 +8,7 @@ max_size      = 4
 min_size      = 4
 desired_size  = 4
 
-cluster_endpoint_public_access       = false
+cluster_endpoint_public_access       = true
 cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
 
 

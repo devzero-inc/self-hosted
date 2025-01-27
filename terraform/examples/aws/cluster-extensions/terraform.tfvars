@@ -8,4 +8,4 @@ region = "us-west-1"
 # Cluster
 enable_cluster_autoscaler = false
 
-cluster_name = "devzero-cluster" 
+cluster_name = "devzero" 

@@ -81,6 +81,7 @@ def check_control_plane_all():
     check_control_plane_ingress()
     check_control_plane_chart()
     check_control_plane_cert_issuer()
+    check_control_plane_ingress_cert_issuer()
 
 
 @check_control_plane.command("permissions")
@@ -133,6 +134,12 @@ def check_control_plane_cert_issuer():
     """Helm chart: cert-issuer"""
     click.echo("Checking helm chart: cert-issuer")
     ControlPlane().check_control_plane_cert_issuer()
+
+@check_control_plane.command("ingress-cert-issuer")
+def check_control_plane_ingress_cert_issuer():
+    """Helm chart: ingress-cert-issuer"""
+    click.echo("Checking helm chart: ingress-cert-issuer")
+    ControlPlane().check_control_plane_ingress_cert_issuer()
 
 # Data plane commands
 @check.group("data-plane", cls=OrderedGroup)
