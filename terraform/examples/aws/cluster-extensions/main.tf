@@ -6,6 +6,11 @@ data "aws_availability_zones" "available" {}
 
 provider "aws" {
   region = var.region
+  default_tags {
+    tags = {
+      CreatedBy: "DevZero"
+    }
+  }
 }
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.this.endpoint

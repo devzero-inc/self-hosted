@@ -48,6 +48,12 @@ provider "tls" {}
 
 provider "aws" {
   region = var.region
+
+  default_tags {
+    tags = {
+      CreatedBy: "DevZero"
+    }
+  }
 }
 
 data "aws_eks_cluster" "cluster-data" {
