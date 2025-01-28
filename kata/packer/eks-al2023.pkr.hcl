@@ -8,17 +8,17 @@ packer {
 }
 
 variable "ami_groups" {
-  type    = list(string)
+  type = list(string)
   default = null
 }
 
 source "amazon-ebs" "al2023_1_29_eks" {
-  ami_name       = "devzero-amazon-eks-node-al2023-x86_64-standard-1.29-{{timestamp}}"
-  ami_desciption = "Devzero Amazon EKS Node AL2023 x86_64 Standard 1.29 with Kata runtime"
-  ami_groups     = var.ami_groups
-  instance_type  = "t3.2xlarge"
-  region         = "us-west-1"
-  ssh_username   = "ec2-user"
+  ami_name        = "devzero-amazon-eks-node-al2023-x86_64-standard-1.29-{{timestamp}}"
+  ami_description = "Devzero Amazon EKS Node AL2023 x86_64 Standard 1.29 with Kata runtime"
+  ami_groups      = var.ami_groups
+  instance_type   = "t3.2xlarge"
+  region          = "us-west-1"
+  ssh_username    = "ec2-user"
 
   source_ami_filter {
     filters = {
@@ -39,12 +39,12 @@ source "amazon-ebs" "al2023_1_29_eks" {
 }
 
 source "amazon-ebs" "al2023_1_30_eks" {
-  ami_name       = "devzero-amazon-eks-node-al2023-x86_64-standard-1.30-{{timestamp}}"
-  ami_desciption = "Devzero Amazon EKS Node AL2023 x86_64 Standard 1.30 with Kata runtime"
-  ami_groups     = var.ami_groups
-  instance_type  = "t3.2xlarge"
-  region         = "us-west-1"
-  ssh_username   = "ec2-user"
+  ami_name        = "devzero-amazon-eks-node-al2023-x86_64-standard-1.30-{{timestamp}}"
+  ami_description = "Devzero Amazon EKS Node AL2023 x86_64 Standard 1.30 with Kata runtime"
+  ami_groups      = var.ami_groups
+  instance_type   = "t3.2xlarge"
+  region          = "us-west-1"
+  ssh_username    = "ec2-user"
 
   source_ami_filter {
     filters = {
@@ -65,12 +65,12 @@ source "amazon-ebs" "al2023_1_30_eks" {
 }
 
 source "amazon-ebs" "al2023_1_31_eks" {
-  ami_name       = "devzero-amazon-eks-node-al2023-x86_64-standard-1.31-{{timestamp}}"
-  ami_desciption = "Devzero Amazon EKS Node AL2023 x86_64 Standard 1.31 with Kata runtime"
-  ami_groups     = var.ami_groups
-  instance_type  = "t3.2xlarge"
-  region         = "us-west-1"
-  ssh_username   = "ec2-user"
+  ami_name        = "devzero-amazon-eks-node-al2023-x86_64-standard-1.31-{{timestamp}}"
+  ami_description = "Devzero Amazon EKS Node AL2023 x86_64 Standard 1.31 with Kata runtime"
+  ami_groups      = var.ami_groups
+  instance_type   = "t3.2xlarge"
+  region          = "us-west-1"
+  ssh_username    = "ec2-user"
 
   source_ami_filter {
     filters = {
