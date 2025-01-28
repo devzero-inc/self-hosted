@@ -7,74 +7,85 @@ packer {
   }
 }
 
+variable "ami_groups" {
+  type    = string
+  default = null
+}
+
 source "amazon-ebs" "al2023_1_29_eks" {
-  ami_name      = "devzero-amazon-eks-node-al2023-x86_64-standard-1.29-{{timestamp}}"
-  instance_type = "t3.2xlarge"
-  region        = "us-west-1"
-  ssh_username = "ec2-user"
+  ami_name       = "devzero-amazon-eks-node-al2023-x86_64-standard-1.29-{{timestamp}}"
+  ami_desciption = "Devzero Amazon EKS Node AL2023 x86_64 Standard 1.29 with Kata runtime"
+  ami_groups     = var.ami_groups
+  instance_type  = "t3.2xlarge"
+  region         = "us-west-1"
+  ssh_username   = "ec2-user"
 
   source_ami_filter {
     filters = {
       virtualization-type = "hvm"
-      name = "amazon-eks-node-al2023-x86_64-standard-1.29-*"
-      root-device-type = "ebs"
+      name                = "amazon-eks-node-al2023-x86_64-standard-1.29-*"
+      root-device-type    = "ebs"
     }
     owners = ["602401143452"]
     most_recent = true
   }
 
   launch_block_device_mappings {
-    device_name = "/dev/xvda"
-    volume_size = 50
-    volume_type = "gp3"
+    device_name           = "/dev/xvda"
+    volume_size           = 50
+    volume_type           = "gp3"
     delete_on_termination = true
   }
 }
 
 source "amazon-ebs" "al2023_1_30_eks" {
-  ami_name      = "devzero-amazon-eks-node-al2023-x86_64-standard-1.30-{{timestamp}}"
-  instance_type = "t3.2xlarge"
-  region        = "us-west-1"
-  ssh_username = "ec2-user"
+  ami_name       = "devzero-amazon-eks-node-al2023-x86_64-standard-1.30-{{timestamp}}"
+  ami_desciption = "Devzero Amazon EKS Node AL2023 x86_64 Standard 1.30 with Kata runtime"
+  ami_groups     = var.ami_groups
+  instance_type  = "t3.2xlarge"
+  region         = "us-west-1"
+  ssh_username   = "ec2-user"
 
   source_ami_filter {
     filters = {
       virtualization-type = "hvm"
-      name = "amazon-eks-node-al2023-x86_64-standard-1.30-*"
-      root-device-type = "ebs"
+      name                = "amazon-eks-node-al2023-x86_64-standard-1.30-*"
+      root-device-type    = "ebs"
     }
     owners = ["602401143452"]
     most_recent = true
   }
 
   launch_block_device_mappings {
-    device_name = "/dev/xvda"
-    volume_size = 50
-    volume_type = "gp3"
+    device_name           = "/dev/xvda"
+    volume_size           = 50
+    volume_type           = "gp3"
     delete_on_termination = true
   }
 }
 
 source "amazon-ebs" "al2023_1_31_eks" {
-  ami_name      = "devzero-amazon-eks-node-al2023-x86_64-standard-1.31-{{timestamp}}"
-  instance_type = "t3.2xlarge"
-  region        = "us-west-1"
-  ssh_username = "ec2-user"
+  ami_name       = "devzero-amazon-eks-node-al2023-x86_64-standard-1.31-{{timestamp}}"
+  ami_desciption = "Devzero Amazon EKS Node AL2023 x86_64 Standard 1.31 with Kata runtime"
+  ami_groups     = var.ami_groups
+  instance_type  = "t3.2xlarge"
+  region         = "us-west-1"
+  ssh_username   = "ec2-user"
 
   source_ami_filter {
     filters = {
       virtualization-type = "hvm"
-      name = "amazon-eks-node-al2023-x86_64-standard-1.31-*"
-      root-device-type = "ebs"
+      name                = "amazon-eks-node-al2023-x86_64-standard-1.31-*"
+      root-device-type    = "ebs"
     }
     owners = ["602401143452"]
     most_recent = true
   }
 
   launch_block_device_mappings {
-    device_name = "/dev/xvda"
-    volume_size = 50
-    volume_type = "gp3"
+    device_name           = "/dev/xvda"
+    volume_size           = 50
+    volume_type           = "gp3"
     delete_on_termination = true
   }
 }
@@ -88,60 +99,60 @@ build {
   ]
 
   provisioner "file" {
-    source = "./kernel.rpm"
+    source      = "./kernel.rpm"
     destination = "/tmp/kernel.rpm"
   }
 
   provisioner "file" {
-    source = "./kernel-devel.rpm"
+    source      = "./kernel-devel.rpm"
     destination = "/tmp/kernel-devel.rpm"
   }
 
   provisioner "file" {
-    source = "./kernel-headers.rpm"
+    source      = "./kernel-headers.rpm"
     destination = "/tmp/kernel-headers.rpm"
   }
 
   provisioner "shell" {
-    name = "Upgrade kernel"
+    name              = "Upgrade kernel"
     script = "./upgrade_kernel.sh"
     # Run it as root
-    execute_command = "sudo {{ .Path }}"
+    execute_command   = "sudo {{ .Path }}"
     expect_disconnect = true
   }
 
   provisioner "shell" {
     name              = "Reboot after kernel upgrade"
-    inline            = ["sudo reboot"]
+    inline = ["sudo reboot"]
     pause_before      = "10s"
     timeout           = "10s"
     expect_disconnect = true
   }
 
   provisioner "file" {
-    source = "./guest-vmlinux"
+    source      = "./guest-vmlinux"
     destination = "/tmp/vmlinux"
   }
 
   provisioner "file" {
-    source = "./containerd.toml"
+    source      = "./containerd.toml"
     destination = "/tmp/containerd.toml"
   }
 
-  provisioner "file" { 
-    source = "./configuration-clh.toml"
+  provisioner "file" {
+    source      = "./configuration-clh.toml"
     destination = "/tmp/configuration-clh.toml"
   }
 
-  provisioner "file" { 
-    source = "./configuration-qemu.toml"
+  provisioner "file" {
+    source      = "./configuration-qemu.toml"
     destination = "/tmp/configuration-qemu.toml"
   }
 
   provisioner "shell" {
-    name = "Install Kata containers"
-    script = "./install-kata.sh"
-    execute_command = "sudo {{ .Path }}"
+    name              = "Install Kata containers"
+    script            = "./install-kata.sh"
+    execute_command   = "sudo {{ .Path }}"
     expect_disconnect = true
   }
 

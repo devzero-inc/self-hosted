@@ -2,6 +2,14 @@ name: Build Kata AMI
 
 on:
   workflow_dispatch:
+    inputs:
+      image_type:
+        type: choice
+        required: true
+        description: 'The type of image to build. Use "private" for development and testing images and "public" for public images available to customers.'
+        options:
+          - private
+          - public
 
 permissions:
   contents: read
@@ -78,17 +86,25 @@ jobs:
           docker cp "$CONTAINER_ID_GUEST:/guest-vmlinux" ./kata/packer/guest-vmlinux
           docker rm "$CONTAINER_ID_GUEST"
 
-      - name: Configure AWS Credentials
+      - name: Configure AWS Credentials for Self Hosted
+        if: github.event.inputs.image_type == 'private'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::484907513542:role/github-actions-oidc-role
+          aws-region: us-west-1
+
+      - name: Configure AWS Credentials for Public AMIs
+        if: github.event.inputs.image_type == 'public'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::710271940431:role/github-actions-oidc-role
           aws-region: us-west-1
 
       - name: Initialize and Build AMI
         run: |
           cd ./kata/packer
           packer init .
-          packer build .
+          packer build --var-file=${{ github.event.inputs.image_type || 'private' }}".pkrvars.hcl .
 
   # build-host-container:
   #   name: Build Host Container
