@@ -50,9 +50,11 @@ module "eks_blueprints_addons" {
   eks_addons = {
     eks-pod-identity-agent = {
       most_recent = true
+      preserve = false
     }
     aws-ebs-csi-driver = {
       most_recent              = true
+      preserve = false
       service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
       configuration_values = jsonencode({
         controller = {
@@ -64,18 +66,23 @@ module "eks_blueprints_addons" {
     }
     coredns = {
       most_recent = true
+      preserve = false
     }
     vpc-cni = {
       most_recent = true
+      preserve = false
     }
     kube-proxy = {
       most_recent = true
+      preserve = false
     }
     snapshot-controller = {
       most_recent = true
+      preserve = false
     }
     aws-efs-csi-driver = {
       most_recent = true
+      preserve = false
     }
   }
 
