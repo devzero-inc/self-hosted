@@ -1,4 +1,6 @@
 name: Build Kata AMI
+run-name: "Build Kata AMI for ${{ github.event.inputs.image_type || 'private' }} image"
+
 
 on:
   workflow_dispatch:
