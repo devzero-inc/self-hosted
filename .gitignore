@@ -21,3 +21,6 @@ dz_config.json
 **/__pycache__/**
 
 .DS_Store
+
+# Ignore files created by permission helper
+terraform/examples/aws/permission-helper/permissions/*.json
