@@ -237,13 +237,13 @@ variable "add_current_user_to_kms" {
 variable "min_size" {
   type        = number
   description = "Min node size"
-  default     = 4
+  default     = 1
 }
 
 variable "desired_size" {
   type        = number
   description = "Desired node size"
-  default     = 4
+  default     = 1
 }
 
 variable "max_size" {
