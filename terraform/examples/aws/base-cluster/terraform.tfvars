@@ -5,8 +5,8 @@ domain       = "devzero.internal"
 # EKS
 instance_type = "m5.4xlarge"
 max_size      = 4
-min_size      = 4
-desired_size  = 4
+min_size      = 1
+desired_size  = 1
 
 cluster_endpoint_public_access       = true
 cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
