@@ -9,49 +9,49 @@ permissions:
   id-token: write
 
 jobs:
-#  build-kernel:
-#    runs-on: ubuntu-x86-kernel-builder
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v4
-#        with:
-#          show-progress: false
-#
-#      - name: Clone Linux repository
-#        uses: actions/checkout@v4
-#        with:
-#          token: ${{ secrets.GH_TOKEN }}
-#          repository: virt-pvm/linux
-#          ref: e7fb41a749cb4ff541f0876629921f1f9b39a805
-#          path: ./kata/linux-images/linux
-#          fetch-depth: 1
-#          show-progress: false
-#
-#      - name: Set up Docker Buildx
-#        uses: docker/setup-buildx-action@v3
-#
-#      - name: Login to registry
-#        uses: docker/login-action@v3
-#        with:
-#          registry: ghcr.io
-#          username: devzero-inc
-#          password: ${{ secrets.GH_TOKEN }}
-#
-#      - name: Build kernel docker image
-#        uses: docker/build-push-action@v6
-#        with:
-#          context: ./kata/linux-images
-#          file: ./kata/linux-images/Dockerfile.host
-#          tags: ghcr.io/devzero-inc/host-pvm-linux:latest
-#          push: true
-#
-#      - name: Build guest docker image
-#        uses: docker/build-push-action@v6
-#        with:
-#          context: ./kata/linux-images
-#          file: ./kata/linux-images/Dockerfile.guest
-#          tags: ghcr.io/devzero-inc/guest-pvm-linux:latest
-#          push: true
+  build-kernel:
+    runs-on: ubuntu-x86-kernel-builder
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Clone Linux repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: virt-pvm/linux
+          ref: e7fb41a749cb4ff541f0876629921f1f9b39a805
+          path: ./kata/linux-images/linux
+          fetch-depth: 1
+          show-progress: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: devzero-inc
+          password: ${{ secrets.GH_TOKEN }}
+
+      - name: Build kernel docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./kata/linux-images
+          file: ./kata/linux-images/Dockerfile.host
+          tags: ghcr.io/devzero-inc/host-pvm-linux:latest
+          push: true
+
+      - name: Build guest docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./kata/linux-images
+          file: ./kata/linux-images/Dockerfile.guest
+          tags: ghcr.io/devzero-inc/guest-pvm-linux:latest
+          push: true
 
   build-ami:
     name: Build AMI with Packer
