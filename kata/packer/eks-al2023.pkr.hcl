@@ -8,7 +8,7 @@ packer {
 }
 
 variable "ami_groups" {
-  type    = string
+  type    = list(string)
   default = null
 }
 
