@@ -9,7 +9,7 @@ resource "tls_self_signed_cert" "ca" {
     common_name  = "${var.name}.vpn.ca"
     organization = var.name
   }
-  validity_period_hours = 87600
+  validity_period_hours = 9528
   is_ca_certificate     = true
   allowed_uses = [
     "cert_signing",
@@ -63,7 +63,7 @@ resource "tls_locally_signed_cert" "server" {
   cert_request_pem      = tls_cert_request.server.cert_request_pem
   ca_private_key_pem    = tls_private_key.ca.private_key_pem
   ca_cert_pem           = tls_self_signed_cert.ca.cert_pem
-  validity_period_hours = 87600
+  validity_period_hours = 9528
   allowed_uses = [
     "key_encipherment",
     "digital_signature",
@@ -230,7 +230,7 @@ resource "tls_locally_signed_cert" "client" {
   cert_request_pem      = tls_cert_request.client[each.value].cert_request_pem
   ca_private_key_pem    = tls_private_key.ca.private_key_pem
   ca_cert_pem           = tls_self_signed_cert.ca.cert_pem
-  validity_period_hours = 87600
+  validity_period_hours = 9528
   allowed_uses = [
     "key_encipherment",
     "digital_signature",

@@ -265,6 +265,14 @@ variable "enable_ubuntu_node_group" {
   default     = true
 }
 
+################################################################################
+# Example of using custom DERP server
+################################################################################
+variable "create_derp" {
+  description = "Create custom DERP server"
+  type        = bool
+  default     = false
+}
 
 ################################################################################
 # Example of using custom ALB, and pointing it to the cluster node port
