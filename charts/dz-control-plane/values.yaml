@@ -397,6 +397,22 @@ hydra:
     server:
       ## @param hydra.derp.server.enabled Enable DERP server
       enabled: false
+      ## @param hydra.derp.server.embeddedDerpRegion Enable embedded DERP region
+      embeddedDerpRegion: false
+
+      ## @param hydra.derp.server.regionId Embedded derp region id
+      regionId: 999
+      ## @param hydra.derp.server.regionCode Embedded derp region code
+      regionCode: "headscale"
+      ## @param hydra.derp.server.regionName Embedded derp region name
+      regionName: "Headscale Embedded DERP"
+      ## @param hydra.derp.server.stunListenAddr Enable embedded DERP stun listen address
+      stunListenAddr: "0.0.0.0:3478"
+      ## @param hydra.derp.server.privateKey Enable embedded DERP private key
+      privateKey: ""
+      ## @param hydra.derp.server.insecure Enable embedded DERP with insecure connection
+      insecure: true
+
     ## @param hydra.derp.urls DERP server URLs
     urls:
     - "https://controlplane.tailscale.com/derpmap/default"
@@ -415,8 +431,8 @@ hydra:
     #               "Name": "901a", 
     #               "RegionID": 901,
     #               "HostName": "your.hostname.com", // for private IP deployments, use the server IP
-    #               "IPv4": "1.1.1.1",
-    #               "IPv6": "1608:f740:f::ab",
+    #               "IPv4": "1.1.1.1", // IP address of the machine
+    #               "IPv6": "1608:f740:f::ab", // IPv6 address of the machine
     #               "InsecureForTests": true // set this true for private IP deploys, false otherwise
     #             }
     #           ]

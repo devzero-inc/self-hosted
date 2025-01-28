@@ -31,8 +31,10 @@ data:
         region_id: {{ .Values.hydra.derp.server.regionId }}
         region_code: {{ .Values.hydra.derp.server.regionCode }}
         region_name: {{ .Values.hydra.derp.server.regionName }}
+        insecure: {{ .Values.hydra.derp.server.insecure }}
         stun_listen_addr: {{ .Values.hydra.derp.server.stunListenAddr }}
         private_key: {{ .Values.hydra.derp.server.privateKey }}
+        automatically_add_embedded_derp_region: {{ .Values.hydra.derp.server.embeddedDerpRegion }}
     
       {{- if .Values.hydra.derp.customderp }}
       paths:

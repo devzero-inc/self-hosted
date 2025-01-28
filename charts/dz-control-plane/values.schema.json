@@ -824,6 +824,41 @@
                                     "type": "boolean",
                                     "description": "Enable DERP server",
                                     "default": false
+                                },
+                                "embeddedDerpRegion": {
+                                    "type": "boolean",
+                                    "description": "Enable embedded DERP region",
+                                    "default": false
+                                },
+                                "regionId": {
+                                    "type": "number",
+                                    "description": "Embedded derp region id",
+                                    "default": 999
+                                },
+                                "regionCode": {
+                                    "type": "string",
+                                    "description": "Embedded derp region code",
+                                    "default": "headscale"
+                                },
+                                "regionName": {
+                                    "type": "string",
+                                    "description": "Embedded derp region name",
+                                    "default": "Headscale Embedded DERP"
+                                },
+                                "stunListenAddr": {
+                                    "type": "string",
+                                    "description": "Enable embedded DERP stun listen address",
+                                    "default": "0.0.0.0:3478"
+                                },
+                                "privateKey": {
+                                    "type": "string",
+                                    "description": "Enable embedded DERP private key",
+                                    "default": ""
+                                },
+                                "insecure": {
+                                    "type": "boolean",
+                                    "description": "Enable embedded DERP with insecure connection",
+                                    "default": true
                                 }
                             }
                         },
