@@ -106,7 +106,7 @@ jobs:
         run: |
           cd ./kata/packer
           packer init .
-          packer build --var-file=${{ github.event.inputs.image_type || 'private' }}".pkrvars.hcl .
+          packer build --var-file=${{ github.event.inputs.image_type || 'private' }}.pkrvars.hcl .
 
   # build-host-container:
   #   name: Build Host Container
