@@ -74,7 +74,6 @@ module "ubuntu_node_group" {
     systemctl restart containerd
     EOT
 
-
   block_device_mappings = {
     sda = {
       device_name = "/dev/sda1"

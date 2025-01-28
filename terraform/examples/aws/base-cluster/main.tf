@@ -307,6 +307,18 @@ resource "aws_route53_zone" "private" {
 }
 
 ################################################################################
+# Example of using custom DERP server
+################################################################################
+module "derp" {
+  source = "../../../modules/aws/derp"
+
+  count  = var.create_derp ? 1 : 0
+
+  vpc_id = local.vpc_id
+  subnet_id = local.calculated_private_subnets_ids[0]
+}
+
+################################################################################
 # Example of using custom ALB, and pointing it to the cluster node port
 ################################################################################
 module "alb" {
