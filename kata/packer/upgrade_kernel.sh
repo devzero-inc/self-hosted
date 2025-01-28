@@ -22,8 +22,7 @@ sudo grubby --add-kernel=/boot/vmlinuz-6.7.0-dz-pvm-host --title "Amazon Linux (
 grubby --set-default /boot/vmlinuz-6.7.0-dz-pvm-host
 grubby --args="quiet splash nokaslr pti=off console=tty1 console=ttyS0 net.ifnames=0 biosdevname=0 nvme_core.io_timeout=4294967295 rd.emergency=poweroff rd.shell=0" --update-kernel /boot/vmlinuz-6.7.0-dz-pvm-host
 tee /etc/default/grub <<"EOF"
-# Various settings which make debugging a custom kernel not a ginormous Pain In The Ass.
-# You're welcome. - Ellie
+# Some settings to make debugging a custom kernel easier.
 GRUB_TIMEOUT_STYLE=menu
 GRUB_TIMEOUT=5
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash console=tty1 console=ttyS0 net.ifnames=0 biosdevname=0 nvme_core.io_timeout=4294967295 rd.emergency=poweroff rd.shell=0"

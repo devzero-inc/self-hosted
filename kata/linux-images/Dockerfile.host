@@ -1,4 +1,5 @@
-FROM amazonlinux@sha256:5cb6ab1a1a13f33425b6c660a45f06298e204a22df1f9eeefe69cda3735d9757 AS build
+#FROM amazonlinux@sha256:2023.6.20250115.0 AS build
+FROM amazonlinux@sha256:9b8a88839ab2c2abd6a8ded18e49255ab6cb89fcbb81eace8b330ee2afd598fd AS build
 
 ENV HOME=/home/root
 ENV SCCACHE_CACHE_SIZE="1G"
@@ -14,10 +15,10 @@ RUN wget https://github.com/mozilla/sccache/releases/download/v0.9.0/sccache-v0.
     chmod +x /usr/local/bin/sccache && \
     rm -r sccache*
 
-COPY linux linux
+COPY linux /linux
 COPY configs/host linux/arch/x86/configs/dz_pvm_host_defconfig
 
-WORKDIR linux
+WORKDIR /linux
 RUN mkdir -p "${HOME}"
 RUN echo "%_binary_payload    w2T16.xzdio" >> "${HOME}/.rpmmacros" && \
     echo "%_source_payload    w2T16.xzdio" >> "${HOME}/.rpmmacros"
