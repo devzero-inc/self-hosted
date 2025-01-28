@@ -22,7 +22,7 @@ module "ebs_csi_driver_irsa" {
   role_name_prefix = "${substr(data.aws_eks_cluster.this.name, 0, (38 - length("-cluster")))}-cluster"
 
   attach_ebs_csi_policy = true
-  policy_name_prefix    = data.aws_eks_cluster.this.id
+  policy_name_prefix    = "${data.aws_eks_cluster.this.name}-"
 
   oidc_providers = {
     main = {
@@ -44,6 +44,9 @@ module "eks_blueprints_addons" {
   oidc_provider_arn = data.aws_iam_openid_connect_provider.this.arn
 
   enable_aws_load_balancer_controller = true
+  aws_load_balancer_controller = {
+    role_name = "${var.cluster_name}-alb-controller"
+  }
 
   observability_tag = null
 
