@@ -4,6 +4,7 @@ import collections
 
 import click
 
+from dz_installer.data_plane import DataPlane
 from dz_installer.dz_config import DZConfig
 from dz_installer.helpers import get_provider, info
 from dz_installer.control_plane import ControlPlane
@@ -218,9 +219,12 @@ def check_data_plane_metacontroller():
 
 
 @check_data_plane.command("prometheus")
-def check_data_plane_prometheus():
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
+def check_data_plane_prometheus(force):
     """Helm chart: prometheus"""
-    click.echo("Checking helm chart: prometheus")
+    DataPlane().check_data_plane_prometheus(force)
 
 @cli.group(name="install")
 @click.option(
