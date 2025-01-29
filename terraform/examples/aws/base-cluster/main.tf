@@ -251,6 +251,14 @@ module "eks" {
   tags = var.tags
 }
 
+data "aws_ami" "devzero_amazon_eks_node_al2023" {
+  filter {
+    name   = "name"
+    values = ["devzero-amazon-eks-node-al2023-x86_64-standard-${var.cluster_version}-*"]
+  }
+  owners      = ["710271940431"] # Devzero public AMIs account
+  most_recent = true
+}
 
 module "kata_node_group" {
   source = "../../../modules/aws/kata_node_group"
@@ -261,7 +269,7 @@ module "kata_node_group" {
 
   instance_type = var.instance_type
 
-  ami_id = "ami-0352d3113189fc490"
+  ami_id = data.aws_ami.devzero_amazon_eks_node_al2023.image_id
 
   desired_size = var.desired_size
   min_size     = var.min_size
