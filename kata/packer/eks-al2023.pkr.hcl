@@ -9,7 +9,10 @@ packer {
 
 variable "ami_groups" {
   type = list(string)
-  default = null
+}
+
+variable "ami_regions" {
+  type = list(string)
 }
 
 source "amazon-ebs" "al2023_1_29_eks" {
@@ -36,6 +39,8 @@ source "amazon-ebs" "al2023_1_29_eks" {
     volume_type           = "gp3"
     delete_on_termination = true
   }
+
+  ami_regions = var.regions
 }
 
 source "amazon-ebs" "al2023_1_30_eks" {
@@ -62,6 +67,8 @@ source "amazon-ebs" "al2023_1_30_eks" {
     volume_type           = "gp3"
     delete_on_termination = true
   }
+
+  ami_regions = var.regions
 }
 
 source "amazon-ebs" "al2023_1_31_eks" {
@@ -88,6 +95,8 @@ source "amazon-ebs" "al2023_1_31_eks" {
     volume_type           = "gp3"
     delete_on_termination = true
   }
+
+  ami_regions = var.regions
 }
 
 build {
