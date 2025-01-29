@@ -30,6 +30,5 @@ class DataPlane:
             error(f"Error checking Prometheus chart: {e}")
             return
 
-        # Store the information in CLI state file
         cfg.save()
         success("Data Plane Prometheus checks")
