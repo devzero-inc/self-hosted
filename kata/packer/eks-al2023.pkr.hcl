@@ -40,7 +40,7 @@ source "amazon-ebs" "al2023_1_29_eks" {
     delete_on_termination = true
   }
 
-  ami_regions = var.regions
+  ami_regions = var.ami_regions
 }
 
 source "amazon-ebs" "al2023_1_30_eks" {
@@ -68,7 +68,7 @@ source "amazon-ebs" "al2023_1_30_eks" {
     delete_on_termination = true
   }
 
-  ami_regions = var.regions
+  ami_regions = var.ami_regions
 }
 
 source "amazon-ebs" "al2023_1_31_eks" {
@@ -96,7 +96,7 @@ source "amazon-ebs" "al2023_1_31_eks" {
     delete_on_termination = true
   }
 
-  ami_regions = var.regions
+  ami_regions = var.ami_regions
 }
 
 build {
