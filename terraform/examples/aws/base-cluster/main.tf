@@ -252,14 +252,16 @@ module "eks" {
 }
 
 
-module "ubuntu_node_group" {
-  source = "../../../modules/aws/ubuntu_node_group"
+module "kata_node_group" {
+  source = "../../../modules/aws/kata_node_group"
 
-  count = var.enable_ubuntu_node_group ? 1 : 0
+  count = var.enable_kata_node_group ? 1 : 0
 
   cluster_name = module.eks.cluster_name
 
   instance_type = var.instance_type
+
+  ami_id = "ami-0352d3113189fc490"
 
   desired_size = var.desired_size
   min_size     = var.min_size
@@ -337,8 +339,8 @@ module "alb" {
     # Other ASG names to be added to this ALB
     },
     # If ubuntu node group is enabled, add it to the ALB
-    var.enable_ubuntu_node_group ? {
-      "ubuntu_node_group" = module.ubuntu_node_group[0].node_group.node_group_autoscaling_group_names[0]
+    var.enable_kata_node_group ? {
+      "kata_node_group" = module.kata_node_group[0].node_group.node_group_autoscaling_group_names[0]
     } : {}
   )
 
