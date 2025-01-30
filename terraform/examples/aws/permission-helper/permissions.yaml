@@ -1,13 +1,9 @@
 helpers:
   condition-resources: &condition-resources
-    Condition:
-      StringEquals:
-        aws:ResourceTag/CreatedBy: DevZero
+    ${condition_resources}
 
   condition-requests: &condition-requests
-    Condition:
-      StringEquals:
-        aws:RequestTag/CreatedBy: DevZero
+    ${condition_requests}
 
 extra:
   debug-permissions:
