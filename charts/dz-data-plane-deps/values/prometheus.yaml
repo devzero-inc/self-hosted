@@ -1,6 +1,6 @@
 # https://github.com/prometheus-community/helm-charts/blob/prometheus-26.0.1/charts/prometheus/values.yaml
 
-extraScrapeConfigs:
+extraScrapeConfigs: |
   - job_name: "cortex"
     metrics_path: "/metrics"
     kubernetes_sd_configs:

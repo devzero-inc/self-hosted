@@ -24,3 +24,5 @@ dz_config.json
 
 # Ignore files created by permission helper
 terraform/examples/aws/permission-helper/permissions/*.json
+
+venv/
