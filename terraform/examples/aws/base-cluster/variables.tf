@@ -266,6 +266,15 @@ variable "enable_kata_node_group" {
 }
 
 ################################################################################
+# Vault
+################################################################################
+variable "create_vault_auto_unseal_key" {
+  description = "Whether or not to create a KMS key for Vault auto unseal"
+  type = bool
+  default = false
+}
+
+################################################################################
 # Example of using custom DERP server
 ################################################################################
 variable "create_derp" {

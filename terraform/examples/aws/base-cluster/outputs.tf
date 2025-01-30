@@ -1,8 +1,6 @@
 ################################################################################
-# Outputs
-################################################################################
-
 # Common Outputs
+################################################################################
 output "cluster_name" {
   description = "The name of the EKS cluster"
   value       = module.eks.cluster_name
@@ -13,7 +11,9 @@ output "region" {
   value       = var.region
 }
 
+################################################################################
 # VPC Outputs
+################################################################################
 output "vpc_id" {
   description = "The ID of the VPC where the cluster is deployed"
   value       = local.vpc_id
@@ -34,7 +34,9 @@ output "vpc_cidr_block" {
   value       = local.effective_vpc_cidr_block
 }
 
+################################################################################
 # EKS Cluster Outputs
+################################################################################
 output "cluster_endpoint" {
   description = "The endpoint of the EKS cluster"
   value       = module.eks.cluster_endpoint
@@ -53,4 +55,19 @@ output "node_security_group_id" {
 output "eks_cluster_version" {
   description = "The version of Kubernetes for the EKS cluster"
   value       = module.eks.cluster_version
+}
+
+################################################################################
+# Vault Outputs
+################################################################################
+locals {
+    vault_auto_unseal_key_output = <<-EOT
+    seal "awskms" {
+        kms_key_id = "${aws_kms_key.vault-auto-unseal[0].id}"
+        region = "${var.region}"
+    }
+    EOT
+}
+output "vault_auto_unseal_key_id" {
+  value = var.create_vault_auto_unseal_key ? local.vault_auto_unseal_key_output : null
 }

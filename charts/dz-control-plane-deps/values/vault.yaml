@@ -45,6 +45,14 @@ server:
 
         connection_url = "postgres://vault:vault@postgres-vault-postgresql-hl:5432/vault"
       }
+      
+      # This is used to configure the Vault server to use AWS KMS for auto-unsealing.
+      # This configuration can be found as the output if the devzero's base_cluster module when 
+      # create_vault_auto_unseal_key variable is set to true. 
+      # seal "awskms" {
+      #   kms_key_id = "KMS_KEY_ID"
+      #   region = "AWS_REGION"
+      # }
 
 ingress:
   # -- Specify if the Vault Ingress is enabled

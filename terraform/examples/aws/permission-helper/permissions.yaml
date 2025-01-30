@@ -153,6 +153,7 @@ cluster:
         Resource:
           - arn:aws:kms:${AWS_REGION}:${ACCOUNT_ID}:alias/eks/${CLUSTER_NAME}
           - arn:aws:kms:${AWS_REGION}:${ACCOUNT_ID}:alias/${CLUSTER_NAME}
+          - arn:aws:kms:${AWS_REGION}:${ACCOUNT_ID}:alias/${CLUSTER_NAME}-auto-unseal
 
       - Effect: Allow
         Action:
@@ -354,6 +355,7 @@ cluster:
         Resource:
           - arn:aws:kms:${AWS_REGION}:${ACCOUNT_ID}:alias/eks/${CLUSTER_NAME}
           - arn:aws:kms:${AWS_REGION}:${ACCOUNT_ID}:alias/${CLUSTER_NAME}
+          - arn:aws:kms:${AWS_REGION}:${ACCOUNT_ID}:alias/${CLUSTER_NAME}-auto-unseal
 
       - Effect: Allow
         Action:

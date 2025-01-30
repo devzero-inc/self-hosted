@@ -374,3 +374,59 @@ module "alb" {
     module.eks
   ]
 }
+
+################################################################################
+# Vault Auto-Unseal Key
+################################################################################
+resource "aws_kms_key" "vault-auto-unseal" {
+  count = var.create_vault_auto_unseal_key ? 1 : 0
+  description = "Vault auto unseal keys"
+
+  deletion_window_in_days = 10
+}
+resource "aws_kms_alias" "vault-auto-unseal" {
+  count = var.create_vault_auto_unseal_key ? 1 : 0
+
+  name          = "alias/${var.cluster_name}-auto-unseal"
+  target_key_id = aws_kms_key.vault-auto-unseal[0].key_id
+}
+
+resource "aws_kms_key_policy" "vault-auto-unseal" {
+  count = var.create_vault_auto_unseal_key ? 1 : 0
+
+  key_id = aws_kms_key.vault-auto-unseal[0].id
+  policy = jsonencode({
+    Id = "${var.cluster_name}-auto-unseal"
+    Statement = [
+      {
+        Action = [
+          "kms:*",
+        ]
+        Effect = "Allow"
+        Principal = {
+          # Uncomment this to allow only current terraform user to manage the KMS key
+          # AWS = data.aws_iam_session_context.current[0].issuer_arn
+
+          # Allows everyone with KMS access to manage this key
+          AWS = "*"
+        }
+        Resource = "*"
+        Sid      = "Vault unseal key management for cluster: (${var.cluster_name})"
+      },
+      {
+        "Sid": "KeyUsage",
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": module.eks.cluster_iam_role_arn
+        },
+        "Action": [
+          "kms:Encrypt",
+          "kms:DescribeKey",
+          "kms:Decrypt"
+        ],
+        "Resource": "*"
+      }
+    ]
+    Version = "2012-10-17"
+  })
+}

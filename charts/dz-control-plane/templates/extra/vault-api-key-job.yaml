@@ -64,40 +64,46 @@ data:
     VAULT_SECRET_KEYS_NAME="vault-unseal-keys"
 
     # Check if Vault is initialized
-    if ! vault status | grep -q 'Initialized.*true'; then
+    initialized=$(vault status -format=json | jq -r '.initialized')
+    echo "Initialized: $initialized"
+    
+    if [ "$initialized" = "false" ]; then
       echo "Vault is not initialized. Initializing now..."
 
-      # Initialize Vault with 5 Shamir keys and 3 required to unseal
-      vault operator init -key-shares=5 -key-threshold=3 > init_output.txt
+      # Check if seal type is awskms
+      seal_type=$(vault status -format=json | jq -r '.initialized')
+      echo "Seal type: $seal_type"
 
-      # Extract keys and root token
-      unseal_keys=$(grep 'Unseal Key' init_output.txt | awk '{print $4}')
-      root_token=$(grep 'Initial Root Token' init_output.txt | awk '{print $4}')
-
-      # Verify that keys and token were extracted successfully
-      if [ -z "$unseal_keys" ] || [ -z "$root_token" ]; then
-        echo "Failed to extract unseal keys or root token from initialization output"
-        echo "This likely means that vault was already initialized. Skipping updating secret..."
-
+      if [ "$seal_type" = "awskms" ]; then
+        echo "Vault is using AWS KMS for auto-unsealing"
+        vault operator init -format=json  > init_output.json
       else
-        echo "Successfully extracted unseal keys and root token"
-
-        # Delete existing secret if it exists
-        if kubectl get secret "$VAULT_SECRET_KEYS_NAME" &>/dev/null; then
-          echo "Deleting existing Kubernetes secret for new keys..."
-          kubectl delete secret "$VAULT_SECRET_KEYS_NAME"
-        fi
-
-        echo "Creating new Kubernetes secret..."
-        kubectl create secret generic "$VAULT_SECRET_KEYS_NAME" --from-literal=keys="$unseal_keys" --from-literal=root-token="$root_token"
-
+        # Initialize Vault with 5 Shamir keys and 3 required to unseal
+        vault operator init -key-shares=5 -key-threshold=3 -format=json > init_output.json
       fi
 
+      echo "Successfully extracted unseal keys and root token"
+
+      # Delete existing secret if it exists
+      if kubectl get secret "$VAULT_SECRET_KEYS_NAME" &>/dev/null; then
+        echo "Deleting existing Kubernetes secret for new keys..."
+        kubectl delete secret "$VAULT_SECRET_KEYS_NAME"
+      fi
+
+      echo "Creating new Kubernetes secret..."
+      kubectl create secret generic "$VAULT_SECRET_KEYS_NAME" --from-literal="data=$(cat init_output.json)"
 
       echo "Vault initialized and keys stored in Kubernetes secret."
     fi
 
     echo "Vault is already initialized."
+    
+    seal_type=$(vault status -format=json | jq -r '.type')
+    echo "Seal type: $seal_type"
+    if [ "$seal_type" = "awskms" ]; then
+      echo "Vault is using AWS KMS for auto-unsealing. Skipping unsealing."
+      exit 0
+    fi
 
     # Get all the IP addresses for the "vault" service endpoints
     endpoints=$(kubectl get endpoints vault -o jsonpath='{.subsets[*].addresses[*].ip}')
@@ -105,7 +111,7 @@ data:
     echo "Vault endpoints: $endpoints"
 
     # Retrieve keys from Kubernetes secret
-    unseal_keys=$(kubectl get secret "$VAULT_SECRET_KEYS_NAME" -o jsonpath='{.data.keys}' | base64 --decode)
+    unseal_keys=$(kubectl get secret "$VAULT_SECRET_KEYS_NAME" -o jsonpath='{.data.data}' | base64 --decode | jq -r '.unseal_keys_b64[]')
 
     # Loop through each IP and echo it
     for ip in $endpoints; do
@@ -120,7 +126,7 @@ data:
         echo "Vault is sealed on $ip. Unsealing now..."
 
         # Read keys line by line and unseal until successful
-        while IFS= read -r key; do
+        for key in $unseal_keys; do
           vault operator unseal "$key" | grep 'Unseal Progress'
 
           # Check if vault is still sealed
@@ -128,7 +134,7 @@ data:
             echo "Vault successfully unsealed!"
             break
           fi
-        done <<< "$unseal_keys"
+        done
       else
         echo "Vault is already unsealed."
       fi
