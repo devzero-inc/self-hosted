@@ -183,9 +183,12 @@ def check_data_plane_ingress():
 
 # Data plane Helm chart checks
 @check_data_plane.command("rook-ceph")
-def check_data_plane_rook_ceph():
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
+def check_data_plane_rook_ceph(force):
     """Helm chart: rook-ceph"""
-    click.echo("Checking helm chart: rook-ceph")
+    DataPlane().check_data_plane_rook_ceph(force)
 
 
 @check_data_plane.command("rook-ceph-cluster")
