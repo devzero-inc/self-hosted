@@ -22,7 +22,7 @@ server:
     enabled: true
 
   # Disable vault anti-affinity that requires one pod on each node. This allows vault to run on a single node cluster.
-  affinity: {}
+  affinity: ""
 
   ha:
     enabled: true
