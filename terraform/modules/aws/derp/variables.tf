@@ -36,6 +36,18 @@ variable "ssh_cidr_blocks" {
   default     = ["0.0.0.0/0"]
 }
 
+variable "ingress_cidr_blocks" {
+  description = "CIDR blocks for ingress access"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "egress_cidr_blocks" {
+  description = "CIDR blocks for egress access"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
 variable "hostname" {
   description = "Server hostname, required for public derps"
   type        = string
