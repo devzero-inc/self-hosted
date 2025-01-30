@@ -44,7 +44,7 @@ module "kata_node_group" {
   instance_types = [var.instance_type]
   key_name       = var.nodes_key_name
 
-  subnet_ids           = try(var.subnet_ids, data.aws_eks_cluster.this.vpc_config[0].subnet_ids)
+  subnet_ids           = coalescelist(var.subnet_ids, tolist(data.aws_eks_cluster.this.vpc_config[0].subnet_ids))
 
   ami_id = var.ami_id
   ami_type = "AL2023_x86_64_STANDARD"
