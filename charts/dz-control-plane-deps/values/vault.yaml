@@ -20,6 +20,10 @@ server:
     enabled: true
   dataStorage:
     enabled: true
+
+  # Disable vault anti-affinity that requires one pod on each node. This allows vault to run on a single node cluster.
+  affinity: {}
+
   ha:
     enabled: true
     replicas: 3
