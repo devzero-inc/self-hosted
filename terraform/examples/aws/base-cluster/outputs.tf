@@ -63,7 +63,7 @@ output "eks_cluster_version" {
 locals {
     vault_auto_unseal_key_output = <<-EOT
     seal "awskms" {
-        kms_key_id = "${aws_kms_key.vault-auto-unseal[0].id}"
+        kms_key_id = "${try(aws_kms_key.vault-auto-unseal[0].id, "")}"
         region = "${var.region}"
     }
     EOT
