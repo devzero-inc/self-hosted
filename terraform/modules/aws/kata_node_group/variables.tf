@@ -53,3 +53,9 @@ variable "max_size" {
   description = "Max node size"
   default     = 4
 }
+
+variable "subnet_ids" {
+  description = "Identifiers of EC2 Subnets to associate with the EKS Node Group. These subnets must have the following resource tag: `kubernetes.io/cluster/CLUSTER_NAME`"
+  type        = list(string)
+  default     = null
+}
