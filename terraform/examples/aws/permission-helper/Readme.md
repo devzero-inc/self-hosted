@@ -40,6 +40,23 @@ least privilege.
 This user can be used to deploy devzero example clusters. You can create AWS credentials for this user and use them to
 deploy the cluster, adjusting the terraform provider configurations as needed.
 
+### Running the module
+
+After setting the variables, run the following commands:
+
+```shell
+terraform init
+```
+and then:
+```shell
+terraform apply
+```
+
+Use the generated resources as you wish, an then you can delete those resources with:
+```shell
+terraform destroy
+```
+
 ## Generating policies only
 
 If you don't need to create the IAM user, you can set the `create_local_files` variable to `true`. This will generate
