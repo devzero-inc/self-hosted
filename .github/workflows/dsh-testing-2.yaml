@@ -93,3 +93,20 @@ jobs:
         run: |
           INGRESS_ADDRESS=$(kubectl get ingress -n devzero -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
           curl -v https://$INGRESS_ADDRESS/dashboard || exit 1
+
+
+      - name: Run Destroy Stage
+        if: always()
+        run: |
+          cd self-hosted/terraform/examples/aws/cluster-extensions
+          terraform destroy -auto-approve
+
+      - name: Run Destroy Stage 2
+        if: always()
+        run: |
+          cd self-hosted/terraform/examples/aws/base-cluster
+          terraform destroy -auto-approve
+
+
+      
+
