@@ -38,7 +38,8 @@ jobs:
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           BACKEND_LICENSE_KEY: ${{ secrets.BACKEND_LICENSE_KEY }}
         run: |
-          yq e '
+          yq --version
+          yq e -i -y'
             .credentials.registry = "docker.io" |
             .credentials.username = strenv(DOCKER_USERNAME) |
             .credentials.password = strenv(DOCKERHUB_TOKEN) |
