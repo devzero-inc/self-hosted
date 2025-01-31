@@ -29,11 +29,7 @@ jobs:
           SERVICES: "polland backend api-gateway hydra falco cortex logsrv buildqd"
           DOCKERHUB_USER: "${{ secrets.DOCKERHUB_USERNAME }}"
         run: |
-          ls
           for service in $SERVICES; do
-
-            ls services/$service
-
             if [ -f "services/$service/Dockerfile" ]; then
               echo "Building and pushing image for $service..."
 
