@@ -80,8 +80,6 @@ jobs:
           yq e -i '.credentials.email = "garvit@devzero.io"' self-hosted/charts/dz-control-plane/values.yaml
           yq e -i '.backend.licenseKey = strenv(BACKEND_LICENSE_KEY)' self-hosted/charts/dz-control-plane/values.yaml
 
-
-
       - name: Deploy DevZero Control Plane
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -116,7 +114,6 @@ jobs:
             email: "garvit@devzero.io"
           EOT
 
-      
       - name: Deploy Data Plane Dependencies
         run: |
           cd self-hosted/charts/dz-data-plane-deps
@@ -135,27 +132,27 @@ jobs:
           kubectl get pods -n devzero-self-hosted
           kubectl get ingress -n devzero-self-hosted
 
-       - name: Run Destroy cluster-extensions
-         if: always()
-         run: |
-           cd self-hosted/terraform/examples/aws/cluster-extensions
-           terraform destroy -auto-approve
+      # - name: Run Destroy cluster-extensions
+      #   if: always()
+      #   run: |
+      #     cd self-hosted/terraform/examples/aws/cluster-extensions
+      #     terraform destroy -auto-approve
 
-       - name: Destroy AWS Dependencies
-         if: always()
-         run: |
-           aws ec2 delete-internet-gateway --internet-gateway-id $(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text) || true
-           aws ec2 delete-nat-gateway --nat-gateway-id $(aws ec2 describe-nat-gateways --filter "Name=vpc-id,Values=$VPC_ID" --query 'NatGateways[0].NatGatewayId' --output text) || true
-           aws ec2 delete-route-table --route-table-id $(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[?Associations[0].Main!=`true`].RouteTableId' --output text) || true
-           for subnet in $(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[*].SubnetId' --output text); do
-             aws ec2 delete-subnet --subnet-id $subnet || true
-           done
-           for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
-             aws ec2 delete-security-group --group-id $sg || true
-           done
+      # - name: Destroy AWS Dependencies
+      #   if: always()
+      #   run: |
+      #     aws ec2 delete-internet-gateway --internet-gateway-id $(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text) || true
+      #     aws ec2 delete-nat-gateway --nat-gateway-id $(aws ec2 describe-nat-gateways --filter "Name=vpc-id,Values=$VPC_ID" --query 'NatGateways[0].NatGatewayId' --output text) || true
+      #     aws ec2 delete-route-table --route-table-id $(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[?Associations[0].Main!=`true`].RouteTableId' --output text) || true
+      #     for subnet in $(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[*].SubnetId' --output text); do
+      #       aws ec2 delete-subnet --subnet-id $subnet || true
+      #     done
+      #     for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
+      #       aws ec2 delete-security-group --group-id $sg || true
+      #     done
 
-       - name: Run Destroy base-cluster
-         if: always()
-         run: |
-           cd self-hosted/terraform/examples/aws/base-cluster
-           terraform destroy -auto-approve
+      # - name: Run Destroy base-cluster
+      #   if: always()
+      #   run: |
+      #     cd self-hosted/terraform/examples/aws/base-cluster
+      #     terraform destroy -auto-approve
