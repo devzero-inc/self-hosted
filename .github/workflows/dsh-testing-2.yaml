@@ -1,0 +1,88 @@
+name: Test DevZero Control Plane on AWS EKS
+
+on:
+  push:
+    branches:
+      - garvit/pipeline-testing
+  workflow_dispatch:
+
+jobs:
+  setup-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::484907513542:role/github-actions-oidc-role
+          aws-region: us-west-1
+
+      - name: Clone DevZero Self-Hosted Repository
+        run: |
+          git clone https://github.com/devzero-inc/self-hosted.git -b garvit/pipeline-testing
+
+      - name: Initialize and Apply Terraform (Infrastructure)
+        run: |
+          cd self-hosted/terraform/examples/aws/base-cluster
+          terraform init
+          terraform apply -auto-approve
+          echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_ENV
+          echo "VPC_ID=$(terraform output -raw vpc_id)" >> $GITHUB_ENV
+          echo "PUBLIC_SUBNET_IDS=$(terraform output -json public_subnet_ids | jq -c .)" >> $GITHUB_ENV
+          echo "PRIVATE_SUBNET_IDS=$(terraform output -json private_subnet_ids | jq -c .)" >> $GITHUB_ENV
+
+      - name: Update Cluster-Extensions tfvars
+        run: |
+          cat <<EOT > self-hosted/terraform/examples/aws/cluster-extensions/terraform.tfvars
+          region = "us-west-1"
+          vpc_id = "$VPC_ID"
+          public_subnet_ids = $PUBLIC_SUBNET_IDS
+          private_subnet_ids = $PRIVATE_SUBNET_IDS
+          enable_cluster_autoscaler = false
+          cluster_name = "$CLUSTER_NAME"
+          EOT
+
+      - name: Initialize and Apply Cluster-Extensions
+        run: |
+          cd self-hosted/terraform/examples/aws/cluster-extensions
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Configure Kubernetes Access
+        run: |
+          aws eks update-kubeconfig --region us-west-1 --name $CLUSTER_NAME
+
+      - name: Deploy Control Plane Dependencies
+        run: |
+          cd self-hosted/charts/dz-control-plane-deps
+          make install
+
+      - name: Deploy DevZero Control Plane
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          cd self-hosted/charts/dz-control-plane
+          make add-docker-creds
+          make install
+
+      - name: Validate Deployment
+        run: |
+          kubectl get pods -n devzero
+          kubectl get ingress -n devzero
+
+      - name: Output Ingress Address
+        run: |
+          INGRESS_ADDRESS=$(kubectl get ingress -n devzero -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
+          echo "Ingress Address: $INGRESS_ADDRESS"
+          echo "::set-output name=ingress_address::$INGRESS_ADDRESS"
+
+      - name: Test Public Access
+        run: |
+          INGRESS_ADDRESS=$(kubectl get ingress -n devzero -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
+          curl -v https://$INGRESS_ADDRESS/dashboard || exit 1
