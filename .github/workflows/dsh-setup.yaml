@@ -1,9 +1,9 @@
-name: devzero testing
+name: devzero DSH deployment
 
 on:
-  # push:
-  #   branches:
-  #     - garvit/pipeline-testing
+  push:
+    branches:
+      - garvit/pipeline-testing
   workflow_dispatch:
 
 jobs:
