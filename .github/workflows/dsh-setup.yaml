@@ -75,10 +75,10 @@ jobs:
 
       - name: Update values.yaml for Data Plane
         run: |
-          yq e -i '.credentials.username = strenv(DOCKERHUB_USERNAME)' self-hosted/charts/dz-control-plane/values.yaml
-          yq e -i '.credentials.password = strenv(DOCKERHUB_TOKEN)' self-hosted/charts/dz-control-plane/values.yaml
-          yq e -i '.credentials.email = "garvit@devzero.io"' self-hosted/charts/dz-control-plane/values.yaml
-          yq e -i '.backend.licenseKey = strenv(BACKEND_LICENSE_KEY)' self-hosted/charts/dz-control-plane/values.yaml
+          yq e -i -y '.credentials.username = strenv(DOCKERHUB_USERNAME)' self-hosted/charts/dz-control-plane/values.yaml
+          yq e -i -y '.credentials.password = strenv(DOCKERHUB_TOKEN)' self-hosted/charts/dz-control-plane/values.yaml
+          yq e -i -y '.credentials.email = "garvit@devzero.io"' self-hosted/charts/dz-control-plane/values.yaml
+          yq e -i -y '.backend.licenseKey = strenv(BACKEND_LICENSE_KEY)' self-hosted/charts/dz-control-plane/values.yaml
 
       - name: Deploy DevZero Control Plane
         env:
