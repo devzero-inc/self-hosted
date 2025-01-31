@@ -39,12 +39,13 @@ data "aws_iam_session_context" "current" {
   arn = try(data.aws_caller_identity.current[0].arn, "")
 }
 
-backend "s3" {
-    bucket         	   = "dsh-tf-state"
-    key              	   = "base-cluster/terraform.tfstate"
-    region         	   = "us-west-1"
+terraform {
+  backend "s3" {
+      bucket         	   = "dsh-tf-state"
+      key              	   = "base-cluster/terraform.tfstate"
+      region         	   = "us-west-1"
   }
-
+}
 
 ################################################################################
 # Providers
