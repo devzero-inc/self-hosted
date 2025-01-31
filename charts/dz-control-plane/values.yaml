@@ -330,9 +330,7 @@ backend:
     ## @param backend.service.annotations Annotations for the Backend service
     annotations: {}
     ## @param backend.service.labels Labels for the Backend service
-    labels:
-      app: web
-      environment: production
+    labels: {}
 
 ## @section Hydra Configuration
 hydra:
