@@ -69,6 +69,20 @@ jobs:
           cd self-hosted/charts/dz-control-plane-deps
           make install
 
+      - name: Install yq
+        run: |
+          sudo apt-get update && sudo apt-get install -y yq
+
+      - name: Update values.yaml for Data Plane
+        run: |
+          yq e -i '
+            .credentials.username = "${{ secrets.DOCKERHUB_USERNAME }}" |
+            .credentials.password = "${{ secrets.DOCKERHUB_TOKEN }}" |
+            .credentials.email = "garvit@devzero.io" |
+            .backend.licenseKey = "${{ secrets.BACKEND_LICENSE_KEY }}"
+          ' self-hosted/charts/dz-control-plane/values.yaml
+
+
       - name: Deploy DevZero Control Plane
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -78,30 +92,70 @@ jobs:
           make add-docker-creds
           make install
 
-      - name: Validate Deployment
+      - name: Validate Control Plane
         run: |
           kubectl get pods -n devzero
           kubectl get ingress -n devzero
 
-      - name: Output Ingress Address
+      - name: Update values.yaml for Data Plane
         run: |
-          INGRESS_ADDRESS=$(kubectl get ingress -n devzero -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
-          echo "Ingress Address: $INGRESS_ADDRESS"
-          echo "::set-output name=ingress_address::$INGRESS_ADDRESS"
+          cat <<EOT > self-hosted/charts/dz-control-plane/values.yaml
+          ## @section Devzero
+          devzero:
+            teamId: ""
+            region: "us-west-1"
+            vault:
+              server: "https://csi.devzero.io"
+          ## @section Node Labeler
+          nodeLabeler:
+            enabled: true
+          ## @section Credentials Configuration
+          credentials:
+            registry: "docker.io"
+            username: "${{ secrets.DOCKERHUB_USERNAME }}"
+            password: "${{ secrets.DOCKERHUB_TOKEN }}"
+            email: "garvit@devzero.io"
+          EOT
 
-      - name: Test Public Access
+      
+      - name: Deploy Data Plane Dependencies
         run: |
-          INGRESS_ADDRESS=$(kubectl get ingress -n devzero -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
-          curl -v https://$INGRESS_ADDRESS/dashboard || exit 1
+          cd self-hosted/charts/dz-data-plane-deps
+          make install
 
+      - name: Deploy DevZero Data Plane
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          cd self-hosted/charts/dz-control-plane
+          make install
 
-      - name: Run Destroy Stage
+      - name: Validate Data Plane
+        run: |
+          kubectl get pods -n devzero-self-hosted
+          kubectl get ingress -n devzero-self-hosted
+
+      - name: Run Destroy cluster-extensions
         if: always()
         run: |
           cd self-hosted/terraform/examples/aws/cluster-extensions
           terraform destroy -auto-approve
 
-      - name: Run Destroy Stage 2
+      - name: Destroy AWS Dependencies
+        if: always()
+        run: |
+          aws ec2 delete-internet-gateway --internet-gateway-id $(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text) || true
+          aws ec2 delete-nat-gateway --nat-gateway-id $(aws ec2 describe-nat-gateways --filter "Name=vpc-id,Values=$VPC_ID" --query 'NatGateways[0].NatGatewayId' --output text) || true
+          aws ec2 delete-route-table --route-table-id $(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[?Associations[0].Main!=`true`].RouteTableId' --output text) || true
+          for subnet in $(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[*].SubnetId' --output text); do
+            aws ec2 delete-subnet --subnet-id $subnet || true
+          done
+          for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
+            aws ec2 delete-security-group --group-id $sg || true
+          done
+
+      - name: Run Destroy base-cluster
         if: always()
         run: |
           cd self-hosted/terraform/examples/aws/base-cluster
