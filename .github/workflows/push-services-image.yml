@@ -1,9 +1,9 @@
 name: Push Services Image
 
 on:
-  push:
-    branches:
-      - garvit/pipeline-testing
+  # push:
+  #   branches:
+  #     - garvit/pipeline-testing
   workflow_dispatch:
 
 jobs:
