@@ -28,31 +28,6 @@ jobs:
         run: |
           git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git -b garvit/pipeline-testing
 
-      - name: Install yq version 4.x.x
-        run: |
-          # Remove existing yq if installed
-          sudo apt-get remove -y yq
-          
-          # Install the latest yq version 4.x.x
-          sudo wget https://github.com/mikefarah/yq/releases/download/v4.15.1/yq_linux_amd64 -O /usr/local/bin/yq
-          sudo chmod +x /usr/local/bin/yq
-          yq --version  # Verify that the correct version is installed
-
-      - name: Update values.yaml for Control Plane
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          BACKEND_LICENSE_KEY: ${{ secrets.BACKEND_LICENSE_KEY }}
-        run: |
-          yq --version  # Confirm the version of yq
-          yq e -i '
-            .credentials.registry = "docker.io" |
-            .credentials.username = strenv(DOCKER_USERNAME) |
-            .credentials.password = strenv(DOCKERHUB_TOKEN) |
-            .credentials.email = "garvit@devzero.io" |
-            .backend.licenseKey = strenv(BACKEND_LICENSE_KEY)
-          ' self-hosted/charts/dz-control-plane/values.yaml
-
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -94,7 +69,24 @@ jobs:
           cd self-hosted/charts/dz-control-plane-deps
           make install
 
-      
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.15.1/yq_linux_amd64 -O /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Update values.yaml for Control Plane
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          BACKEND_LICENSE_KEY: ${{ secrets.BACKEND_LICENSE_KEY }}
+        run: |
+          yq e -i '
+            .credentials.registry = "docker.io" |
+            .credentials.username = strenv(DOCKER_USERNAME) |
+            .credentials.password = strenv(DOCKERHUB_TOKEN) |
+            .credentials.email = "garvit@devzero.io" |
+            .backend.licenseKey = strenv(BACKEND_LICENSE_KEY)
+          ' self-hosted/charts/dz-control-plane/values.yaml
 
       - name: Deploy DevZero Control Plane
         env:
@@ -148,27 +140,27 @@ jobs:
           kubectl get pods -n devzero-self-hosted
           kubectl get ingress -n devzero-self-hosted
 
-      # - name: Run Destroy cluster-extensions
-      #   if: always()
-      #   run: |
-      #     cd self-hosted/terraform/examples/aws/cluster-extensions
-      #     terraform destroy -auto-approve
+      - name: Run Destroy cluster-extensions
+        if: always()
+        run: |
+          cd self-hosted/terraform/examples/aws/cluster-extensions
+          terraform destroy -auto-approve
 
-      # - name: Destroy AWS Dependencies
-      #   if: always()
-      #   run: |
-      #     aws ec2 delete-internet-gateway --internet-gateway-id $(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text) || true
-      #     aws ec2 delete-nat-gateway --nat-gateway-id $(aws ec2 describe-nat-gateways --filter "Name=vpc-id,Values=$VPC_ID" --query 'NatGateways[0].NatGatewayId' --output text) || true
-      #     aws ec2 delete-route-table --route-table-id $(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[?Associations[0].Main!=`true`].RouteTableId' --output text) || true
-      #     for subnet in $(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[*].SubnetId' --output text); do
-      #       aws ec2 delete-subnet --subnet-id $subnet || true
-      #     done
-      #     for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
-      #       aws ec2 delete-security-group --group-id $sg || true
-      #     done
+      - name: Destroy AWS Dependencies
+        if: always()
+        run: |
+          aws ec2 delete-internet-gateway --internet-gateway-id $(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text) || true
+          aws ec2 delete-nat-gateway --nat-gateway-id $(aws ec2 describe-nat-gateways --filter "Name=vpc-id,Values=$VPC_ID" --query 'NatGateways[0].NatGatewayId' --output text) || true
+          aws ec2 delete-route-table --route-table-id $(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[?Associations[0].Main!=`true`].RouteTableId' --output text) || true
+          for subnet in $(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[*].SubnetId' --output text); do
+            aws ec2 delete-subnet --subnet-id $subnet || true
+          done
+          for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
+            aws ec2 delete-security-group --group-id $sg || true
+          done
 
-      # - name: Run Destroy base-cluster
-      #   if: always()
-      #   run: |
-      #     cd self-hosted/terraform/examples/aws/base-cluster
-      #     terraform destroy -auto-approve
+      - name: Run Destroy base-cluster
+        if: always()
+        run: |
+          cd self-hosted/terraform/examples/aws/base-cluster
+          terraform destroy -auto-approve
