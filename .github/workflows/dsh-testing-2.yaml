@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  setup-and-test:
+  Deploy Infra:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
