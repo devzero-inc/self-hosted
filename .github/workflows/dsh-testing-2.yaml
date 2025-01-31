@@ -23,8 +23,10 @@ jobs:
           aws-region: us-west-1
 
       - name: Clone DevZero Self-Hosted Repository
+        env:
+          GH_PAT: ${{ secrets.GH_TOKEN }}
         run: |
-          git clone https://github.com/devzero-inc/self-hosted.git -b garvit/pipeline-testing
+          git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git -b garvit/pipeline-testing
 
       - name: Initialize and Apply Terraform (Infrastructure)
         run: |
