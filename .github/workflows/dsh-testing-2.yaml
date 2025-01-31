@@ -28,26 +28,10 @@ jobs:
         run: |
           git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git -b garvit/pipeline-testing
 
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y curl unzip jq
-          curl -fsSL https://releases.hashicorp.com/terraform/1.5.3/terraform_1.5.3_linux_amd64.zip -o terraform.zip
-          unzip -o terraform.zip
-          sudo mv terraform /usr/local/bin/
-          terraform -version
-          curl -fsSL -o helm.tar.gz https://get.helm.sh/helm-v3.8.2-linux-amd64.tar.gz
-          tar -zxvf helm.tar.gz
-          sudo mv linux-amd64/helm /usr/local/bin/helm
-          helm version
-          curl -fsSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
-          unzip awscliv2.zip
-          sudo ./aws/install
-          aws --version
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
-          kubectl version --client
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3 # Ensure Terraform is available here as well
+        with:
+          terraform_version: 1.5.7
 
       - name: Initialize and Apply Terraform (Infrastructure)
         run: |
