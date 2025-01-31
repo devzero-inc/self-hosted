@@ -67,6 +67,9 @@ jobs:
   deploy-control-plane:
     name: Deploy Control Plane
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     needs: setup
     steps:
       - name: Configure AWS Credentials
