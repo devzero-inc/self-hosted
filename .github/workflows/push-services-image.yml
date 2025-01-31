@@ -1,9 +1,9 @@
 name: Push Services Image
 
 on:
-  # push:
-  #   branches:
-  #     - garvit/pipeline-testing
+  push:
+    branches:
+      - garvit/pipeline-testing
   workflow_dispatch:
 
 jobs:
@@ -29,8 +29,12 @@ jobs:
           SERVICES: "polland backend api-gateway hydra falco cortex logsrv buildqd"
           DOCKERHUB_USER: "${{ secrets.DOCKERHUB_USERNAME }}"
         run: |
+          ls
           for service in $SERVICES; do
-            if [ -f "./$service/Dockerfile" ]; then
+
+            ls services/$service
+
+            if [ -f "services/$service/Dockerfile" ]; then
               echo "Building and pushing image for $service..."
 
               IMAGE_NAME="devzeroinc/$service"
