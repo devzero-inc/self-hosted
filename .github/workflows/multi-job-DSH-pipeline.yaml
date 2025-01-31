@@ -69,7 +69,7 @@ jobs:
           terraform init
           terraform apply -auto-approve
 
-      - name: Configure Kubernetes Access
+      - name: Configure Kubernetes cluster Access
         run: |
           aws eks update-kubeconfig --region us-west-1 --name $CLUSTER_NAME
 
