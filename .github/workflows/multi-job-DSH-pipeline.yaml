@@ -1,9 +1,9 @@
 name: Test DevZero Control Plane on AWS EKS
 
 on:
-  push:
-    branches:
-      - garvit/pipeline-testing
+  # push:
+  #   branches:
+  #     - garvit/pipeline-testing
   workflow_dispatch:
 
 jobs:
