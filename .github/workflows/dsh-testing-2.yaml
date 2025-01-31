@@ -33,7 +33,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y curl unzip jq
           curl -fsSL https://releases.hashicorp.com/terraform/1.5.3/terraform_1.5.3_linux_amd64.zip -o terraform.zip
-          unzip terraform.zip
+          unzip -o terraform.zip
           sudo mv terraform /usr/local/bin/
           terraform -version
           curl -fsSL -o helm.tar.gz https://get.helm.sh/helm-v3.8.2-linux-amd64.tar.gz
