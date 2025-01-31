@@ -40,7 +40,7 @@ jobs:
               IMAGE_NAME="devzeroinc/$service"
               IMAGE_TAG="$(git rev-parse --short HEAD)"
 
-              docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:$IMAGE_TAG -f ./$service/Dockerfile ./$service
+              docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:$IMAGE_TAG -f services/$service/Dockerfile services/$service
               docker push $IMAGE_NAME:latest
               docker push $IMAGE_NAME:$IMAGE_TAG
             else
