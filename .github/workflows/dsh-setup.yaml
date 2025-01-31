@@ -28,9 +28,15 @@ jobs:
         run: |
           git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git -b garvit/pipeline-testing
 
-      - name: Install yq
+      - name: Install yq version 4.x.x
         run: |
-          sudo apt-get update && sudo apt-get install -y yq
+          # Remove existing yq if installed
+          sudo apt-get remove -y yq
+          
+          # Install the latest yq version 4.x.x
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.15.1/yq_linux_amd64 -O /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+          yq --version  # Verify that the correct version is installed
 
       - name: Update values.yaml for Control Plane
         env:
@@ -38,8 +44,8 @@ jobs:
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           BACKEND_LICENSE_KEY: ${{ secrets.BACKEND_LICENSE_KEY }}
         run: |
-          yq --version
-          yq e -i -y'
+          yq --version  # Confirm the version of yq
+          yq e -i '
             .credentials.registry = "docker.io" |
             .credentials.username = strenv(DOCKER_USERNAME) |
             .credentials.password = strenv(DOCKERHUB_TOKEN) |
