@@ -28,6 +28,20 @@ jobs:
         run: |
           git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git -b garvit/pipeline-testing
 
+      - name: Install yq
+        run: |
+          sudo apt-get update && sudo apt-get install -y yq
+
+      - name: Update values.yaml for Control Plane
+        run: |
+          yq e -i '
+            .credentials.registry = "docker.io" |
+            .credentials.username = "${{ secrets.DOCKER_USERNAME }}" |
+            .credentials.password = "${{ secrets.DOCKERHUB_TOKEN }}" |
+            .credentials.email = "garvit@devzero.io" |
+            .backend.licenseKey = "${{ secrets.BACKEND_LICENSE_KEY }}"
+          ' self-hosted/charts/dz-control-plane/values.yaml
+
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -69,16 +83,7 @@ jobs:
           cd self-hosted/charts/dz-control-plane-deps
           make install
 
-      - name: Install yq
-        run: |
-          sudo apt-get update && sudo apt-get install -y yq
-
-      - name: Update values.yaml for Data Plane
-        run: |
-          yq e -i -y '.credentials.username = strenv(DOCKERHUB_USERNAME)' self-hosted/charts/dz-control-plane/values.yaml
-          yq e -i -y '.credentials.password = strenv(DOCKERHUB_TOKEN)' self-hosted/charts/dz-control-plane/values.yaml
-          yq e -i -y '.credentials.email = "garvit@devzero.io"' self-hosted/charts/dz-control-plane/values.yaml
-          yq e -i -y '.backend.licenseKey = strenv(BACKEND_LICENSE_KEY)' self-hosted/charts/dz-control-plane/values.yaml
+      
 
       - name: Deploy DevZero Control Plane
         env:
