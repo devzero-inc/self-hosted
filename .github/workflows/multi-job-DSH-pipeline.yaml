@@ -69,6 +69,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup
     steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::484907513542:role/github-actions-oidc-role
+          aws-region: us-west-1
+          
+      - name: Clone DevZero Self-Hosted Repository
+        env:
+          GH_PAT: ${{ secrets.GH_TOKEN }}
+        run: |
+          git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git -b garvit/pipeline-testing
       - name: Deploy Control Plane Dependencies
         run: |
           aws eks update-kubeconfig --region us-west-1 --name $CLUSTER_NAME
