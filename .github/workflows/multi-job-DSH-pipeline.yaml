@@ -29,11 +29,6 @@ jobs:
         run: |
           git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git -b garvit/pipeline-testing
 
-  terraform-provision:
-    name: Provision AWS EKS Infrastructure
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -52,7 +47,7 @@ jobs:
   cluster-extensions-kube-config:
     name: Deploy Cluster Extensions & Configure Kubeconfig
     runs-on: ubuntu-latest
-    needs: terraform-provision
+    needs: setup
     steps:
       - name: Update Cluster-Extensions tfvars
         run: |
