@@ -67,7 +67,7 @@ jobs:
   deploy-control-plane:
     name: Deploy Control Plane
     runs-on: ubuntu-latest
-    needs: cluster-extensions-kube-config
+    needs: setup
     steps:
       - name: Deploy Control Plane Dependencies
         run: |
