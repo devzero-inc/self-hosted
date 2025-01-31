@@ -16,11 +16,13 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::484907513542:role/github-actions-oidc-role
           aws-region: us-west-1
+          
       - name: Clone DevZero Self-Hosted Repository
         env:
           GH_PAT: ${{ secrets.GH_TOKEN }}
@@ -171,7 +173,7 @@ jobs:
 
   #     - name: Destroy AWS Dependencies
   #       run: |
-  #         aws ec2 delete-internet-gateway --internet-gateway-id $(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text) || true
+  # <        aws ec2 delete-internet-gateway --internet-gateway-id $(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text) || true
   #         aws ec2 delete-nat-gateway --nat-gateway-id $(aws ec2 describe-nat-gateways --filter "Name=vpc-id,Values=$VPC_ID" --query 'NatGateways[0].NatGatewayId' --output text) || true
   #         aws ec2 delete-route-table --route-table-id $(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[?Associations[0].Main!=`true`].RouteTableId' --output text) || true
   #         for subnet in $(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[*].SubnetId' --output text); do
