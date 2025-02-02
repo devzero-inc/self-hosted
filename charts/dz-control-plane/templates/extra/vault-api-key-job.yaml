@@ -84,6 +84,9 @@ data:
 
       echo "Successfully extracted unseal keys and root token"
 
+      # Extract the root_token from init_output.json
+      root_token=$(jq -r '.root_token' init_output.json)
+
       # Delete existing secret if it exists
       if kubectl get secret "$VAULT_SECRET_KEYS_NAME" &>/dev/null; then
         echo "Deleting existing Kubernetes secret for new keys..."
@@ -91,7 +94,9 @@ data:
       fi
 
       echo "Creating new Kubernetes secret..."
-      kubectl create secret generic "$VAULT_SECRET_KEYS_NAME" --from-literal="data=$(cat init_output.json)"
+      kubectl create secret generic "$VAULT_SECRET_KEYS_NAME" \
+        --from-literal="data=$(cat init_output.json)" \
+        --from-literal="root-token=$root_token"
 
       echo "Vault initialized and keys stored in Kubernetes secret."
     fi

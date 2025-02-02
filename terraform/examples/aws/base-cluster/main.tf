@@ -271,6 +271,10 @@ module "kata_node_group" {
 
   ami_id = data.aws_ami.devzero_amazon_eks_node_al2023.image_id
 
+  # Optinally pass in CA certificate
+  enable_custom_ca_cert = var.create_vpn
+  custom_ca_cert = var.create_vpn ? module.vpn[0].vpn_ca_certificate : ""
+
   desired_size = var.desired_size
   min_size     = var.min_size
   max_size     = var.max_size

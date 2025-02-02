@@ -58,21 +58,23 @@ module "kata_node_group" {
 
   enable_bootstrap_user_data = true
 
-#   cloudinit_pre_nodeadm = [
-#     {
-#       content_type = "application/node.eks.aws"
-#       content      = <<-EOT
-#         ---
-#         apiVersion: node.eks.aws/v1alpha1
-#         kind: NodeConfig
-#         spec:
-#           containerd:
-#             config: |
-#               [plugins."io.containerd.grpc.v1.cri".registry.configs."docker-registry.devzero.svc.cluster.local:5000".tls]
-#                 insecure_skip_verify = true
-#       EOT
-#     }
-#   ]
+  # Conditionally define cloudinit_pre_nodeadm only if custom_ca_cert is provided
+  cloudinit_pre_nodeadm = var.enable_custom_ca_cert ? [
+    {
+      content_type = "text/cloud-config"
+      content = <<-EOF
+        #cloud-config
+        ca_certs:
+          remove_default_ca: false
+          trusted:
+            - |
+              ${indent(12, var.custom_ca_cert)}
+
+        runcmd:
+          - systemctl restart containerd
+      EOF
+    }
+  ] : []
 
   block_device_mappings = {
     sda = {
@@ -92,6 +94,9 @@ module "kata_node_group" {
 
   labels = {
     "kata-runtime" = "running"
+    "node-role.kubernetes.io/devpod-node" = 1
+    "node-role.kubernetes.io/vcluster-node" = 1
+    "node-role.kubernetes.io/kata-devpod-node" = 1
   }
 
 }

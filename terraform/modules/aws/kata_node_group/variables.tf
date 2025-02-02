@@ -59,3 +59,15 @@ variable "subnet_ids" {
   type        = list(string)
   default     = []
 }
+
+variable "enable_custom_ca_cert" {
+  type    = bool
+  default = false
+  description = "Whether to enable injection of a custom CA cert"
+}
+
+variable "custom_ca_cert" {
+  type        = string
+  default     = ""
+  description = "Optional custom CA certificate contents. If empty, no custom CA is injected."
+}

@@ -7,6 +7,7 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
 data:
   self_hosted.yaml: |
+    force_enable_kata: true
     prometheus_port: {{ .Values.backend.service.metricsPort }}
     healthcheck_port: 8080
     listener_endpoint: "0.0.0.0:{{ .Values.backend.service.port }}"
@@ -80,7 +81,7 @@ data:
     cost_prometheus_url: {{ .Values.backend.mimir.url }}
     base_images:
       sysbox_base: {{ .Values.workspace.baseImages.sysboxBase }}
-      kase_base: {{ .Values.workspace.baseImages.kataBase }}
+      kata_base: {{ .Values.workspace.baseImages.kataBase }}
       cli_image: {{ .Values.workspace.baseImages.cliImage }}
     default_dz_base_image_tag: base-latest
     vault_endpoint: "http://vault:8200"
