@@ -26,7 +26,7 @@ jobs:
         env:
           GH_PAT: ${{ secrets.GH_TOKEN }}
         run: |
-          git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git -b garvit/pipeline-testing
+          git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
