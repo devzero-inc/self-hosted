@@ -19,6 +19,7 @@ domain: "devzero.internal"
 ## @section Credentials Configuration
 credentials:
   ## @param credentials.enable Enable docker hub credentials
+  # Comment out image.pullSecrets if you disable this
   enable: true
   ## @param credentials.registry Container registry URL
   registry: "docker.io"
@@ -43,7 +44,9 @@ image:
   # pullSecrets:
   #   - pull-secret
   ## @param image.pullSecrets Optionally specify an array of imagePullSecrets
-  pullSecrets: []
+  pullSecrets:
+    # Comment this out if you are not using credentials.enabled=true
+    - pull-secret
 
 ## @section Workspace Configuration
 workspace:
