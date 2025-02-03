@@ -21,6 +21,10 @@ sudo grubby --add-kernel=/boot/vmlinuz-6.7.0-dz-pvm-host --title "Amazon Linux (
 
 grubby --set-default /boot/vmlinuz-6.7.0-dz-pvm-host
 grubby --args="quiet splash nokaslr pti=off console=tty1 console=ttyS0 net.ifnames=0 biosdevname=0 nvme_core.io_timeout=4294967295 rd.emergency=poweroff rd.shell=0" --update-kernel /boot/vmlinuz-6.7.0-dz-pvm-host
+
+echo "Regenerating initramfs with ENA driver..."
+sudo dracut -f --kernel-image "${KERNEL_IMAGE}" --kver "${KERNEL_VERSION}" --add-drivers "ena"
+
 tee /etc/default/grub <<"EOF"
 # Some settings to make debugging a custom kernel easier.
 GRUB_TIMEOUT_STYLE=menu
@@ -30,5 +34,3 @@ GRUB_TERMINAL="ec2-console console serial"
 GRUB_SERIAL_COMMAND="serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1"
 EOF
 grub2-mkconfig -o /boot/grub2/grub.cfg
-
-
