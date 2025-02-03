@@ -23,7 +23,7 @@ grubby --set-default /boot/vmlinuz-6.7.0-dz-pvm-host
 grubby --args="quiet splash nokaslr pti=off console=tty1 console=ttyS0 net.ifnames=0 biosdevname=0 nvme_core.io_timeout=4294967295 rd.emergency=poweroff rd.shell=0" --update-kernel /boot/vmlinuz-6.7.0-dz-pvm-host
 
 echo "Regenerating initramfs with ENA driver..."
-sudo dracut -f --kernel-image "${KERNEL_IMAGE}" --kver "${KERNEL_VERSION}" --add-drivers "ena"
+dracut -f --kernel-image '/boot/vmlinuz-6.7.0-dz-pvm-host' --kver '6.7.0-dz-pvm-host' --add-drivers "ena"
 
 tee /etc/default/grub <<"EOF"
 # Some settings to make debugging a custom kernel easier.
