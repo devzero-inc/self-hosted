@@ -26,6 +26,13 @@ provider "helm" {
   }
 }
 
+terraform {
+  backend "s3" {
+      bucket         	   = "dsh-tf-state"
+      key              	   = "cluster-extensions/terraform.tfstate"
+      region         	   = "us-west-1"
+  }
+}
 ################################################################################
 
 data "aws_eks_cluster" "this" {

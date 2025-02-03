@@ -1,93 +1,170 @@
-name: Deploy DevZero Control Plane
+name: devzero DSH deployment
 
 on:
+  push:
+    branches:
+      - garvit/pipeline-testing
   workflow_dispatch:
 
-permissions:
-  id-token: write
-
 jobs:
-  apply:
-    name: Apply Terraform
+  setup-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
-      
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.5.7 # Specify the required version
 
-      - name: Configure AWS Credentials
+      - name: Configure AWS Credential
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::484907513542:role/github-actions-oidc-role
           aws-region: us-west-1
-      
-      - name: Install Helm
-        run: |
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-      
-      - name: Run Apply Stage
-        run: |
-          chmod +x ./dsh-testing.sh
-          DOMAIN_NAME="${{ secrets.DOMAIN_NAME }}"
-          EMAIL="${{ secrets.EMAIL }}"
-          TF_BACKEND="S3"
-          BUCKET_NAME="${{ secrets.BUCKET_NAME }}"
-          ./dsh-testing.sh apply_terraform
 
-  eks-setup:
-    name: EKS Setup
-    runs-on: ubuntu-latest
-    needs: apply
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Clone DevZero Self-Hosted Repository
+        env:
+          GH_PAT: ${{ secrets.GH_TOKEN }}
+        run: |
+          git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3 # Ensure Terraform is available here as well
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.5.7
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::484907513542:role/github-actions-oidc-role
-          aws-region: us-west-1
-
-      - name: Run EKS Setup Stage
+      - name: Initialize and Apply Terraform (Infrastructure)
         run: |
-          chmod +x ./dsh-testing.sh
-          ./dsh-testing.sh get_eks_info
-          ./dsh-testing.sh configure_kubeconfig
-          ./dsh-testing.sh login_to_helm_registry
-          ./dsh-testing.sh install_devzero_crds
-          ./dsh-testing.sh install_devzero_control_plane
-          ./dsh-testing.sh get_ingress_service
+          cd self-hosted/terraform/examples/aws/base-cluster
+          terraform init
+          terraform apply -auto-approve
+          echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_ENV
+          echo "VPC_ID=$(terraform output -raw vpc_id)" >> $GITHUB_ENV
+          echo "PUBLIC_SUBNET_IDS=$(terraform output -json public_subnet_ids | jq -c .)" >> $GITHUB_ENV
+          echo "PRIVATE_SUBNET_IDS=$(terraform output -json private_subnet_ids | jq -c .)" >> $GITHUB_ENV
 
-  destroy:
-    name: Terraform Destroy
-    runs-on: ubuntu-latest
-    needs: eks-setup
-    if: always()
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.5.7 # Add Terraform setup here as well
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::484907513542:role/github-actions-oidc-role
-          aws-region: us-west-1
-
-      - name: Run Destroy Stage
+      - name: Update Cluster-Extensions tfvars
         run: |
-          chmod +x ./dsh-testing.sh
-          ./dsh-testing.sh cleanup
+          cat <<EOT > self-hosted/terraform/examples/aws/cluster-extensions/terraform.tfvars
+          region = "us-west-1"
+          vpc_id = "$VPC_ID"
+          public_subnet_ids = $PUBLIC_SUBNET_IDS
+          private_subnet_ids = $PRIVATE_SUBNET_IDS
+          enable_cluster_autoscaler = false
+          cluster_name = "$CLUSTER_NAME"
+          EOT
+
+      - name: Initialize and Apply Cluster-Extensions
+        run: |
+          cd self-hosted/terraform/examples/aws/cluster-extensions
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Configure Kubernetes Access
+        run: |
+          aws eks update-kubeconfig --region us-west-1 --name $CLUSTER_NAME
+
+      - name: Deploy Control Plane Dependencies
+        run: |
+          cd self-hosted/charts/dz-control-plane-deps
+          make install
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.15.1/yq_linux_amd64 -O /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Update values.yaml for Control Plane
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          BACKEND_LICENSE_KEY: ${{ secrets.BACKEND_LICENSE_KEY }}
+        run: |
+          yq e -i '
+            .credentials.registry = "docker.io" |
+            .credentials.username = strenv(DOCKER_USERNAME) |
+            .credentials.password = strenv(DOCKERHUB_TOKEN) |
+            .credentials.email = "garvit@devzero.io" |
+            .backend.licenseKey = strenv(BACKEND_LICENSE_KEY)
+          ' self-hosted/charts/dz-control-plane/values.yaml
+
+      - name: Deploy DevZero Control Plane
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          cd self-hosted/charts/dz-control-plane
+          make add-docker-creds
+          make install
+
+      - name: Validate Control Plane
+        run: |
+          echo -e "\nPods in namespace  devzero:"
+          kubectl get pods -n devzero
+          chmod +x self-hosted/.github/scripts/dsh-pod-test.sh
+          self-hosted/.github/scripts/dsh-pod-test.sh
+          echo -e "\nIngress in namespace  devzero:"
+          kubectl get ingress -n devzero
+
+      - name: Update values.yaml for Data Plane
+        run: |
+          cat <<EOT > self-hosted/charts/dz-data-plane/values.yaml
+          ## @section Devzero
+          devzero:
+            teamId: ""
+            region: "us-west-1"
+            vault:
+              server: "https://csi.devzero.io"
+          ## @section Node Labeler
+          nodeLabeler:
+            enabled: true
+          ## @section Credentials Configuration
+          credentials:
+            registry: "docker.io"
+            username: "${{ secrets.DOCKERHUB_USERNAME }}"
+            password: "${{ secrets.DOCKERHUB_TOKEN }}"
+            email: "garvit@devzero.io"
+          EOT
+
+      - name: Deploy Data Plane Dependencies
+        run: |
+          cd self-hosted/charts/dz-data-plane-deps
+          make install
+
+      - name: Deploy DevZero Data Plane
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          cd self-hosted/charts/dz-data-plane
+          make install
+
+      - name: Validate Data Plane
+        run: |
+          kubectl get pods -n devzero-self-hosted
+          kubectl get ingress -n devzero-self-hosted
+
+      - name: Run Destroy cluster-extensions
+        if: always()
+        run: |
+          cd self-hosted/terraform/examples/aws/cluster-extensions
+          terraform destroy -auto-approve
+
+      - name: Destroy AWS Dependencies
+        if: always()
+        run: |
+          aws ec2 delete-internet-gateway --internet-gateway-id $(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text) || true
+          aws ec2 delete-nat-gateway --nat-gateway-id $(aws ec2 describe-nat-gateways --filter "Name=vpc-id,Values=$VPC_ID" --query 'NatGateways[0].NatGatewayId' --output text) || true
+          aws ec2 delete-route-table --route-table-id $(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[?Associations[0].Main!=`true`].RouteTableId' --output text) || true
+          for subnet in $(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[*].SubnetId' --output text); do
+            aws ec2 delete-subnet --subnet-id $subnet || true
+          done
+          for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
+            aws ec2 delete-security-group --group-id $sg || true
+          done
+
+      - name: Run Destroy base-cluster
+        if: always()
+        run: |
+          cd self-hosted/terraform/examples/aws/base-cluster
+          terraform destroy -auto-approve
