@@ -73,6 +73,13 @@ jobs:
         with:
           token: ${{ secrets.GH_TOKEN }}
 
+      - name: Login to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: devzero-inc
+          password: ${{ secrets.GH_TOKEN }}
+
       - name: Pull and Create Temporary Container
         run: |
           docker pull ghcr.io/devzero-inc/public-host-pvm-linux:latest
