@@ -28,7 +28,7 @@ jobs:
         with:
           repository: virt-pvm/linux
           ref: e7fb41a749cb4ff541f0876629921f1f9b39a805
-          path: ./linux-images/linux
+          path: ./kata/linux-images/linux
           fetch-depth: 1
           show-progress: false
 
