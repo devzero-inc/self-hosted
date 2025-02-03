@@ -37,7 +37,7 @@
 | `image.repository`  | Devzero container image repository              | `docker.io/devzeroinc` |
 | `image.tag`         | Devzero container image tag                     | `v1.0.0`               |
 | `image.pullPolicy`  | Container pull policy                           | `IfNotPresent`         |
-| `image.pullSecrets` | Optionally specify an array of imagePullSecrets | `[]`                   |
+| `image.pullSecrets` | Optionally specify an array of imagePullSecrets | `["pull-secret"]`      |
 
 ### Workspace Configuration
 

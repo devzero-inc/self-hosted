@@ -68,8 +68,12 @@
                 "pullSecrets": {
                     "type": "array",
                     "description": "Optionally specify an array of imagePullSecrets",
-                    "default": [],
-                    "items": {}
+                    "default": [
+                        "pull-secret"
+                    ],
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
