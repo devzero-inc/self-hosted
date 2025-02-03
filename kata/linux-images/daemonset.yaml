@@ -28,7 +28,7 @@ spec:
         - /bin/sh
         - -c
         - cp /guest-vmlinux /host/opt/kata/share/kata-containers/vmlinux-6.7-pvm && sleep infinity
-        image: ghcr.io/devzero-inc/guest-pvm-linux:latest
+        image: ghcr.io/devzero-inc/public-guest-pvm-linux:latest
         imagePullPolicy: Always
         name: vmlinux
         resources: {}

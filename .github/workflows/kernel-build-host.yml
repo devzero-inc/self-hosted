@@ -40,12 +40,12 @@ jobs:
         with:
           registry: ghcr.io
           username: devzero-inc
-          password: ${{ secrets.DOCKER_HUB_PASSSWORD }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build kernel docker image
         uses: docker/build-push-action@v6
         with:
           context: ./kata/linux-images
           file: ./kata/linux-images/Dockerfile.host
-          tags: ghcr.io/devzero-inc/host-pvm-linux:latest
+          tags: ghcr.io/devzero-inc/public-host-pvm-linux:latest
           push: true

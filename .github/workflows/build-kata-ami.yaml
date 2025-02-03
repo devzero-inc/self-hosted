@@ -52,7 +52,7 @@ jobs:
 #        with:
 #          context: ./kata/linux-images
 #          file: ./kata/linux-images/Dockerfile.host
-#          tags: ghcr.io/devzero-inc/host-pvm-linux:latest
+#          tags: ghcr.io/devzero-inc/public-host-pvm-linux:latest
 #          push: true
 #
 #      - name: Build guest docker image
@@ -60,7 +60,7 @@ jobs:
 #        with:
 #          context: ./kata/linux-images
 #          file: ./kata/linux-images/Dockerfile.guest
-#          tags: ghcr.io/devzero-inc/guest-pvm-linux:latest
+#          tags: ghcr.io/devzero-inc/public-guest-pvm-linux:latest
 #          push: true
 
   build-ami:
@@ -75,16 +75,16 @@ jobs:
 
       - name: Pull and Create Temporary Container
         run: |
-          docker pull ghcr.io/devzero-inc/host-pvm-linux:latest
-          docker pull ghcr.io/devzero-inc/guest-pvm-linux:latest
+          docker pull ghcr.io/devzero-inc/public-host-pvm-linux:latest
+          docker pull ghcr.io/devzero-inc/public-guest-pvm-linux:latest
 
-          CONTAINER_ID=$(docker create ghcr.io/devzero-inc/host-pvm-linux:latest)
+          CONTAINER_ID=$(docker create ghcr.io/devzero-inc/public-host-pvm-linux:latest)
           docker cp "$CONTAINER_ID:/kernel-6.7.0_dz_pvm_host-1.x86_64.rpm" ./kata/packer/kernel.rpm
           docker cp "$CONTAINER_ID:/kernel-headers-6.7.0_dz_pvm_host-1.x86_64.rpm" ./kata/packer/kernel-headers.rpm
           docker cp "$CONTAINER_ID:/kernel-devel-6.7.0_dz_pvm_host-1.x86_64.rpm" ./kata/packer/kernel-devel.rpm
           docker rm "$CONTAINER_ID"
 
-          CONTAINER_ID_GUEST=$(docker create ghcr.io/devzero-inc/guest-pvm-linux:latest)
+          CONTAINER_ID_GUEST=$(docker create ghcr.io/devzero-inc/public-guest-pvm-linux:latest)
           docker cp "$CONTAINER_ID_GUEST:/guest-vmlinux" ./kata/packer/guest-vmlinux
           docker rm "$CONTAINER_ID_GUEST"
 
