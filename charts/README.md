@@ -1,6 +1,6 @@
 # Helm Chart Versioning Strategy
 
-This document defines the versioning approach for Helm charts in the **SelfHosted** repository. It ensures consistency and automation in chart updates and releases.
+This document defines the versioning approach for Helm charts in the **self-hosted** repository. It ensures consistency and automation in chart updates and releases.
 
 ## 📌 Versioning Approach
 
@@ -12,8 +12,8 @@ We follow **Semantic Versioning (MAJOR.MINOR.PATCH)** for Helm charts:
 
 ## 📌 Versioning Rules for Chart Changes
 
-| Change Type            | Version Increment | Example        |
-|------------------------|------------------|----------------|
+| Change Type            | Version Increment|     Example     |
+|------------------------|------------------|-----------------|
 | **Breaking change**    | **MAJOR**        | `1.0.0 → 2.0.0` |
 | **New feature**        | **MINOR**        | `1.1.0 → 1.2.0` |
 | **Bug fix / small update** | **PATCH**    | `1.1.1 → 1.1.2` |
