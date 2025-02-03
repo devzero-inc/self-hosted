@@ -66,3 +66,13 @@ All version changes must be documented in `CHANGELOG.md`. The changelog will be 
 - Support for custom TLS certificates.
 ```
 
+## 📌 Rolling Back to a Previous Version
+
+If you need to roll back to a previous Helm chart version, follow these steps:
+
+1. **Identify** the previous chart version from the Git tags or `CHANGELOG.md`.
+2. **Install** the previous version using the Helm command:
+
+   ```bash
+   helm install <release-name> <chart-name> --version <previous-version>
+   ```
