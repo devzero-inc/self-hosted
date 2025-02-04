@@ -2,7 +2,7 @@
 
 ingress:
   # -- Specify if the Docker registry Ingress is enabled
-  enabled: false
+  enabled: true
   # -- Class Name. May be required for k8s >= 1.18
   className: nginx
   path: /

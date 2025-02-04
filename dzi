@@ -253,16 +253,28 @@ def install_control_plane():
 def install_control_plane_all():
     """Runs all control-plane checks"""
     click.echo("Running all control plane checks...")
+    cp = ControlPlane()
+    cp.install_control_plane_ingress()
+    cp.install_control_plane_cert_manager()
+    cp.install_control_plane_deps()
 
-# Control plane Helm chart checks
+def install_control_plane_ingress():
+    """Runs cluster existence checks kubernetes ingresses"""
+    ControlPlane().install_control_plane_ingress()
+
+def install_control_plane_certificate():
+    """Runs cluster existence checks kubernetes ingresses"""
+    # ControlPlane().install_control_plane_cert_manager()
+
+def install_control_plane_chart_deps():
+    """Helm chart: control-plane"""
+    # ControlPlane().install_control_plane_chart_deps()
+
 @install_control_plane.command("chart")
-@click.option(
-    "--force", is_flag=True, help="Force run checks even if already checked before"
-)
-def install_control_plane_chart(force):
+def install_control_plane_chart():
     """Helm chart: control-plane"""
     click.echo("Installing helm chart: control-plane")
-    ControlPlane().install_control_plane_chart(force)
+    ControlPlane().install_control_plane_chart()
 
 if __name__ == "__main__":
     cli()

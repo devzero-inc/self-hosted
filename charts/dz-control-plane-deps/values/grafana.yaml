@@ -8,7 +8,7 @@ grafana.ini:
     header_name: "X-JWT-Assertion"
     auto_sign_up: true
     url_login: true
-    jwk_set_url: "https://devinfra.us.auth0.com/.well-known/jwks.json"
+    key_file: "/home/grafana/public.pem"
     skip_org_role_sync: true
   auth.anonymous:
     enabled: true
@@ -63,6 +63,12 @@ datasources:
           password: "pulse"
         jsonData:
           database: "postgres"
+extraSecretMounts:
+  - name: auth-secret
+    mountPath: /etc/secrets
+    secretName: auth-secret
+    readOnly: false
+    optional: false
 ingress:
   enabled: true
   ingressClassName: nginx
@@ -76,3 +82,9 @@ ingress:
     - secretName: devzero-registry-tls
       hosts:
         - grafana.devzero.internal
+command:
+  - "sh"
+  - "-c"
+  - |
+    cat /etc/secrets/public.key | base64 -d > /home/grafana/public.pem
+    exec /run.sh

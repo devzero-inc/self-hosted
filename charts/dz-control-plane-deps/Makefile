@@ -4,7 +4,6 @@ include ../Makefile.common
 install:
 	@$(MAKE) install-cert-manager
 	@$(MAKE) install-ingress-nginx
-	# @$(MAKE) install-devzero-control-ingress
 	@$(MAKE) install-mysql-pulse
 	@$(MAKE) install-mongodb
 	@$(MAKE) install-redis
@@ -14,16 +13,15 @@ install:
 	@$(MAKE) install-postgres-vault
 	@$(MAKE) install-timescaledb-single
 	@$(MAKE) install-elasticmq
-	@$(MAKE) install-docker-registry
+	@$(MAKE) install-registry
 	@$(MAKE) install-grafana
-	@$(MAKE) install-mimir-distributed
+	@$(MAKE) install-mimir
 	@$(MAKE) install-vault
 
 .PHONY: delete
 delete:
 	@$(MAKE) delete-cert-manager
 	@$(MAKE) delete-ingress-nginx
-	# @$(MAKE) delete-devzero-control-ingress
 	@$(MAKE) delete-mysql-pulse
 	@$(MAKE) delete-mongodb
 	@$(MAKE) delete-redis
@@ -33,25 +31,10 @@ delete:
 	@$(MAKE) delete-postgres-vault
 	@$(MAKE) delete-timescaledb-single
 	@$(MAKE) delete-elasticmq
-	@$(MAKE) delete-docker-registry
+	@$(MAKE) delete-registry
 	@$(MAKE) delete-grafana
-	@$(MAKE) delete-mimir-distributed
+	@$(MAKE) delete-mimir
 	@$(MAKE) delete-vault
-
-.PHONY: install-devzero-control-ingress
-install-devzero-control-ingress:
-	@$(MAKE) _install-helm-chart \
-		APP_NAME=devzero-control-ingress \
-		REPO_NAME=ingress-nginx \
-		REPO_URL=https://kubernetes.github.io/ingress-nginx \
-		REPO_APP_NAME=ingress-nginx \
-		VERSION=4.11.3 \
-		NAMESPACE=devzero-control-ingress
-
-.PHONY: delete-devzero-control-ingress
-delete-devzero-control-ingress:
-	helm delete devzero-control-ingress -n devzero-control-ingress  --ignore-not-found
-	kubectl delete namespace devzero-control-ingress --ignore-not-found=true
 
 .PHONY: install-cert-manager
 install-cert-manager:
@@ -211,19 +194,19 @@ install-elasticmq:
 delete-elasticmq:
 	helm delete elasticmq -n devzero --ignore-not-found
 
-.PHONY: install-docker-registry
-install-docker-registry:
+.PHONY: install-registry
+install-registry:
 	@$(MAKE) _install-helm-chart \
-		APP_NAME=docker-registry \
-		REPO_NAME=docker-registry \
+		APP_NAME=registry \
+		REPO_NAME=registry \
 		REPO_URL=https://helm.twun.io \
-		REPO_APP_NAME=docker-registry \
+		REPO_APP_NAME=registry \
 		VERSION=2.2.3 \
 		NAMESPACE=devzero
 
-.PHONY: delete-docker-registry
-delete-docker-registry:
-	helm delete docker-registry -n devzero --ignore-not-found
+.PHONY: delete-registry
+delete-registry:
+	helm delete registry -n devzero --ignore-not-found
 
 .PHONY: install-grafana
 install-grafana:
@@ -239,19 +222,19 @@ install-grafana:
 delete-grafana:
 	helm delete grafana -n devzero --ignore-not-found
 
-.PHONY: install-mimir-distributed
-install-mimir-distributed:
+.PHONY: install-mimir
+install-mimir:
 	@$(MAKE) _install-helm-chart \
-		APP_NAME=mimir-distributed \
+		APP_NAME=mimir \
 		REPO_NAME=grafana \
 		REPO_URL=https://grafana.github.io/helm-charts \
-		REPO_APP_NAME=mimir-distributed \
+		REPO_APP_NAME=mimir \
 		VERSION=5.6.0-weekly.321 \
 		NAMESPACE=devzero
 
-.PHONY: delete-mimir-distributed
-delete-mimir-distributed:
-	helm delete mimir-distributed -n devzero --ignore-not-found
+.PHONY: delete-mimir
+delete-mimir:
+	helm delete mimir -n devzero --ignore-not-found
 
 .PHONY: install-vault
 install-vault:
