@@ -132,8 +132,8 @@ build {
   provisioner "shell" {
     name              = "Reboot after kernel upgrade"
     inline            = ["sudo reboot"]
-    pause_before      = "10s"
-    timeout           = "10s"
+    pause_before      = "30s"
+    timeout           = "30s"
     expect_disconnect = true
   }
 
