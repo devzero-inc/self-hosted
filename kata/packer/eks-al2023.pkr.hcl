@@ -124,15 +124,14 @@ build {
 
   provisioner "shell" {
     name              = "Upgrade kernel"
-    script = "./upgrade_kernel.sh"
+    script            = "./upgrade_kernel.sh"
     # Run it as root
     execute_command   = "sudo {{ .Path }}"
-    expect_disconnect = true
   }
 
   provisioner "shell" {
     name              = "Reboot after kernel upgrade"
-    inline = ["sudo reboot"]
+    inline            = ["sudo reboot"]
     pause_before      = "10s"
     timeout           = "10s"
     expect_disconnect = true
@@ -162,13 +161,13 @@ build {
     name              = "Install Kata containers"
     script            = "./install-kata.sh"
     execute_command   = "sudo {{ .Path }}"
-    expect_disconnect = true
+    expect_disconnect = false
   }
 
   provisioner "shell" {
     name              = "Configure various machine settings"
     script            = "./config.sh"
     execute_command   = "sudo {{ .Path }}"
-    expect_disconnect = true
+    expect_disconnect = false
   }
 }
