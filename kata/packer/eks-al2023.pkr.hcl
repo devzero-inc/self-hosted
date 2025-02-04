@@ -138,6 +138,16 @@ build {
     expect_disconnect = true
   }
 
+  # Wait for instance to be available again
+  provisioner "shell" {
+    name              = "Wait for instance to come back online"
+    inline            = [
+      "echo 'Waiting for system to reboot...'",
+      "while ! (sudo cloud-init status --wait || systemctl is-system-running | grep -q 'running'); do sleep 10; done"
+    ]
+    pause_before      = "50s"
+  }
+
   provisioner "file" {
     source      = "./guest-vmlinux"
     destination = "/tmp/vmlinux"
@@ -162,7 +172,6 @@ build {
     name              = "Install Kata containers"
     script            = "./install-kata.sh"
     execute_command   = "sudo {{ .Path }}"
-    pause_before      = "50s"
     expect_disconnect = false
   }
 
