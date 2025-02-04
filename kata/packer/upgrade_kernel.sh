@@ -32,5 +32,8 @@ GRUB_TIMEOUT=5
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash console=tty1 console=ttyS0 net.ifnames=0 biosdevname=0 nvme_core.io_timeout=4294967295 rd.emergency=poweroff rd.shell=0"
 GRUB_TERMINAL="ec2-console console serial"
 GRUB_SERIAL_COMMAND="serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1"
+GRUB_DEFAULT=saved
+GRUB_UPDATE_DEFAULT_KERNEL=true
+GRUB_ENABLE_BLSCFG="true"
 EOF
 grub2-mkconfig -o /boot/grub2/grub.cfg
