@@ -198,9 +198,9 @@ delete-elasticmq:
 install-registry:
 	@$(MAKE) _install-helm-chart \
 		APP_NAME=registry \
-		REPO_NAME=registry \
+		REPO_NAME=docker-registry \
 		REPO_URL=https://helm.twun.io \
-		REPO_APP_NAME=registry \
+		REPO_APP_NAME=docker-registry \
 		VERSION=2.2.3 \
 		NAMESPACE=devzero
 
@@ -228,7 +228,7 @@ install-mimir:
 		APP_NAME=mimir \
 		REPO_NAME=grafana \
 		REPO_URL=https://grafana.github.io/helm-charts \
-		REPO_APP_NAME=mimir \
+		REPO_APP_NAME=mimir-distributed \
 		VERSION=5.6.0-weekly.321 \
 		NAMESPACE=devzero
 

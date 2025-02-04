@@ -55,22 +55,14 @@ server:
       # }
 
 ingress:
-  # -- Specify if the Vault Ingress is enabled
-  enabled: true
-  # -- Ingress Class Name. May be required for k8s >= 1.18
-  ingressClassName: "nginx"
-  # -- Annotations
+  enabled: false
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-  # -- TLS
+  ingressClassName: "nginx"
+  hosts:
+    - host: "vault.example.com"
   tls:
     - secretName: devzero-vault-tls
       hosts:
-        - "vault.{{ .Values.domain }}"
-  # -- Hosts
-  hosts:
-    - host: "vault.{{ .Values.domain }}"
-      paths:
-        - path: /
-          pathType: Prefix
+        - "vault.example.com"

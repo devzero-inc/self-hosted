@@ -311,8 +311,15 @@ class ControlPlane:
 
                 ingress = values['ingress']
 
-                ingress['ingressClassName'] = control_plane_cfg.ingress.cls if control_plane_cfg.ingress.cls not in ["new", ""] else "nginx"
-                ingress['hosts'][0] = f"{dep}.{global_cfg.domain_name}"
+                if dep == "registry":
+                    ingress['className'] = control_plane_cfg.ingress.cls if control_plane_cfg.ingress.cls not in ["new", ""] else "nginx"
+                else:
+                    ingress['ingressClassName'] = control_plane_cfg.ingress.cls if control_plane_cfg.ingress.cls not in ["new", ""] else "nginx"
+
+                if dep == "vault":
+                    ingress['hosts'][0]['host'] = f"vault.{global_cfg.domain_name}"
+                else:
+                    ingress['hosts'][0] = f"{dep}.{global_cfg.domain_name}"
 
                 if control_plane_cfg.cert_manager.external:
                     ingress['tls'] = []
