@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -euxo pipefail
 
 DIR=$(mktemp -d)
 trap "rm -r $DIR" EXIT
