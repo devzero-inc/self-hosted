@@ -73,8 +73,43 @@ module "kata_node_group" {
         runcmd:
           - systemctl restart containerd
       EOF
+    }, {
+      content_type = "application/node.eks.aws"
+      content = <<-EOF
+        #cloud-config
+        apiVersion: node.eks.aws/v1alpha1
+        kind: NodeConfig
+        spec:
+          containerd:
+            config: |
+              [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata]
+              runtime_type = "io.containerd.kata.v2"
+              privileged_without_host_devices = true
+              
+              [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-qemu]
+              runtime_type = "io.containerd.kata-qemu.v2"
+              privileged_without_host_devices = true
+      EOF
     }
-  ] : []
+  ] : [
+    {
+      content_type = "application/node.eks.aws"
+      content = <<-EOF
+        #cloud-config
+        apiVersion: node.eks.aws/v1alpha1
+        kind: NodeConfig
+        spec:
+          config: |
+          [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata]
+          runtime_type = "io.containerd.kata.v2"
+          privileged_without_host_devices = true
+          
+          [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-qemu]
+          runtime_type = "io.containerd.kata-qemu.v2"
+          privileged_without_host_devices = true
+      EOF
+    }
+  ]
 
   block_device_mappings = {
     sda = {
