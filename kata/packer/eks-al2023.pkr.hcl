@@ -47,7 +47,7 @@ source "amazon-ebs" "al2023_1_30_eks" {
   ami_name        = "devzero-amazon-eks-node-al2023-x86_64-standard-1.30-{{timestamp}}"
   ami_description = "Devzero Amazon EKS Node AL2023 x86_64 Standard 1.30 with Kata runtime"
   ami_groups      = var.ami_groups
-  instance_type   = "t3.2xlarge"
+  instance_type   = "t3.4xlarge"
   region          = "us-west-1"
   ssh_username    = "ec2-user"
 
@@ -63,7 +63,7 @@ source "amazon-ebs" "al2023_1_30_eks" {
 
   launch_block_device_mappings {
     device_name           = "/dev/xvda"
-    volume_size           = 50
+    volume_size           = 100
     volume_type           = "gp3"
     delete_on_termination = true
   }
