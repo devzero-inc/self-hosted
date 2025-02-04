@@ -162,6 +162,7 @@ build {
     name              = "Install Kata containers"
     script            = "./install-kata.sh"
     execute_command   = "sudo {{ .Path }}"
+    pause_before      = "50s"
     expect_disconnect = false
   }
 
