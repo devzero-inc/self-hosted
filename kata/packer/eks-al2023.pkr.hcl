@@ -102,9 +102,9 @@ source "amazon-ebs" "al2023_1_30_eks" {
 build {
   name = "upgrade-kernel"
   sources = [
-    "source.amazon-ebs.al2023_1_29_eks",
+    #"source.amazon-ebs.al2023_1_29_eks",
     "source.amazon-ebs.al2023_1_30_eks",
-    "source.amazon-ebs.al2023_1_31_eks",
+    #"source.amazon-ebs.al2023_1_31_eks",
   ]
 
   provisioner "file" {
