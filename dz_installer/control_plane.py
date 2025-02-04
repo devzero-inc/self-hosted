@@ -163,6 +163,7 @@ class ControlPlane:
         success("Control plane ingress checks done")
 
     def install_control_plane_ingress(self):
+        info("Installing control plane ingress...")
         control_plane_cfg = DZConfig().data.control_plane
 
         globals_cfg = DZConfig().data.globals
@@ -204,7 +205,7 @@ class ControlPlane:
                 click.echo(f"Error installing ingress controller: {err.stderr.decode('utf-8')}", err=True)
                 self.error("INGRESS_INSTALL_FAILED")
 
-    success("Control plane ingress installed successfully")
+        success("Control plane ingress installed successfully")
 
     def check_control_plane_cert_manager(self, force):
         info("Checking control plane certificates...")
@@ -251,6 +252,7 @@ class ControlPlane:
         success("Control plane certificates checks done")
 
     def install_control_plane_cert_manager(self):
+        info("Installing control plane certificates...")
         control_plane_cfg = DZConfig().data.control_plane
 
         if not control_plane_cfg.cert_manager.install and not control_plane_cfg.cert_manager.external and not control_plane_cfg.cert_manager.issuer:
@@ -278,9 +280,10 @@ class ControlPlane:
                 click.echo(f"Error creating ClusterIssuer: {err.stderr.decode('utf-8')}", err=True)
                 self.error("CLUSTER_ISSUER_CREATE_FAILED")
 
-    success("Control plane certificates installed successfully")
+        success("Control plane certificates installed successfully")
 
     def install_control_plane_deps(self):
+        info("Installing control plane dependencies...")
         control_plane_cfg = DZConfig().data.control_plane
         global_cfg = DZConfig().data.globals
 
@@ -325,4 +328,4 @@ class ControlPlane:
         except sh.ErrorReturnCode as err:
             click.echo(f"Error installing dependencies: {err.stderr.decode('utf-8')}", err=True)
             self.error("DEPS_INSTALL_FAILED")
-    success("Control plane dependencies installed successfully")
+        success("Control plane dependencies installed successfully")
