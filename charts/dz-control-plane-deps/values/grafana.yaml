@@ -70,17 +70,17 @@ extraSecretMounts:
   readOnly: false
   optional: false
 ingress:
-  enabled: false
+  enabled: true
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   ingressClassName: "nginx"
   hosts:
-    - "grafana.example.com"
+  - "grafana.example.com"
   tls:
-    - secretName: devzero-vault-tls
-      hosts:
-        - "grafana.example.com"
+  - secretName: devzero-grafana-tls
+    hosts:
+    - grafana.example.com
 command:
 - "sh"
 - "-c"

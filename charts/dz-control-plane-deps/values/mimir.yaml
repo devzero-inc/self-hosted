@@ -43,14 +43,14 @@ minio:
   enabled: true
 
 ingress:
-  enabled: false
+  enabled: true
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   ingressClassName: "nginx"
   hosts:
-    - "mimir.example.com"
+  - "mimir.example.com"
   tls:
-    - secretName: devzero-vault-tls
-      hosts:
-        - "mimir.example.com"
+  - secretName: devzero-mimir-tls
+    hosts:
+    - mimir.example.com

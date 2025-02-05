@@ -8,7 +8,7 @@ ingress:
   path: /
   # -- Hosts
   hosts:
-    - registry.example.com
+  - registry.example.com
   # -- Annotations
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
@@ -16,6 +16,6 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: "200g"
   # -- TLS
   tls:
-    - secretName: devzero-registry-tls
-      hosts:
-        - registry.example.com
+  - secretName: devzero-registry-tls
+    hosts:
+    - registry.example.com

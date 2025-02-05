@@ -5,7 +5,7 @@ import click
 from kubernetes import client, config
 from kubernetes.client import V1IngressClass
 from ruamel.yaml import YAML
-from dz_installer.dz_config import DZConfig, DZDotMap
+from dz_installer.dz_config import DZConfig
 from dz_installer.helpers import error, success, info, check_chart_is_installed
 
 yaml = YAML()
@@ -155,11 +155,15 @@ class ControlPlane:
             options.append("new")
             control_plane_cfg.ingress.cls = click.prompt("Please select an existing ingress class for the control plane. Use new if you want devzero to install nginx ingress controller", type=click.Choice(options, case_sensitive=False), default=options[0])
 
-        control_plane_cfg.save()
-
         if not control_plane_cfg.ingress.install and not control_plane_cfg.ingress.cls:
             click.echo("Cannot proceed without an ingress class")
             self.error("INGRESS_CLASS_NOT_FOUND")
+
+        if control_plane_cfg.ingress.cls == "new" or control_plane_cfg.ingress.install:
+            control_plane_cfg.ingress.public = click.confirm("Do you want your DevZero instance to be publicly accessible?", default=False)
+
+        control_plane_cfg.save()
+
         success("Control plane ingress checks done")
 
     def install_control_plane_ingress(self):
@@ -182,20 +186,21 @@ class ControlPlane:
                 aws_cfg = DZConfig().data.aws
                 subnets = aws_cfg.vpc.subnets.keys()
 
-                public = False
-                for subnet in subnets:
-                    if aws_cfg.vpc.subnets[subnet].public:
-                        public = True
-                        break
-
-                if not public:
+                if not control_plane_cfg.ingress.public:
                     annotations['service.beta.kubernetes.io/aws-load-balancer-scheme'] = "internal"
                     annotations['service.beta.kubernetes.io/aws-load-balancer-subnets'] = ",".join(subnets)
                     annotations['service.beta.kubernetes.io/aws-load-balancer-backend-protocol'] = "ssl"
                     annotations['service.beta.kubernetes.io/aws-load-balancer-ssl-ports'] = "https, http"
+                else:
+                    annotations['service.beta.kubernetes.io/aws-load-balancer-scheme'] = "internet-facing"
+                    annotations['service.beta.kubernetes.io/aws-load-balancer-subnets'] = None
+                    annotations['service.beta.kubernetes.io/aws-load-balancer-backend-protocol'] = "tcp"
+                    annotations['service.beta.kubernetes.io/aws-load-balancer-ssl-ports'] = None
 
                 if control_plane_cfg.cert_manager.external:
                     annotations['service.beta.kubernetes.io/aws-load-balancer-ssl-cert'] = control_plane_cfg.cert_manager.cert_arn
+                else:
+                    annotations['service.beta.kubernetes.io/aws-load-balancer-ssl-cert'] = None
 
             yaml.dump(values, file)
 
@@ -266,8 +271,8 @@ class ControlPlane:
                 click.echo(f"Error installing cert-manager: {err.stderr.decode('utf-8')}", err=True)
                 self.error("CERT_MANAGER_INSTALL_FAILED")
 
-        if control_plane_cfg.cert_manager.issuer == "new":
-            file = pathlib.Path(f"{control_plane_deps_dir}/values/cluster-issuer.yaml")
+        if control_plane_cfg.cert_manager.issuer == "new" or control_plane_cfg.cert_manager.install:
+            file = pathlib.Path(f"{control_plane_deps_dir}/cluster_issuer.yaml")
             values = yaml.load(file)
 
             values['spec']['acme']['solvers'][0]['http01']['ingress']['class'] = control_plane_cfg.ingress.cls if control_plane_cfg.ingress.cls not in ["new", ""] else "nginx"
@@ -309,7 +314,9 @@ class ControlPlane:
                 file = pathlib.Path(f"{control_plane_deps_dir}/values/{dep}.yaml")
                 values = yaml.load(file)
 
-                ingress = values['ingress']
+                ingress = values['ingress'] if dep != "vault" else values['server']['ingress']
+
+                ingress['enabled'] = True
 
                 if dep == "registry":
                     ingress['className'] = control_plane_cfg.ingress.cls if control_plane_cfg.ingress.cls not in ["new", ""] else "nginx"
