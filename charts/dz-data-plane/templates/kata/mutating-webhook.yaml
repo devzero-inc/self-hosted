@@ -1,0 +1,30 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: kata-webhook
+  annotations:
+    cert-manager.io/inject-ca-from: kube-system/kata-webhook-cert
+webhooks:
+  - name: kata-webhook.devzero.io
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values:
+            - kube-system
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["pods"]
+        scope: "*"
+    clientConfig:
+      service:
+        namespace: kube-system
+        name: kata-webhook
+        path: /mutate
+        port: 443
+      caBundle: ""
+    admissionReviewVersions: ["v1"]
+    sideEffects: None
+    timeoutSeconds: 2

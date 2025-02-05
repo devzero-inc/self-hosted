@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu-kata
+spec:
+  runtimeClassName: kata
+  containers:
+    - name: ubuntu
+      image: ubuntu:jammy
+      imagePullPolicy: Always
+      command: ["/bin/bash"]
+      tty: true
+      stdin: true
+  nodeSelector:
+    "node-role.kubernetes.io/kata-devpod-node": "1"
+  tolerations:
+    - key: "kata-devpod-node"
+      operator: "Equal"
+      value: "true"
+      effect: "NoExecute"

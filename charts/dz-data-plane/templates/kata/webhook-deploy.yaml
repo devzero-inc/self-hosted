@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kata-webhook
+  name: kata-webhook
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kata-webhook
+  template:
+    metadata:
+      labels:
+        app: kata-webhook
+    spec:
+      containers:
+        - image: public.ecr.aws/v1i4e1r2/kata-webhook:latest
+          imagePullPolicy: Always
+          name: kata-webhook
+          env:
+            - name: TLS
+              value: "true"
+          resources:
+            requests:
+              cpu: "0.5"
+              memory: "200M"
+            limits:
+              cpu: "0.5"
+              memory: "200M"
+          volumeMounts:
+            - name: tls
+              mountPath: "/etc/tls"
+              readOnly: true
+      volumes:
+        - name: tls
+          secret:
+            secretName: kata-webhook-tls
