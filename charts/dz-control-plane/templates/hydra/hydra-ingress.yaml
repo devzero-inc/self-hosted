@@ -16,7 +16,7 @@ spec:
   {{- if .Values.hydra.ingress.ingressClassName }}
   ingressClassName: {{ .Values.hydra.ingress.ingressClassName }}
   {{- end }}
-  {{- if .Values.hydra.ingress.tls }}
+  {{- if and .Values.hydra.ingress.tls .Values.tls.enabled }}
   tls:
     {{- range .Values.hydra.ingress.tls }}
     - hosts:

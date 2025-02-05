@@ -47,6 +47,16 @@
                 }
             }
         },
+        "tls": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Enable TLS",
+                    "default": true
+                }
+            }
+        },
         "image": {
             "type": "object",
             "properties": {
@@ -2449,26 +2459,6 @@
                             }
                         }
                     }
-                }
-            }
-        },
-        "issuer": {
-            "type": "object",
-            "properties": {
-                "enabled": {
-                    "type": "boolean",
-                    "description": "Enable Cluster Issuer",
-                    "default": true
-                },
-                "acme": {
-                    "type": "string",
-                    "description": "ACME server URL",
-                    "default": "https://acme-v02.api.letsencrypt.org/directory"
-                },
-                "email": {
-                    "type": "string",
-                    "description": "Email address used for ACME registration",
-                    "default": "email@selfzero.net"
                 }
             }
         },

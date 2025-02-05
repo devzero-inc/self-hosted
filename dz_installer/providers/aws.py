@@ -98,7 +98,11 @@ class AWSProvider:
 
             click.echo("Fetching information about the cluster...")
             eks = boto3.client("eks", region_name="us-west-1")
-            desc_cluster = eks.describe_cluster(name=self.config.aws.cluster_name)
+            try:
+                desc_cluster = eks.describe_cluster(name=self.config.aws.cluster_name)
+            except Exception as e:
+                click.echo(f"Error fetching cluster information: {str(e)}", err=True)
+                self.error("CP_CLUSTER_FAILED")
             # click.echo(desc_cluster)
 
             # Check if cluster has public and private endpoints enabled
@@ -145,6 +149,7 @@ class AWSProvider:
                 is_public = False
                 # Check routes in each associated route table
                 for rt in route_tables:
+                    print(rt)
                     for route in rt['Routes']:
                         # Check if route goes to internet gateway
                         if route.get('GatewayId', '').startswith('igw-'):

@@ -29,6 +29,12 @@
 | `credentials.password` | Registry password             | `""`        |
 | `credentials.email`    | Registry email address        | `""`        |
 
+### TLS Configuration
+
+| Name          | Description | Value  |
+| ------------- | ----------- | ------ |
+| `tls.enabled` | Enable TLS  | `true` |
+
 ### Image Configuration
 
 | Name                | Description                                     | Value                  |
@@ -476,14 +482,6 @@
 | `web.ingress.hosts[0].host`                                              | Host name for ingress                               | `{{ .Values.domain }}`                                                                                                 |
 | `web.ingress.hosts[0].paths[0].path`                                     | Path for ingress                                    | `/`                                                                                                                    |
 | `web.ingress.hosts[0].paths[0].pathType`                                 | Path type for ingress                               | `Prefix`                                                                                                               |
-
-### Cluster Issuer Configuration
-
-| Name             | Description                              | Value                                            |
-| ---------------- | ---------------------------------------- | ------------------------------------------------ |
-| `issuer.enabled` | Enable Cluster Issuer                    | `true`                                           |
-| `issuer.acme`    | ACME server URL                          | `https://acme-v02.api.letsencrypt.org/directory` |
-| `issuer.email`   | Email address used for ACME registration | `email@selfzero.net`                             |
 
 ### Vault Configuration
 
