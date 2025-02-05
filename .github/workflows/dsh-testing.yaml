@@ -2,8 +2,12 @@ name: devzero DSH deployment
 
 on:
   push:
+    paths:
+      - 'self-hosted/terraform/examples/aws/**'
     branches:
-      - garvit/pipeline-testing
+      - main
+  schedule:
+    - cron: '0 3 * * *'
   workflow_dispatch:
 
 jobs:
