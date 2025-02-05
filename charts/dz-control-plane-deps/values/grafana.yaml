@@ -38,7 +38,7 @@ datasources:
       version: 1
       type: prometheus
       uid: "mimir"
-      url: http://mimir-distributed-nginx:80
+      url: http://mimir-nginx:80
     - name: pulse
       access: proxy
       orgId: 1
