@@ -16,6 +16,6 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: "200g"
   # -- TLS
   tls:
-  - secretName: devzero-registry-tls
+  - secretName: devzero-docker-registry-tls
     hosts:
     - docker-registry.example.com

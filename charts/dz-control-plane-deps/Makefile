@@ -195,7 +195,7 @@ delete-elasticmq:
 	helm delete elasticmq -n devzero --ignore-not-found
 
 .PHONY: install-docker-registry
-install-registry:
+install-docker-registry:
 	@$(MAKE) _install-helm-chart \
 		APP_NAME=docker-registry \
 		REPO_NAME=docker-registry \
@@ -205,7 +205,7 @@ install-registry:
 		NAMESPACE=devzero
 
 .PHONY: delete-docker-registry
-delete-registry:
+delete-docker-registry:
 	helm delete docker-registry -n devzero --ignore-not-found
 
 .PHONY: install-grafana
