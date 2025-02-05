@@ -8,7 +8,7 @@ ingress:
   path: /
   # -- Hosts
   hosts:
-  - registry.example.com
+  - docker-registry.example.com
   # -- Annotations
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
@@ -18,4 +18,4 @@ ingress:
   tls:
   - secretName: devzero-registry-tls
     hosts:
-    - registry.example.com
+    - docker-registry.example.com

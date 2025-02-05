@@ -106,8 +106,6 @@ class ControlPlane:
         file = pathlib.Path(f"{control_plane_dir}/values.yaml")
         values = yaml.load(file)
 
-        click.echo()
-
         if globals_cfg.domain_name:
             values['domain'] = globals_cfg.domain_name
 
@@ -118,9 +116,15 @@ class ControlPlane:
             if control_plane_cfg.docker_hub.access:
                 values['credentials']['enable'] = False
             else:
+                values['credentials']['enable'] = True
                 values['credentials']['username'] = control_plane_cfg.docker_hub.username
                 values['credentials']['password'] = control_plane_cfg.docker_hub.password
                 values['credentials']['email'] = control_plane_cfg.docker_hub.email
+
+        values['tls']['enabled'] = not control_plane_cfg.cert_manager.external
+
+        # if control_plane_cfg.ingress.cls not in ["new", ""]:
+        #     values['ingressClassOverride'] = control_plane_cfg.ingress.cls
 
         yaml.dump(values, file)
 
@@ -193,14 +197,14 @@ class ControlPlane:
                     annotations['service.beta.kubernetes.io/aws-load-balancer-ssl-ports'] = "https, http"
                 else:
                     annotations['service.beta.kubernetes.io/aws-load-balancer-scheme'] = "internet-facing"
-                    annotations['service.beta.kubernetes.io/aws-load-balancer-subnets'] = None
-                    annotations['service.beta.kubernetes.io/aws-load-balancer-backend-protocol'] = "tcp"
-                    annotations['service.beta.kubernetes.io/aws-load-balancer-ssl-ports'] = None
+                    annotations.pop('service.beta.kubernetes.io/aws-load-balancer-subnets', None)
+                    annotations.pop('service.beta.kubernetes.io/aws-load-balancer-backend-protocol', None)
+                    annotations.pop('service.beta.kubernetes.io/aws-load-balancer-ssl-ports', None)
 
                 if control_plane_cfg.cert_manager.external:
                     annotations['service.beta.kubernetes.io/aws-load-balancer-ssl-cert'] = control_plane_cfg.cert_manager.cert_arn
                 else:
-                    annotations['service.beta.kubernetes.io/aws-load-balancer-ssl-cert'] = None
+                    annotations.pop('service.beta.kubernetes.io/aws-load-balancer-ssl-cert', None)
 
             yaml.dump(values, file)
 
@@ -308,7 +312,7 @@ class ControlPlane:
                 self.error("DATABASES_INSTALL_FAILED")
 
         try:
-            deps = ["registry", "grafana", "mimir", "vault"]
+            deps = ["docker-registry", "grafana", "mimir", "vault"]
 
             for dep in deps:
                 file = pathlib.Path(f"{control_plane_deps_dir}/values/{dep}.yaml")
@@ -318,7 +322,7 @@ class ControlPlane:
 
                 ingress['enabled'] = True
 
-                if dep == "registry":
+                if dep == "docker-registry":
                     ingress['className'] = control_plane_cfg.ingress.cls if control_plane_cfg.ingress.cls not in ["new", ""] else "nginx"
                 else:
                     ingress['ingressClassName'] = control_plane_cfg.ingress.cls if control_plane_cfg.ingress.cls not in ["new", ""] else "nginx"

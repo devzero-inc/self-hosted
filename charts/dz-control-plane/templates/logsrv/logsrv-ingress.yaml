@@ -16,7 +16,7 @@ spec:
   {{- if .Values.logsrv.ingress.ingressClassName }}
   ingressClassName: {{ .Values.logsrv.ingress.ingressClassName }}
   {{- end }}
-  {{- if .Values.logsrv.ingress.tls }}
+  {{- if and .Values.logsrv.ingress.tls .Values.tls.enabled }}
   tls:
     {{- range .Values.logsrv.ingress.tls }}
     - hosts:

@@ -13,7 +13,7 @@ install:
 	@$(MAKE) install-postgres-vault
 	@$(MAKE) install-timescaledb-single
 	@$(MAKE) install-elasticmq
-	@$(MAKE) install-registry
+	@$(MAKE) install-docker-registry
 	@$(MAKE) install-grafana
 	@$(MAKE) install-mimir
 	@$(MAKE) install-vault
@@ -31,7 +31,7 @@ delete:
 	@$(MAKE) delete-postgres-vault
 	@$(MAKE) delete-timescaledb-single
 	@$(MAKE) delete-elasticmq
-	@$(MAKE) delete-registry
+	@$(MAKE) delete-docker-registry
 	@$(MAKE) delete-grafana
 	@$(MAKE) delete-mimir
 	@$(MAKE) delete-vault
@@ -194,19 +194,19 @@ install-elasticmq:
 delete-elasticmq:
 	helm delete elasticmq -n devzero --ignore-not-found
 
-.PHONY: install-registry
+.PHONY: install-docker-registry
 install-registry:
 	@$(MAKE) _install-helm-chart \
-		APP_NAME=registry \
+		APP_NAME=docker-registry \
 		REPO_NAME=docker-registry \
 		REPO_URL=https://helm.twun.io \
 		REPO_APP_NAME=docker-registry \
 		VERSION=2.2.3 \
 		NAMESPACE=devzero
 
-.PHONY: delete-registry
+.PHONY: delete-docker-registry
 delete-registry:
-	helm delete registry -n devzero --ignore-not-found
+	helm delete docker-registry -n devzero --ignore-not-found
 
 .PHONY: install-grafana
 install-grafana:

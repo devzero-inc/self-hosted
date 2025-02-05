@@ -257,6 +257,7 @@ def install_control_plane_all():
     cp.install_control_plane_ingress()
     cp.install_control_plane_cert_manager()
     cp.install_control_plane_deps()
+    cp.install_control_plane_chart()
 
 @install_control_plane.command("ingress")
 def install_control_plane_ingress():
