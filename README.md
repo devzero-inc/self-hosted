@@ -27,7 +27,7 @@ Welcome to the **self-hosted** repository. This repository contains all the nece
 
 5. **Data Plane**
    - The Control Plane communicates with the **Data Plane**, which includes:
-     - **DevZero Cluster**: A Kubernetes cluster hosting DevZero workloads.
+     - **DevZero Cluster**: A Kubernetes cluster.
      - **DevZero Workspace**: Isolated development environments where users run their applications and workloads.
 
 
