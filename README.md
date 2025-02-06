@@ -46,16 +46,19 @@ self-hosted/
 - Used to create Amazon Machine Images (AMIs) required in the infrastructure for setting up Kubernetes nodes with Kata as the default `RuntimeClass`.
 - Build and manage AMIs optimised for secure and efficient Kubernetes workloads using Kata Containers.
 - Check out [kata/README.md](./kata/README.md) to know more about it.
+- **[View Running Pipeline](https://github.com/devzero-inc/self-hosted/actions/runs/13143937396/job/36677500059)**
 
 ### 2. **terraform/**
 - Contains Infrastructure as Code (IaC) scripts to provision the required infrastructure on cloud platforms such as AWS, GCP, and Azure for self-hosting the DevZero Control Plane and Data Plane.
 - Deploy and manage scalable infrastructure tailored for DevZero’s self-hosted architecture.
 - Check out [terraform/README.md](./terraform/README.md) to know more about it.
+- **[View Running Pipeline](https://github.com/devzero-inc/self-hosted/actions/runs/13118086483/job/36597219883)**
 
 ### 3. **charts/**
 - Contains Helm charts used to package, configure, and deploy the DevZero Control Plane and Data Plane.
 - Utilise Helm to streamline Kubernetes application deployments, ensuring consistent and repeatable configurations.
 - Check out [charts/README.md](./charts/README.md) to know more about it.
+- **[View Running Pipeline](https://github.com/devzero-inc/self-hosted/actions/runs/13118086483/job/36597219883)**
 
 ### 4. **dz_installer/**
 - A Python CLI tool designed for easy requirement checks, installation, and validation of DevZero self-hosted environments based on user-specific requirements.
