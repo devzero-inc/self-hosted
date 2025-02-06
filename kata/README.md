@@ -74,11 +74,11 @@ us-west-1: ami-yyyyyyyyyyyyyyyyy
    cd ../../terraform/examples/aws/base-cluster
    ```
 
-2. **Update the EC2 Launch Template:**
-   - In `main.tf`, replace the existing `ami_id` under `module "kata_node_group"` with the new AMI ID:
-     ```bash
-     ami_id = "ami-xxxxxxxxxxxxxxxxx"
-     ```
+2. **Update the AMI ID:**
+   In `main.tf`, replace the existing `ami_id` under `module "kata_node_group"` with the new AMI ID:
+   ```bash
+   ami_id = "ami-xxxxxxxxxxxxxxxxx"
+   ```
 
 3. **Deploy the Infrastructure:**
    ```bash
