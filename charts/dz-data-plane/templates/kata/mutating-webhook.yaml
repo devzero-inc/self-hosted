@@ -2,8 +2,6 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: kata-webhook
-  annotations:
-    cert-manager.io/inject-ca-from: kube-system/kata-webhook-cert
 webhooks:
   - name: kata-webhook.devzero.io
     namespaceSelector:
