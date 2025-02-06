@@ -50,11 +50,32 @@ ingress:
         - grafana.<domain>
 ```
 
+Update `values/docker-registry.yaml`:
+
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  path: /
+  hosts:
+    - docker-registry.<domain>
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "200g"
+  tls:
+    - secretName: devzero-docker-registry-tls
+      hosts:
+        - docker-registry.<domain>
+```
+
 Reinstall dependencies:
 
 ```bash
 make install
 ```
+
+Check out [charts/dz-control-plane-deps/README.md](./dz-control-plane-deps/README.md)
 
 ### 3. Install the Control Plane
 
@@ -80,6 +101,8 @@ ingress:
         - path: /
           pathType: Prefix
 ```
+
+Check out [charts/dz-control-plane/README.md](./dz-control-plane/README.md)
 
 ### 4. DNS Setup
 
@@ -120,6 +143,8 @@ Apply changes:
 make install
 ```
 
+Check out [charts/dz-data-plane-deps/README.md](./dz-data-plane-deps/README.md)
+
 ### 3. Install the Data Plane
 
 ```bash
@@ -134,6 +159,8 @@ Monitor pods:
 ```bash
 watch kubectl get pods -n devzero-self-hosted
 ```
+
+Check out [charts/dz-data-plane/README.md](./dz-data-plane/README.md)
 
 ### 4. DNS Setup
 

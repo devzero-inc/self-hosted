@@ -2,6 +2,11 @@
 
 This document provides a step-by-step guide for setting up the infrastructure required to self-host the DevZero Control Plane and Data Plane using Terraform. The infrastructure can be deployed on cloud platforms like AWS, GCP, and Azure.
 
+## Pre-reading
+
+For readers experienced with Terraform deployments at their companies, we have some examples under [./examples](./examples/) that you can reference to see how to run a full DevZero deployment.
+If you have your own terraform environment and want to reuse our modules, you can refer to the [./modules](./modules/) directory to use whichever components you need.
+
 ## Overview
 
 The `terraform/` directory contains Infrastructure as Code (IaC) configurations that automate the provisioning of essential cloud resources such as VPCs, EKS clusters, load balancers, and VPNs.
