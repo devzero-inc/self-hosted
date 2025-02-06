@@ -93,7 +93,7 @@ kubectl apply -f runtimeclass.yaml
 
 ### 10. Install DevZero Control Plane
 
-Refer to the `charts/README.md` for further steps to deploy the Control Plane and Data Plane.
+Refer to the [Charts README](../charts/README.md) for further steps to deploy the Control Plane and Data Plane.
 
 ## Troubleshooting
 

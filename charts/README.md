@@ -154,5 +154,4 @@ kubectl get secret <sa-token> -n devzero-self-hosted -o jsonpath='{.data.token}'
 3. Add the retrieved details in the dashboard:
    - Cluster Name, Region ID, Cluster URL, CA Certificate, Service Account Token
 
-**Contributions are welcome!** Feel free to open issues or submit pull requests.
-
+To easily check requirements, install DevZero self-hosted, and validate the installation with CLI, refer to the [DevZero Installer README](../dz_installer/README.md).
