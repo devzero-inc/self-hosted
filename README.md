@@ -20,10 +20,12 @@ Welcome to the **self-hosted** repository. This repository contains all the nece
    - The cloud provider manages the underlying infrastructure, including networking and resource allocation.
 
 4. **Control Plane**
-   - The DNS directs the user requests to the **Control Plane**, which is deployed on a Kubernetes cluster.
+   - After DNS resolution, user requests are routed to the **Control Plane**, which operates on a Kubernetes cluster within the cloud provider.
    - The Control Plane consists of:
-     - **Front End**: Handles user interface interactions, API calls, and manages user requests.
-     - **Back End**: Processes business logic, authentication, and manages communication with the Data Plane.
+     - **Website (Dashboard):** A user-friendly web interface for managing DevZero projects, monitoring activities, and configuring resources.
+     - **API Gateway:** Facilitates secure and efficient communication between the front-end (Dashboard/DZ CLI) and backend services.
+     - **Various Backend Services:** Handle core business logic, authentication, data processing, and manage communication with the Data Plane.
+
 
 5. **Data Plane**
    - The Control Plane communicates with the **Data Plane**, which includes:
