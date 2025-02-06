@@ -131,6 +131,8 @@ install-timescaledb:
 		VERSION=0.23.0 \
 		NAMESPACE=devzero
 
+	kubectl apply -f timescaledb-secret.yaml
+
 	@$(MAKE) _install-helm-chart \
 		APP_NAME=timescaledb \
 		REPO_NAME=cnpg \
@@ -143,6 +145,7 @@ install-timescaledb:
 .PHONY: delete-timescaledb
 delete-timescaledb:
 	helm delete timescaledb -n devzero --ignore-not-found
+	kubectl delete -f timescaledb-secret.yaml
 	helm delete cnpg -n devzero --ignore-not-found
 	kubectl get crds -o name | grep 'postgresql.cnpg.io' | xargs kubectl delete
 
