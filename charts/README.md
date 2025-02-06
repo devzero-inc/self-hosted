@@ -50,6 +50,25 @@ ingress:
         - grafana.<domain>
 ```
 
+Update `values.docker-registry.yaml`:
+
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  path: /
+  hosts:
+    - docker-registry.<domain>
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "200g"
+  tls:
+    - secretName: devzero-docker-registry-tls
+      hosts:
+        - docker-registry.<domain>
+```
+
 Reinstall dependencies:
 
 ```bash
