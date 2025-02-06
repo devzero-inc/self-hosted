@@ -141,7 +141,6 @@ Monitor pods:
 watch kubectl get pods -n devzero-self-hosted
 ```
 
-
 Check out [charts/dz-data-plane/README.md](./dz-data-plane/README.md)
 
 ### 4. DNS Setup

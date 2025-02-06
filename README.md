@@ -4,6 +4,33 @@ Welcome to the **self-hosted** repository. This repository contains all the nece
 
 ![DevZero Self-Hosted Architecture](./dz-dsh-arch.png)
 
+## Flow of the Architecture
+
+1. **User Interaction**
+   - Users interact with the DevZero environment through two interfaces:
+     - **DZ CLI**: A command-line interface for managing DevZero resources.
+     - **Browser**: A web-based interface to access the DevZero dashboard and workspaces.
+
+2. **DNS Resolution**
+   - Both the DZ CLI and Browser requests are routed through the **DNS** (Domain Name System).
+   - The DNS resolves the requests to the appropriate endpoints within the cloud infrastructure.
+
+3. **Cloud Provider Infrastructure**
+   - The environment is hosted on a cloud provider such as **AWS**, **GCP**, or **Azure**.
+   - The cloud provider manages the underlying infrastructure, including networking and resource allocation.
+
+4. **Control Plane**
+   - The DNS directs the user requests to the **Control Plane**, which is deployed on a Kubernetes cluster.
+   - The Control Plane consists of:
+     - **Front End**: Handles user interface interactions, API calls, and manages user requests.
+     - **Back End**: Processes business logic, authentication, and manages communication with the Data Plane.
+
+5. **Data Plane**
+   - The Control Plane communicates with the **Data Plane**, which includes:
+     - **DevZero Cluster**: A Kubernetes cluster hosting DevZero workloads.
+     - **DevZero Workspace**: Isolated development environments where users run their applications and workloads.
+
+
 ## Repository Structure
 
 ```bash
