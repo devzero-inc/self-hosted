@@ -2,6 +2,8 @@
 
 An Application Load Balancer (ALB) is a highly available, scalable service offered by AWS that automatically distributes incoming application traffic across multiple targets, such as EC2 instances, containers, IP addresses, and Lambda functions. It operates at the application layer (Layer 7) of the OSI model, making it ideal for HTTP and HTTPS traffic routing.
 
+This module is helpful for teams that use custom load balancers to point to internal services (running on nodeport), when they dont want to use other ingresses for whatever reasons.
+
 ## Requirements
 
 No requirements.

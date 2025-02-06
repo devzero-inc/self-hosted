@@ -4,6 +4,8 @@ DERP (Designated Encrypted Relay for Packets) is a relay server designed to help
 
 In the context of cloud infrastructure, DERP servers ensure reliable, encrypted communication between distributed nodes, especially in Kubernetes clusters, remote development environments, and private networks.
 
+For more information, check out Taiscale's documentation [here](https://tailscale.com/kb/1232/derp-servers).
+
 ## Requirements
 
 No requirements.
