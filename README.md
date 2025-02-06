@@ -42,11 +42,11 @@ self-hosted/
 
 ## Getting Started
 
-1. **Provision Infrastructure:**
-   - Navigate to the `terraform/` folder and follow the instructions to deploy the necessary cloud infrastructure.
+1. **Build AMIs:**
+   - Use the `kata/` directory to create the AMIs required for Kubernetes nodes. If you prefer to skip building custom Kata AMIs, you can proceed directly to provisioning infrastructure. The Terraform scripts are configured to use the public Kata AMIs created by DevZero.
 
-2. **Build AMIs:**
-   - Use the `kata/` directory to create the AMIs required for Kubernetes nodes.
+2. **Provision Infrastructure:**
+   - Navigate to the `terraform/` folder and follow the instructions to deploy the necessary cloud infrastructure. 
 
 3. **Deploy Applications:**
    - Deploy the DevZero Control Plane and Data Plane using Helm charts from the `charts/` directory.

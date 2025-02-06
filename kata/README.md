@@ -71,11 +71,11 @@ us-west-1: ami-yyyyyyyyyyyyyyyyy
 
 1. **Navigate to the Terraform Deployment Directory:**
    ```bash
-   cd ../../terraform/examples/aws/simple-deployment
+   cd ../../terraform/examples/aws/base-cluster
    ```
 
 2. **Update the EC2 Launch Template:**
-   - In `main.tf`, replace the existing `ami_id` under `eks_managed_node_groups` with the new AMI ID:
+   - In `main.tf`, replace the existing `ami_id` under `module "kata_node_group"` with the new AMI ID:
      ```bash
      ami_id = "ami-xxxxxxxxxxxxxxxxx"
      ```
