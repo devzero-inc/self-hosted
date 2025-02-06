@@ -43,7 +43,7 @@ server:
         ha_enabled = true
         ha_table = "vault_ha_locks"
 
-        connection_url = "postgres://vault:vault@postgres-vault-postgresql-hl:5432/vault"
+        connection_url = "postgres://vault:vault@devzero-db-postgresql-hl:5432/vault"
       }
       
       # This is used to configure the Vault server to use AWS KMS for auto-unsealing.
