@@ -30,17 +30,17 @@ self-hosted/
 - Utilise Helm to streamline Kubernetes application deployments, ensuring consistent and repeatable configurations.
 - Check out [charts/README.md](./charts/README.md) to know more about it.
 
-### 4. **dz-installer/**
+### 4. **dz_installer/**
 - A Python CLI tool designed for easy requirement checks, installation, and validation of DevZero self-hosted environments based on user-specific requirements.
 - Simplify the setup process by automating environment validation and installation workflows through interactive user inputs.
-- Check out [dz-installer/README.md](./dz-installer/README.md)
+- Check out [dz_installer/README.md](./dz_installer/README.md)
 
 ## How They Fit Together
 
 - **kata** builds the custom AMIs required for Kubernetes nodes, optimised with Kata Containers as the default runtime.
 - **terraform** provisions the infrastructure across different cloud providers to support both the Control Plane and Data Plane of DevZero.
 - **charts** deploys the DevZero Control Plane and Data Plane onto the infrastructure provisioned by Terraform.
-- **dz-installer** ensures seamless installation and validation of the self-hosted setup, guiding users through configuration and deployment steps.
+- **dz_installer** ensures seamless installation and validation of the self-hosted setup, guiding users through configuration and deployment steps.
 
 ## Getting Started
 
@@ -54,7 +54,7 @@ self-hosted/
    - Deploy the DevZero Control Plane and Data Plane using Helm charts from the `charts/` directory.
 
 4. **Automate Setup:**
-   - Leverage the `dz-installer/` Python CLI to check prerequisites, install components, and validate the environment.
+   - Leverage the `dz_installer/` Python CLI to check prerequisites, install components, and validate the environment.
 
 For detailed instructions, refer to the specific README files within each folder.
 
