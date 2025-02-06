@@ -50,7 +50,7 @@ ingress:
         - grafana.<domain>
 ```
 
-Update `values.docker-registry.yaml`:
+Update `values/docker-registry.yaml`:
 
 ```yaml
 ingress:
