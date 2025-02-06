@@ -71,7 +71,7 @@ data:
       echo "Vault is not initialized. Initializing now..."
 
       # Check if seal type is awskms
-      seal_type=$(vault status -format=json | jq -r '.initialized')
+      seal_type=$(vault status -format=json | jq -r '.type')
       echo "Seal type: $seal_type"
 
       if [ "$seal_type" = "awskms" ]; then
