@@ -26,3 +26,6 @@ dz_config.json
 terraform/examples/aws/permission-helper/permissions/*.json
 
 venv/
+
+# Python bin
+dzi
