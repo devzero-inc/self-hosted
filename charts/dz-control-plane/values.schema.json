@@ -769,7 +769,7 @@
                         "host": {
                             "type": "string",
                             "description": "PostgreSQL host",
-                            "default": "postgres-hydra-postgresql-hl"
+                            "default": "devzero-db-postgresql-hl"
                         },
                         "port": {
                             "type": "number",
@@ -779,7 +779,7 @@
                         "name": {
                             "type": "string",
                             "description": "PostgreSQL database name",
-                            "default": "postgres"
+                            "default": "hydra"
                         },
                         "user": {
                             "type": "string",
@@ -1120,7 +1120,7 @@
                         "url": {
                             "type": "string",
                             "description": "PostgreSQL URL for LogSrv",
-                            "default": "postgresql://logsrv:logsrv@postgres-logsrv-postgresql-hl:5432/logsrv"
+                            "default": "postgresql://logsrv:logsrv@devzero-db-postgresql-hl:5432/logsrv"
                         },
                         "password": {
                             "type": "string",
@@ -1475,7 +1475,7 @@
                         "POSTGRES_HOST": {
                             "type": "string",
                             "description": "PostgreSQL host",
-                            "default": "postgres-polland-postgresql-hl"
+                            "default": "devzero-db-postgresql-hl"
                         },
                         "REDIS_URL": {
                             "type": "string",
@@ -1731,12 +1731,12 @@
                         "user": {
                             "type": "string",
                             "description": "PostgreSQL user for Pulse",
-                            "default": "postgres"
+                            "default": "pulse"
                         },
                         "host": {
                             "type": "string",
                             "description": "PostgreSQL host for Pulse",
-                            "default": "timescaledb-single"
+                            "default": "timescaledb-cluster-rw"
                         },
                         "port": {
                             "type": "number",
@@ -1746,7 +1746,7 @@
                         "database": {
                             "type": "string",
                             "description": "PostgreSQL database for Pulse",
-                            "default": "postgres"
+                            "default": "pulse"
                         },
                         "ssl": {
                             "type": "string",
