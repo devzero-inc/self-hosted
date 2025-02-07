@@ -111,6 +111,8 @@ The Helm chart installs the following components:
 2. BACKEND: 1
 3. HYDRA: 2
 
+
+
 ### Chart Configuration
 
 | Name               | Description                                      | Value              |
