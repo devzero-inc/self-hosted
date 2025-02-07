@@ -52,6 +52,7 @@ jobs:
 
       - name: Initialize and Apply Terraform (Base Cluster)
         run: |
+          cd self-hosted/terraform/examples/aws/base-cluster
           terraform init
           terraform apply -auto-approve
           echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_ENV
@@ -85,6 +86,7 @@ jobs:
 
       - name: Initialize and Apply Cluster-Extensions
         run: |
+          cd self-hosted/terraform/examples/aws/cluster-extensions
           terraform init
           terraform apply -auto-approve
 
