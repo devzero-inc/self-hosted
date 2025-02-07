@@ -1,5 +1,107 @@
-<!--- app-name: controlplane -->
+# DevZero Self-Hosted - Helm Charts - Control Plane
 
+This document provides instructions for deploying the **DevZero Control Plane** in a self-hosted environment using Helm charts. The Helm chart automates the deployment of all necessary components, ensuring seamless integration with the DevZero Data Plane.
+
+## Overview
+
+The **DevZero Control Plane Helm Chart** installs critical components to manage DevZero's self-hosted architecture. It includes workloads like:
+
+- **API Gateway:** Manages incoming API traffic securely.
+- **Backend Services:** Core business logic and data processing services.
+- **Authentication Services (Hydra):** Handles secure identity and access management.
+- **Monitoring and Logging:** For observability and operational insights.
+
+## Prerequisites
+
+- **Kubernetes Cluster (EKS preferred)**
+- **kubectl** configured with your cluster credentials
+- **Helm 3.x** installed
+- DockerHub credentials (contact [support@devzero.io](mailto:support@devzero.io))
+
+## Installation
+
+1. **Clone the Repository:**
+
+```bash
+git clone https://github.com/devzero-inc/self-hosted.git
+cd self-hosted/charts/dz-control-plane
+```
+
+2. **Install the Control Plane:**
+
+```bash
+make install
+```
+
+Alternatively, using Helm directly:
+
+```bash
+helm install dz-control-plane oci://public.ecr.aws/v1i4e1r2/charts/dz-control-plane \
+  -n devzero \
+  --version 0.1.3 \
+  --set credentials.registry=<REGISTRY_URL> \
+  --set credentials.username=<USERNAME> \
+  --set credentials.password=<PASSWORD> \
+  --set domain=<DOMAIN_NAME>
+```
+
+3. **Configure Values:**
+
+Edit `values.yaml` to provide your specific configurations:
+
+```yaml
+credentials:
+  registry: "<REGISTRY_URL>"
+  username: "<USERNAME>"
+  password: "<PASSWORD>"
+  email: "<EMAIL>"
+domain: "<DOMAIN_NAME>"
+backend:
+  replicas: 2
+  service:
+    port: 8443
+```
+
+## Retrieving Connection Credentials
+
+After installation, retrieve the credentials needed to connect the Control Plane with other services:
+
+```bash
+kubectl get secret devzero-control-plane-token -n devzero -o jsonpath='{.data.token}' | base64 -d
+```
+
+## Custom Namespace Deployment
+
+By default, the chart deploys to the `devzero` namespace. To use a custom namespace, modify the Helm command:
+
+```bash
+--namespace <NAMESPACE>
+```
+
+## Helm Chart Components
+
+The Helm chart installs the following components:
+
+1. **API Gateway:** Routes and manages API traffic securely.
+2. **Backend Services:** Processes business logic and data.
+3. **Hydra:** Manages OAuth 2.0 and OpenID Connect protocols.
+4. **LogSrv:** Handles centralised logging.
+5. **Monitoring Tools:** Integrates with Grafana and Prometheus.
+
+## Makefile Commands
+
+- **Install the Control Plane:**
+  ```bash
+  make install
+  ```
+- **Uninstall the Control Plane:**
+  ```bash
+  make delete
+  ```
+- **Generate Documentation:**
+  ```bash
+  make docs
+  ```
 
 ## Parameters
 
@@ -8,8 +110,6 @@
 1. POLLAND/BUILDQD: 0
 2. BACKEND: 1
 3. HYDRA: 2
-
-
 
 ### Chart Configuration
 
@@ -28,6 +128,12 @@
 | `credentials.username` | Registry username             | `""`        |
 | `credentials.password` | Registry password             | `""`        |
 | `credentials.email`    | Registry email address        | `""`        |
+
+### TLS Configuration
+
+| Name          | Description | Value  |
+| ------------- | ----------- | ------ |
+| `tls.enabled` | Enable TLS  | `true` |
 
 ### Image Configuration
 
@@ -477,17 +583,27 @@
 | `web.ingress.hosts[0].paths[0].path`                                     | Path for ingress                                    | `/`                                                                                                                    |
 | `web.ingress.hosts[0].paths[0].pathType`                                 | Path type for ingress                               | `Prefix`                                                                                                               |
 
-### Cluster Issuer Configuration
-
-| Name             | Description                              | Value                                            |
-| ---------------- | ---------------------------------------- | ------------------------------------------------ |
-| `issuer.enabled` | Enable Cluster Issuer                    | `true`                                           |
-| `issuer.acme`    | ACME server URL                          | `https://acme-v02.api.letsencrypt.org/directory` |
-| `issuer.email`   | Email address used for ACME registration | `email@selfzero.net`                             |
-
 ### Vault Configuration
 
 | Name                | Description           | Value        |
 | ------------------- | --------------------- | ------------ |
 | `vault.job.enabled` | Enable Vault job      | `true`       |
 | `vault.job.address` | Vault address for job | `vault:8200` |
+
+## Uninstallation
+
+To uninstall the DevZero Control Plane:
+
+```bash
+make delete
+```
+
+Or via Helm:
+
+```bash
+helm delete dz-control-plane -n devzero
+```
+
+
+
+

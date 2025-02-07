@@ -1,137 +1,127 @@
-# Kata AMI Build Process
+# DevZero Self-Hosted - Kata AMI
 
-This document outlines the process for building a custom Amazon Machine Image (AMI) for running Kata Containers. The AMI is tailored to support lightweight, secure virtualization with Kata Containers.
-
----
+This document outlines the process for building a custom Amazon Machine Image (AMI) optimised for running Kata Containers. The AMI is tailored to support lightweight, secure virtualisation, making it ideal for Kubernetes workloads.
 
 ## Overview
 
-The Kata AMI is a pre-configured Amazon Machine Image designed to run Kata Containers efficiently. It includes the required Kata runtime, kernel modules, and dependencies. The AMI is useful for deploying Kata Containers on AWS EC2 instances with minimal setup.
-
----
+The **Kata AMI** is a pre-configured Amazon Machine Image designed to efficiently run Kata Containers. It includes the necessary Kata runtime, kernel modules, and dependencies, simplifying the deployment of secure container environments on AWS EC2 instances.
 
 ## Prerequisites
 
 ### Tools Required
-- [HashiCorp Packer](https://www.packer.io/) (for automating the AMI build process)
-- [AWS CLI](https://aws.amazon.com/cli/) (for managing AWS resources)
-- Access credentials for your AWS account (IAM user/role with sufficient permissions)
+- [HashiCorp Packer](https://www.packer.io/) - Automates the AMI build process.
+- [AWS CLI](https://aws.amazon.com/cli/) - Manages AWS resources.
+- **AWS Access Credentials** - IAM user/role with sufficient permissions.
 
 ### Base AMI Requirements
-- **Amazon Linux 2**
+- **Amazon Linux 2023** (used as the base image for AMI creation)
 
----
+For infrastructure setup, refer to the [Terraform README](../terraform/README.md).
 
-## Step-by-Step Guide
+## AMI Build Process
 
 ### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/devzero-inc/self-hosted.git
-```
-### 2. Navigate to the linux-images Directory
-
-```bash
 cd self-hosted/kata/linux-images
 ```
 
-### 3. Clone the Linux Repository
+### 2. Build the Host Environment
 
-```bash
-git clone https://github.com/virt-pvm/linux.git
-```
+- Clone the Linux repository:
+  ```bash
+  git clone https://github.com/virt-pvm/linux.git
+  ```
+- Build and run the Docker container:
+  ```bash
+  docker build -t linux-image-host -f Dockerfile.host .
+  docker run -d --name linux-image-host linux-image-host
+  ```
+- Copy package files to the Packer directory:
+  ```bash
+  docker cp linux-image-host:/kernel-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel.rpm
+  docker cp linux-image-host:/kernel-headers-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel-headers.rpm
+  docker cp linux-image-host:/kernel-devel-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel-devel.rpm
+  ```
 
-### 4. Build and Run the Docker Container of the Host
-
-```bash
-docker build -t linux-image-host -f Dockerfile.host .
-docker run -d --name linux-image-host linux-image-host
-```
-
-### 5. Copy the Package files to the Packer Directory
-
-```bash
-docker cp linux-image-host:/kernel-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel.rpm
-docker cp linux-image-host:/kernel-headers-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel-headers.rpm
-docker cp linux-image-host:/kernel-devel-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel-devel.rpm
-```
-
-### 6. Build and Run the Docker Container of the Guest
+### 3. Build the Guest Environment
 
 ```bash
 docker build -t linux-image-guest -f Dockerfile.guest .
 docker run -d --name linux-image-guest linux-image-guest
-```
-
-### 7. Copy guest-vmlinux to the Packer Directory
-
-```bash
 docker cp linux-image-guest:/guest-vmlinux /packer
 ```
 
-### 8. Build the AMI with Packer
+### 4. Build the AMI with Packer
 
 ```bash
 packer init .
 packer build .
 ```
 
-#### Output
+Upon successful build, Packer will output AMI IDs for multiple AWS regions:
 
 ```bash
-us-east-1: ami-wwwwxxxxyyyyzzzzz
-us-east-2: ami-wwwwxxxxyyyyzzzzz
-us-west-1: ami-wwwwxxxxyyyyzzzzz
-us-west-2: ami-wwwwxxxxyyyyzzzzz
+us-east-1: ami-xxxxxxxxxxxxxxxxx
+us-west-1: ami-yyyyyyyyyyyyyyyyy
 ```
 
-Copy the AMI of `ws-west-1` region.
+## Integrating the AMI with Terraform
 
-### 9. Navigate to the Terraform to update the AMI for EC2 launch template
+1. **Navigate to the Terraform Deployment Directory:**
+   ```bash
+   cd ../../terraform/examples/aws/base-cluster
+   ```
 
-```bash
-cd ../../terraform/examples/aws/simple-deployment
-```
+2. **Update the AMI ID:**
+   In `main.tf`, replace the existing `ami_id` under `module "kata_node_group"` with the new AMI ID:
+   ```bash
+   ami_id = "ami-xxxxxxxxxxxxxxxxx"
+   ```
 
-### 10. Paste the AMI in the EC2 launch template
+3. **Deploy the Infrastructure:**
+   ```bash
+   terraform init
+   terraform apply
+   ```
 
-In `main.tf`, replace the `ami_id` in the `eks_managed_node_groups` with the copied AMI.
+For detailed Terraform setup instructions, refer to the [Terraform README](../terraform/README.md).
 
-```bash
-ami_id = "ami-wwwwxxxxyyyyzzzzz"
-```
+## Kubernetes Configuration
 
-### 11. Run the Terraform
+1. **Update the kubeconfig:**
+   ```bash
+   aws eks update-kubeconfig --region <region> --name <cluster-name>
+   ```
 
-```bash
-terraform init
-terraform apply
-```
+2. **Apply the Kata RuntimeClass:**
+   ```bash
+   kubectl apply -f runtimeclass.yaml
+   ```
 
-### 12. Update the kubeconfig
+## Control Plane and CRD Setup
 
-```bash
-aws eks update-kubeconfig --region <region> --name <cluster-name>
-```
+To deploy the DevZero Control Plane and Data Plane:
 
-### 13. Apply the Kata runtimeclass
+1. **Set up CRDs:**
+   ```bash
+   helm pull oci://registry-1.docker.io/devzeroinc/dz-data-plane-crds
+   helm install dz-control-plane-crds oci://registry-1.docker.io/devzeroinc/dz-control-plane-crds -n devzero --create-namespace
+   ```
 
-```bash
-cd ../../../../kata
-kubectl apply -f runtimeclass.yaml
-```
+2. **Install the Control Plane:**
+   ```bash
+   helm pull oci://registry-1.docker.io/devzeroinc/dz-control-plane
+   helm install dz-control-plane oci://registry-1.docker.io/devzeroinc/dz-control-plane -n devzero --set domain=<domain_name> --set issuer.email=support@devzero.io --set credentials.registry=docker.io/devzeroinc --set credentials.username=<username> --set credentials.password=<password> --set credentials.email=<email> --set backend.licenseKey=<license_key>
+   ```
 
+For additional deployment details, refer to the [Charts README](../charts/README.md).
 
-### 14. Set up the CRDs
+## Troubleshooting
 
-```bash
-helm pull oci://registry-1.docker.io/devzeroinc/dz-data-plane-crds
-helm install dz-control-plane-crds oci://registry-1.docker.io/devzeroinc/dz-control-plane-crds -n devzero --create-namespace
-```
+- Ensure all required tools are installed and up-to-date.
+- Validate AWS credentials and permissions.
+- Use `packer build -debug` for more detailed AMI build logs.
+- For Terraform issues, run `terraform plan` to diagnose configuration errors.
 
-### 15. Install the Control Plane
-
-```bash
-helm pull oci://registry-1.docker.io/devzeroinc/dz-control-plane
-helm install dz-control-plane oci://registry-1.docker.io/devzeroinc/dz-control-plane -n devzero --set domain=<domain_name> --set issuer.email=support@devzero.io --set credentials.registry=docker.io/devzeroinc --set credentials.username=<username> --set credentials.password=<password> --set credentials.email=<email> --set backend.licenseKey=<license_key>
-```

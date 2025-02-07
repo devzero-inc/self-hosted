@@ -2,8 +2,12 @@ name: devzero DSH deployment
 
 on:
   push:
+    paths:
+      - 'self-hosted/terraform/examples/aws/**'
     branches:
-      - garvit/pipeline-testing
+      - main
+  schedule:
+    - cron: '0 3 * * *'
   workflow_dispatch:
 
 jobs:
@@ -33,7 +37,20 @@ jobs:
         with:
           terraform_version: 1.5.7
 
-      - name: Initialize and Apply Terraform (Infrastructure)
+      - name: Add Backend Override (Base Cluster)
+        run: |
+          cd self-hosted/terraform/examples/aws/base-cluster
+          cat <<EOF > backend_override.tf
+          terraform {
+            backend "s3" {
+                bucket         	   = "dsh-tf-state"
+                key              	 = "base-cluster/terraform.tfstate"
+                region         	   = "us-west-1"
+            }
+          }
+          EOF
+
+      - name: Initialize and Apply Terraform (Base Cluster)
         run: |
           cd self-hosted/terraform/examples/aws/base-cluster
           terraform init
@@ -53,6 +70,19 @@ jobs:
           enable_cluster_autoscaler = false
           cluster_name = "$CLUSTER_NAME"
           EOT
+
+      - name: Add Backend Override (Cluster Extensions)
+        run: |
+          cd self-hosted/terraform/examples/aws/cluster-extensions
+          cat <<EOF > backend_override.tf
+          terraform {
+            backend "s3" {
+                bucket         	   = "dsh-tf-state"
+                key              	 = "cluster-extensions/terraform.tfstate"
+                region         	   = "us-west-1"
+            }
+          }
+          EOF
 
       - name: Initialize and Apply Cluster-Extensions
         run: |

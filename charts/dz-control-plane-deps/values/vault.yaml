@@ -14,8 +14,6 @@ ui:
 
 server:
   enabled: true
-  ingress:
-    enabled: false
   auditStorage:
     enabled: true
   dataStorage:
@@ -30,13 +28,13 @@ server:
     config: |
       disable_mlock = true
       ui = true
-      
+
       listener "tcp" {
         tls_disable = 1
         address = "[::]:8200"
         cluster_address = "[::]:8201"
       }
-      
+
       service_registration "kubernetes" {}
 
       storage "postgresql" {
@@ -45,7 +43,7 @@ server:
 
         connection_url = "postgres://vault:vault@devzero-db-postgresql-hl:5432/vault"
       }
-      
+
       # This is used to configure the Vault server to use AWS KMS for auto-unsealing.
       # This configuration can be found as the output if the devzero's base_cluster module when 
       # create_vault_auto_unseal_key variable is set to true. 
@@ -54,23 +52,15 @@ server:
       #   region = "AWS_REGION"
       # }
 
-ingress:
-  # -- Specify if the Vault Ingress is enabled
-  enabled: true
-  # -- Ingress Class Name. May be required for k8s >= 1.18
-  ingressClassName: "nginx"
-  # -- Annotations
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-  # -- TLS
-  tls:
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    ingressClassName: "nginx"
+    hosts:
+    - host: "vault.example.com"
+    tls:
     - secretName: devzero-vault-tls
       hosts:
-        - "vault.{{ .Values.domain }}"
-  # -- Hosts
-  hosts:
-    - host: "vault.{{ .Values.domain }}"
-      paths:
-        - path: /
-          pathType: Prefix
+      - vault.example.com

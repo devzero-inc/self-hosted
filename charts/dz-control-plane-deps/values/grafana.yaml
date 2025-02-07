@@ -8,7 +8,7 @@ grafana.ini:
     header_name: "X-JWT-Assertion"
     auto_sign_up: true
     url_login: true
-    jwk_set_url: "https://devinfra.us.auth0.com/.well-known/jwks.json"
+    key_file: "/home/grafana/public.pem"
     skip_org_role_sync: true
   auth.anonymous:
     enabled: true
@@ -24,55 +24,66 @@ persistence:
   enabled: true
   type: "sts"
   accessModes:
-    - "ReadWriteOnce"
+  - "ReadWriteOnce"
   size: "10Gi"
   finalizers:
-    - "kubernetes.io/pvc-protection"
+  - "kubernetes.io/pvc-protection"
 datasources:
   datasources.yaml:
     apiVersion: 1
     datasources:
-      - name: mimir
-        access: proxy
-        orgId: 1
-        version: 1
-        type: prometheus
-        uid: "mimir"
-        url: http://mimir-distributed-nginx:80
-      - name: pulse
-        access: proxy
-        orgId: 1
-        version: 1
-        uid: "pulse"
-        type: mysql
-        url: mysql-pulse-headless:3306
-        user: "pulse"
-        secureJsonData:
-          password: "pulse"
-        jsonData:
-          database: "pulse"
-      - name: timescale
-        access: proxy
-        orgId: 1
-        version: 1
-        uid: "timescale"
-        type: "postgres"
-        url: http://timescaledb-single:5432
-        user: "postgres"
-        secureJsonData:
-          password: "pulse"
-        jsonData:
-          database: "postgres"
+    - name: mimir
+      access: proxy
+      orgId: 1
+      version: 1
+      type: prometheus
+      uid: "mimir"
+      url: http://mimir-nginx:80
+    - name: pulse
+      access: proxy
+      orgId: 1
+      version: 1
+      uid: "pulse"
+      type: mysql
+      url: mysql-pulse-headless:3306
+      user: "pulse"
+      secureJsonData:
+        password: "pulse"
+      jsonData:
+        database: "pulse"
+    - name: timescale
+      access: proxy
+      orgId: 1
+      version: 1
+      uid: "timescale"
+      type: "postgres"
+      url: http://timescaledb-single:5432
+      user: "postgres"
+      secureJsonData:
+        password: "pulse"
+      jsonData:
+        database: "postgres"
+extraSecretMounts:
+- name: auth-secret
+  mountPath: /etc/secrets
+  secretName: auth-secret
+  readOnly: false
+  optional: false
 ingress:
   enabled: true
-  ingressClassName: nginx
-  path: /
-  hosts:
-    - grafana.devzero.internal
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  ingressClassName: "nginx"
+  hosts:
+  - "grafana.example.com"
   tls:
-    - secretName: devzero-registry-tls
-      hosts:
-        - grafana.devzero.internal
+  - secretName: devzero-grafana-tls
+    hosts:
+    - grafana.example.com
+command:
+- "sh"
+- "-c"
+- |-
+  cat /etc/secrets/public.key | base64 -d > /home/grafana/public.pem
+  exec /run.sh

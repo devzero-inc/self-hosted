@@ -1,0 +1,155 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: webhook-cert-sa
+  namespace: kube-system
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: webhook-cert-role
+  namespace: kube-system
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create", "get", "update", "patch", "delete"]
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources: ["mutatingwebhookconfigurations"]
+    verbs: ["get", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: webhook-cert-rolebinding
+  namespace: kube-system
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+subjects:
+  - kind: ServiceAccount
+    name: webhook-cert-sa
+    namespace: kube-system
+roleRef:
+  kind: Role
+  name: webhook-cert-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: webhook-cert-job-pre
+  namespace: kube-system
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+spec:
+  template:
+    spec:
+      serviceAccountName: webhook-cert-sa
+      restartPolicy: OnFailure
+      containers:
+        - name: cert-generator
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/sh
+              set -e
+
+              WEBHOOK_NAME="kata-webhook"
+              NAMESPACE="kube-system"
+              SECRET_NAME="kata-webhook-tls"
+              CERT_DIR="/tmp/webhook-certs"
+
+              echo "Checking if secret $SECRET_NAME exists..."
+              if kubectl get secret "$SECRET_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
+                echo "Secret $SECRET_NAME already exists. Skipping certificate generation."
+                exit 0
+              fi
+
+              echo "Secret not found. Generating new TLS certificates..."
+              mkdir -p "$CERT_DIR"
+              cd "$CERT_DIR"
+
+              openssl genrsa -out ca.key 2048
+              openssl req -new -x509 -days 365 -key ca.key -subj "/C=US/CN=${WEBHOOK_NAME}-ca" -out ca.crt
+
+              openssl req -newkey rsa:2048 -nodes -keyout server.key -subj "/C=US/CN=${WEBHOOK_NAME}.${NAMESPACE}.svc" -out server.csr
+
+              echo "subjectAltName=DNS:${WEBHOOK_NAME}.${NAMESPACE}.svc" > san.ext
+              openssl x509 -req -extfile san.ext \
+                  -days 365 \
+                  -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
+                  -out server.crt
+              rm san.ext
+
+              echo "Storing new TLS certificates in secret $SECRET_NAME..."
+              kubectl create secret generic "$SECRET_NAME-ca" \
+                --from-file=ca.crt \
+                -n "$NAMESPACE"
+
+              kubectl create secret tls "$SECRET_NAME" \
+                --cert=server.crt \
+                --key=server.key \
+                -n "$NAMESPACE"
+
+              echo "TLS secret $SECRET_NAME created successfully."
+
+              rm -rf "$CERT_DIR"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: webhook-cert-job-post
+  namespace: kube-system
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+spec:
+  template:
+    spec:
+      serviceAccountName: webhook-cert-sa
+      restartPolicy: OnFailure
+      containers:
+        - name: webhook-patcher
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/sh
+              set -e
+
+              WEBHOOK_NAME="kata-webhook"
+              NAMESPACE="kube-system"
+              SECRET_NAME="kata-webhook-tls"
+
+              # Get CA bundle
+              CA_BUNDLE=$(kubectl get secret "$SECRET_NAME-ca" -n "$NAMESPACE" -o jsonpath="{.data.ca\.crt}" | base64 --decode | base64 -w 0)
+
+              echo "Waiting for WebhookConfiguration to be available..."
+              for i in {1..10}; do
+                if kubectl get mutatingwebhookconfiguration "$WEBHOOK_NAME" &>/dev/null; then
+                  echo "WebhookConfiguration found!"
+                  break
+                fi
+                echo "Webhook not ready yet. Retrying in 5 seconds..."
+                sleep 5
+              done
+
+              echo "Patching MutatingWebhookConfiguration with updated CA Bundle..."
+              kubectl patch mutatingwebhookconfiguration "$WEBHOOK_NAME" \
+                --type='json' -p="[{\"op\": \"replace\", \"path\": \"/webhooks/0/clientConfig/caBundle\", \"value\":\"$CA_BUNDLE\"}]" || {
+                  echo "Failed to patch webhook. Dumping current state:"
+                  kubectl get mutatingwebhookconfiguration "$WEBHOOK_NAME" -o yaml
+                  exit 1
+              }
+
+              echo "Webhook successfully patched with new CA certificate."

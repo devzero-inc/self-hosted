@@ -23,7 +23,8 @@ RUN mkdir -p "${HOME}"
 RUN echo "%_binary_payload    w2T16.xzdio" >> "${HOME}/.rpmmacros" && \
     echo "%_source_payload    w2T16.xzdio" >> "${HOME}/.rpmmacros"
 RUN make defconfig KBUILD_DEFCONFIG=dz_pvm_host_defconfig
-RUN scripts/config -d ADDRESS_MASKING && \
+RUN scripts/config -m KVM_PVM && \
+    scripts/config -d ADDRESS_MASKING && \
     scripts/config -e DEBUG_INFO_NONE && \
     scripts/config -d DEBUG_INFO_BTF && \
     scripts/config -d DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT && \

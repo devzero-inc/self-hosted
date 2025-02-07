@@ -12,7 +12,7 @@ install:
 	@$(MAKE) install-elasticmq
 	@$(MAKE) install-docker-registry
 	@$(MAKE) install-grafana
-	@$(MAKE) install-mimir-distributed
+	@$(MAKE) install-mimir
 	@$(MAKE) install-vault
 
 .PHONY: delete
@@ -27,7 +27,7 @@ delete:
 	@$(MAKE) delete-elasticmq
 	@$(MAKE) delete-docker-registry
 	@$(MAKE) delete-grafana
-	@$(MAKE) delete-mimir-distributed
+	@$(MAKE) delete-mimir
 	@$(MAKE) delete-vault
 
 .PHONY: install-cert-manager
@@ -192,19 +192,19 @@ install-grafana:
 delete-grafana:
 	helm delete grafana -n devzero --ignore-not-found
 
-.PHONY: install-mimir-distributed
-install-mimir-distributed:
+.PHONY: install-mimir
+install-mimir:
 	@$(MAKE) _install-helm-chart \
-		APP_NAME=mimir-distributed \
+		APP_NAME=mimir \
 		REPO_NAME=grafana \
 		REPO_URL=https://grafana.github.io/helm-charts \
 		REPO_APP_NAME=mimir-distributed \
 		VERSION=5.6.0-weekly.321 \
 		NAMESPACE=devzero
 
-.PHONY: delete-mimir-distributed
-delete-mimir-distributed:
-	helm delete mimir-distributed -n devzero --ignore-not-found
+.PHONY: delete-mimir
+delete-mimir:
+	helm delete mimir -n devzero --ignore-not-found
 
 .PHONY: install-vault
 install-vault:

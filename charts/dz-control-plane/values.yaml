@@ -30,6 +30,11 @@ credentials:
   ## @param credentials.email Registry email address
   email: ""
 
+## @section TLS Configuration
+tls:
+  ## @param tls.enabled Enable TLS
+  # Disable this to remove TLS configuration in all ingresses
+  enabled: true
 
 ## @section Image Configuration
 ## @param image.repository Devzero container image repository
@@ -46,7 +51,7 @@ image:
   ## @param image.pullSecrets Optionally specify an array of imagePullSecrets
   pullSecrets:
     # Comment this out if you are not using credentials.enabled=true
-    - pull-secret
+  - pull-secret
 
 ## @section Workspace Configuration
 workspace:
@@ -1229,16 +1234,6 @@ web:
       - path: /
             ## @param web.ingress.hosts[0].paths[0].pathType Path type for ingress
         pathType: Prefix
-
-## @section Cluster Issuer Configuration
-issuer:
-  ## @param issuer.enabled Enable Cluster Issuer
-  enabled: true
-
-  ## @param issuer.acme ACME server URL
-  acme: https://acme-v02.api.letsencrypt.org/directory
-  ## @param issuer.email Email address used for ACME registration
-  email: email@selfzero.net
 
 ## @section Vault Configuration
 vault:
