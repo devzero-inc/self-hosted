@@ -1,0 +1,88 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bitnami/charts/refs/tags/postgresql/16.3.5/bitnami/postgresql/values.schema.json
+
+# https://github.com/bitnami/charts/tree/postgresql/16.3.5/bitnami/postgresql
+
+global:
+  postgresql:
+    auth:
+      username: postgres
+      password: postgres
+      database: postgres
+      postgresPassword: postgres
+
+primary:
+  persistentVolumeClaimRetentionPolicy:
+    enabled: true
+    whenDeleted: Delete
+
+  pdb:
+    create: false
+
+  name: postgres
+  persistence:
+    size: 50Gi
+  initdb:
+    scripts:
+      # These permissions are not intended to be used in production.
+      init.sql: |
+        -- Create databases
+        CREATE DATABASE polland;
+        CREATE ROLE polland WITH LOGIN PASSWORD 'polland';
+        GRANT ALL PRIVILEGES ON DATABASE polland TO polland;
+        
+        CREATE DATABASE hydra;
+        CREATE ROLE hydra WITH LOGIN PASSWORD 'hydra';
+        GRANT ALL PRIVILEGES ON DATABASE hydra TO hydra;
+        
+        CREATE DATABASE logsrv;
+        CREATE ROLE logsrv WITH LOGIN PASSWORD 'logsrv';
+        GRANT ALL PRIVILEGES ON DATABASE logsrv TO logsrv;
+        
+        CREATE DATABASE vault;
+        CREATE ROLE vault WITH LOGIN PASSWORD 'vault';
+        GRANT ALL PRIVILEGES ON DATABASE vault TO vault;
+        
+        
+    
+        \c polland
+        GRANT CONNECT ON DATABASE polland TO polland;
+        GRANT ALL ON SCHEMA public TO polland;
+        GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO polland;
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO polland;
+
+        \c hydra
+        GRANT CONNECT ON DATABASE hydra TO hydra;
+        GRANT ALL ON SCHEMA public TO hydra;
+        GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO hydra;
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO hydra;
+
+        \c logsrv
+        GRANT CONNECT ON DATABASE logsrv TO logsrv;
+        GRANT ALL ON SCHEMA public TO logsrv;
+        GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO logsrv;
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO logsrv;
+        
+        \c vault;
+        GRANT CONNECT ON DATABASE vault TO vault;
+        GRANT ALL ON SCHEMA public TO vault;
+        GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO vault;
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO vault;
+
+        CREATE TABLE vault_kv_store (
+          parent_path TEXT COLLATE "C" NOT NULL,
+          path        TEXT COLLATE "C",
+          key         TEXT COLLATE "C",
+          value       BYTEA,
+          CONSTRAINT pkey PRIMARY KEY (path, key)
+        );
+        
+        CREATE INDEX parent_path_idx ON vault_kv_store (parent_path);
+        CREATE TABLE vault_ha_locks (
+          ha_key                                      TEXT COLLATE "C" NOT NULL,
+          ha_identity                                 TEXT COLLATE "C" NOT NULL,
+          ha_value                                    TEXT COLLATE "C",
+          valid_until                                 TIMESTAMP WITH TIME ZONE NOT NULL,
+          CONSTRAINT ha_key PRIMARY KEY (ha_key)
+        );
+      
+

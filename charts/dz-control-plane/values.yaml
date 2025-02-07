@@ -378,11 +378,11 @@ hydra:
   ## @subsection Hydra Postgres Configuration
   postgres:
     ## @param hydra.postgres.host PostgreSQL host
-    host: "postgres-hydra-postgresql-hl"
+    host: "devzero-db-postgresql-hl"
     ## @param hydra.postgres.port PostgreSQL port
     port: 5432
     ## @param hydra.postgres.name PostgreSQL database name
-    name: "postgres"
+    name: "hydra"
     ## @param hydra.postgres.user PostgreSQL user
     user: "hydra"
     ## @param hydra.postgres.password PostgreSQL password
@@ -563,7 +563,7 @@ logsrv:
   ## @subsection LogSrv Postgres Configuration
   postgres:
     ## @param logsrv.postgres.url PostgreSQL URL for LogSrv
-    url: postgresql://logsrv:logsrv@postgres-logsrv-postgresql-hl:5432/logsrv
+    url: postgresql://logsrv:logsrv@devzero-db-postgresql-hl:5432/logsrv
     ## @param logsrv.postgres.password PostgreSQL password for LogSrv
     password: logsrv
 
@@ -778,7 +778,7 @@ polland:
     ## @param polland.env.POSTGRES_PASSWORD PostgreSQL password
     POSTGRES_PASSWORD: "polland"
     ## @param polland.env.POSTGRES_HOST PostgreSQL host
-    POSTGRES_HOST: "postgres-polland-postgresql-hl"
+    POSTGRES_HOST: "devzero-db-postgresql-hl"
 
     ## @param polland.env.REDIS_URL Redis URL
     REDIS_URL: "redis://redis-headless:6379/0"
@@ -901,13 +901,13 @@ pulse:
     ## @param pulse.postgres.password PostgreSQL password for Pulse
     password: pulse
     ## @param pulse.postgres.user PostgreSQL user for Pulse
-    user: postgres
+    user: pulse
     ## @param pulse.postgres.host PostgreSQL host for Pulse
-    host: timescaledb-single
+    host: timescaledb-cluster-rw
     ## @param pulse.postgres.port PostgreSQL port for Pulse
     port: 5432
     ## @param pulse.postgres.database PostgreSQL database for Pulse
-    database: postgres
+    database: pulse
     ## @param pulse.postgres.ssl SSL mode for PostgreSQL
     ssl: allow
 

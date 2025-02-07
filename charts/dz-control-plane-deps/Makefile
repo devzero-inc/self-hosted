@@ -7,11 +7,8 @@ install:
 	@$(MAKE) install-mysql-pulse
 	@$(MAKE) install-mongodb
 	@$(MAKE) install-redis
-	@$(MAKE) install-postgres-logsrv
-	@$(MAKE) install-postgres-hydra
-	@$(MAKE) install-postgres-polland
-	@$(MAKE) install-postgres-vault
-	@$(MAKE) install-timescaledb-single
+	@$(MAKE) install-devzero-db
+	@$(MAKE) install-timescaledb
 	@$(MAKE) install-elasticmq
 	@$(MAKE) install-docker-registry
 	@$(MAKE) install-grafana
@@ -25,11 +22,8 @@ delete:
 	@$(MAKE) delete-mysql-pulse
 	@$(MAKE) delete-mongodb
 	@$(MAKE) delete-redis
-	@$(MAKE) delete-postgres-logsrv
-	@$(MAKE) delete-postgres-hydra
-	@$(MAKE) delete-postgres-polland
-	@$(MAKE) delete-postgres-vault
-	@$(MAKE) delete-timescaledb-single
+	@$(MAKE) delete-devzero-db
+	@$(MAKE) delete-timescaledb
 	@$(MAKE) delete-elasticmq
 	@$(MAKE) delete-docker-registry
 	@$(MAKE) delete-grafana
@@ -110,75 +104,51 @@ install-redis:
 delete-redis:
 	helm delete redis -n devzero --ignore-not-found
 
-.PHONY: install-postgres-logsrv
-install-postgres-logsrv:
+
+.PHONY: install-devzero-db
+install-devzero-db:
 	@$(MAKE) _install-helm-chart \
-		APP_NAME=postgres-logsrv \
+		APP_NAME=devzero-db \
 		REPO_NAME=bitnami \
 		REPO_URL=https://charts.bitnami.com/bitnami \
 		REPO_APP_NAME=postgresql \
 		VERSION=16.3.5 \
 		NAMESPACE=devzero
 
-.PHONY: delete-postgres-logsrv
-delete-postgres-logsrv:
-	helm delete postgres-logsrv -n devzero --ignore-not-found
 
-.PHONY: install-postgres-hydra
-install-postgres-hydra:
-	@$(MAKE) _install-helm-chart \
-		APP_NAME=postgres-hydra \
-		REPO_NAME=bitnami \
-		REPO_URL=https://charts.bitnami.com/bitnami \
-		REPO_APP_NAME=postgresql \
-		VERSION=16.3.5 \
+.PHONY: delete-devzero-db
+delete-devzero-db:
+	helm delete devzero-db -n devzero --ignore-not-found
+
+
+.PHONY: install-timescaledb
+install-timescaledb:
+	@$(MAKE) _install-helm-chart-default \
+		APP_NAME=cnpg \
+		REPO_NAME=cnpg \
+		REPO_URL=https://cloudnative-pg.github.io/charts \
+		REPO_APP_NAME=cloudnative-pg \
+		VERSION=0.23.0 \
 		NAMESPACE=devzero
 
-.PHONY: delete-postgres-hydra
-delete-postgres-hydra:
-	helm delete postgres-hydra -n devzero --ignore-not-found
+	kubectl apply -f timescaledb-secret.yaml
 
-.PHONY: install-postgres-polland
-install-postgres-polland:
 	@$(MAKE) _install-helm-chart \
-		APP_NAME=postgres-polland \
-		REPO_NAME=bitnami \
-		REPO_URL=https://charts.bitnami.com/bitnami \
-		REPO_APP_NAME=postgresql \
-		VERSION=16.3.5 \
+		APP_NAME=timescaledb \
+		REPO_NAME=cnpg \
+		REPO_URL=https://cloudnative-pg.github.io/charts \
+		REPO_APP_NAME=cluster \
+		VERSION=0.2.1 \
 		NAMESPACE=devzero
 
-.PHONY: delete-postgres-polland
-delete-postgres-polland:
-	helm delete postgres-polland -n devzero --ignore-not-found
 
-.PHONY: install-postgres-vault
-install-postgres-vault:
-	@$(MAKE) _install-helm-chart \
-		APP_NAME=postgres-vault \
-		REPO_NAME=bitnami \
-		REPO_URL=https://charts.bitnami.com/bitnami \
-		REPO_APP_NAME=postgresql \
-		VERSION=16.3.5 \
-		NAMESPACE=devzero
+.PHONY: delete-timescaledb
+delete-timescaledb:
+	helm delete timescaledb -n devzero --ignore-not-found
+	kubectl delete -f timescaledb-secret.yaml
+	helm delete cnpg -n devzero --ignore-not-found
+	kubectl get crds -o name | grep 'postgresql.cnpg.io' | xargs kubectl delete
 
-.PHONY: delete-postgres-vault
-delete-postgres-vault:
-	helm delete postgres-vault -n devzero --ignore-not-found
-
-.PHONY: install-timescaledb-single
-install-timescaledb-single:
-	@$(MAKE) _install-helm-chart \
-		APP_NAME=timescaledb-single \
-		REPO_NAME=timescale \
-		REPO_URL=https://charts.timescale.com \
-		REPO_APP_NAME=timescaledb-single \
-		VERSION=0.33.1 \
-		NAMESPACE=devzero
-
-.PHONY: delete-timescaledb-single
-delete-timescaledb-single:
-	helm delete timescaledb-single -n devzero --ignore-not-found
 
 .PHONY: install-elasticmq
 install-elasticmq:

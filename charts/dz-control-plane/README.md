@@ -111,6 +111,8 @@ The Helm chart installs the following components:
 2. BACKEND: 1
 3. HYDRA: 2
 
+
+
 ### Chart Configuration
 
 | Name               | Description                                      | Value              |
@@ -283,9 +285,9 @@ The Helm chart installs the following components:
 | `hydra.podAnnotations`                                                     | Pod annotations                                       | `{}`                                                                                                                   |
 | `hydra.annotations`                                                        | Annotations                                           | `{}`                                                                                                                   |
 | `hydra.job`                                                                | Enable job mode                                       | `true`                                                                                                                 |
-| `hydra.postgres.host`                                                      | PostgreSQL host                                       | `postgres-hydra-postgresql-hl`                                                                                         |
+| `hydra.postgres.host`                                                      | PostgreSQL host                                       | `devzero-db-postgresql-hl`                                                                                             |
 | `hydra.postgres.port`                                                      | PostgreSQL port                                       | `5432`                                                                                                                 |
-| `hydra.postgres.name`                                                      | PostgreSQL database name                              | `postgres`                                                                                                             |
+| `hydra.postgres.name`                                                      | PostgreSQL database name                              | `hydra`                                                                                                                |
 | `hydra.postgres.user`                                                      | PostgreSQL user                                       | `hydra`                                                                                                                |
 | `hydra.postgres.password`                                                  | PostgreSQL password                                   | `hydra`                                                                                                                |
 | `hydra.redis.url`                                                          | Redis URL for Hydra                                   | `redis://redis-headless:6379/2`                                                                                        |
@@ -341,7 +343,7 @@ The Helm chart installs the following components:
 | `logsrv.podAnnotations`                                                     | Pod annotations for LogSrv           | `{}`                                                                                                                   |
 | `logsrv.annotations`                                                        | Annotations for LogSrv               | `{}`                                                                                                                   |
 | `logsrv.queue.url`                                                          | Queue URL for LogSrv                 | `http://elasticmq:9324/queue/logsrv.fifo`                                                                              |
-| `logsrv.postgres.url`                                                       | PostgreSQL URL for LogSrv            | `postgresql://logsrv:logsrv@postgres-logsrv-postgresql-hl:5432/logsrv`                                                 |
+| `logsrv.postgres.url`                                                       | PostgreSQL URL for LogSrv            | `postgresql://logsrv:logsrv@devzero-db-postgresql-hl:5432/logsrv`                                                      |
 | `logsrv.postgres.password`                                                  | PostgreSQL password for LogSrv       | `logsrv`                                                                                                               |
 | `logsrv.refreshJwksTimer`                                                   | JWKS refresh timer in seconds        | `3600`                                                                                                                 |
 | `logsrv.autoscaling.enabled`                                                | Enable autoscaling for LogSrv        | `false`                                                                                                                |
@@ -419,7 +421,7 @@ The Helm chart installs the following components:
 | `polland.env.POSTGRES_DB`                               | PostgreSQL database name                         | `polland`                                        |
 | `polland.env.POSTGRES_USER`                             | PostgreSQL user                                  | `polland`                                        |
 | `polland.env.POSTGRES_PASSWORD`                         | PostgreSQL password                              | `polland`                                        |
-| `polland.env.POSTGRES_HOST`                             | PostgreSQL host                                  | `postgres-polland-postgresql-hl`                 |
+| `polland.env.POSTGRES_HOST`                             | PostgreSQL host                                  | `devzero-db-postgresql-hl`                       |
 | `polland.env.REDIS_URL`                                 | Redis URL                                        | `redis://redis-headless:6379/0`                  |
 | `polland.env.USE_DOCKER`                                | Use Docker                                       | `yes`                                            |
 | `polland.env.CONN_MAX_AGE`                              | Connection max age                               | `60`                                             |
@@ -468,10 +470,10 @@ The Helm chart installs the following components:
 | `pulse.podAnnotations`                                                     | Pod annotations for Pulse                           | `{}`                                                                                                                   |
 | `pulse.annotations`                                                        | Annotations for Pulse                               | `{}`                                                                                                                   |
 | `pulse.postgres.password`                                                  | PostgreSQL password for Pulse                       | `pulse`                                                                                                                |
-| `pulse.postgres.user`                                                      | PostgreSQL user for Pulse                           | `postgres`                                                                                                             |
-| `pulse.postgres.host`                                                      | PostgreSQL host for Pulse                           | `timescaledb-single`                                                                                                   |
+| `pulse.postgres.user`                                                      | PostgreSQL user for Pulse                           | `pulse`                                                                                                                |
+| `pulse.postgres.host`                                                      | PostgreSQL host for Pulse                           | `timescaledb-cluster-rw`                                                                                               |
 | `pulse.postgres.port`                                                      | PostgreSQL port for Pulse                           | `5432`                                                                                                                 |
-| `pulse.postgres.database`                                                  | PostgreSQL database for Pulse                       | `postgres`                                                                                                             |
+| `pulse.postgres.database`                                                  | PostgreSQL database for Pulse                       | `pulse`                                                                                                                |
 | `pulse.postgres.ssl`                                                       | SSL mode for PostgreSQL                             | `allow`                                                                                                                |
 | `pulse.mysql.user`                                                         | MySQL user for Pulse                                | `pulse`                                                                                                                |
 | `pulse.mysql.password`                                                     | MySQL password for Pulse                            | `pulse`                                                                                                                |

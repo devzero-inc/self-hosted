@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cloudnative-pg/charts/refs/tags/cluster-v0.2.1/charts/cluster/values.schema.json
+
+# https://github.com/cloudnative-pg/charts/tree/cluster-v0.2.1/charts/cluster
+
+type: timescaledb
+
+version:
+  # -- If using TimescaleDB, specify the version
+  timescaledb: "2.15"
+
+cluster:
+  instances: 1
+  storage:
+    size: 20Gi
+  roles:
+    - name: pulse
+      comment: Pulse application database
+      ensure: present
+      login: true
+      superuser: false
+      passwordSecret:
+        name: timescaledb-secret
+  initdb:
+    database: pulse
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
