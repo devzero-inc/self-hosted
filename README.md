@@ -65,7 +65,7 @@ self-hosted/
 ### **dz_installer/**
 - A Python CLI tool designed for easy requirement checks, installation, and validation of DevZero self-hosted environments based on user-specific requirements.
 - Simplify the setup process by automating environment validation and installation workflows through interactive user inputs.
-- Check out [dz-installer/README.md](./dz-installer/README.md) to learn more.
+- Check out [dz_installer/README.md](./dz_installer/README.md) to learn more.
 
 ## How They Fit Together
 

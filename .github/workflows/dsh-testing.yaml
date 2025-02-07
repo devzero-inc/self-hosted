@@ -37,9 +37,21 @@ jobs:
         with:
           terraform_version: 1.5.7
 
-      - name: Initialize and Apply Terraform (Infrastructure)
+      - name: Add Backend Override (Base Cluster)
         run: |
           cd self-hosted/terraform/examples/aws/base-cluster
+          cat <<EOF > backend_override.tf
+          terraform {
+            backend "s3" {
+                bucket         	   = "dsh-tf-state"
+                key              	 = "base-cluster/terraform.tfstate"
+                region         	   = "us-west-1"
+            }
+          }
+          EOF
+
+      - name: Initialize and Apply Terraform (Base Cluster)
+        run: |
           terraform init
           terraform apply -auto-approve
           echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_ENV
@@ -58,9 +70,21 @@ jobs:
           cluster_name = "$CLUSTER_NAME"
           EOT
 
-      - name: Initialize and Apply Cluster-Extensions
+      - name: Add Backend Override (Cluster Extensions)
         run: |
           cd self-hosted/terraform/examples/aws/cluster-extensions
+          cat <<EOF > backend_override.tf
+          terraform {
+            backend "s3" {
+                bucket         	   = "dsh-tf-state"
+                key              	 = "cluster-extensions/terraform.tfstate"
+                region         	   = "us-west-1"
+            }
+          }
+          EOF
+
+      - name: Initialize and Apply Cluster-Extensions
+        run: |
           terraform init
           terraform apply -auto-approve
 
