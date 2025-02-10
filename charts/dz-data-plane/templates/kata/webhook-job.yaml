@@ -8,10 +8,9 @@ metadata:
     "helm.sh/hook-weight": "-5"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: webhook-cert-role
-  namespace: kube-system
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-5"
@@ -24,10 +23,9 @@ rules:
     verbs: ["get", "update", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: webhook-cert-rolebinding
-  namespace: kube-system
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-5"
@@ -36,7 +34,7 @@ subjects:
     name: webhook-cert-sa
     namespace: kube-system
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: webhook-cert-role
   apiGroup: rbac.authorization.k8s.io
 ---
@@ -47,7 +45,7 @@ metadata:
   namespace: kube-system
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-weight": "-4"
 spec:
   template:
     spec:
@@ -111,7 +109,7 @@ metadata:
   namespace: kube-system
   annotations:
     "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-weight": "1"
 spec:
   template:
     spec:
