@@ -35,7 +35,8 @@ source "amazon-ebs" "al2023_1_29_eks" {
 
   launch_block_device_mappings {
     device_name           = "/dev/xvda"
-    volume_size           = 100
+    volume_size           = 200
+    throughput            = 750
     volume_type           = "gp3"
     delete_on_termination = true
   }
@@ -63,7 +64,8 @@ source "amazon-ebs" "al2023_1_30_eks" {
 
   launch_block_device_mappings {
     device_name           = "/dev/xvda"
-    volume_size           = 100
+    volume_size           = 200
+    throughput            = 750
     volume_type           = "gp3"
     delete_on_termination = true
   }
@@ -91,7 +93,8 @@ source "amazon-ebs" "al2023_1_31_eks" {
 
   launch_block_device_mappings {
     device_name           = "/dev/xvda"
-    volume_size           = 100
+    volume_size           = 200
+    throughput            = 750
     volume_type           = "gp3"
     delete_on_termination = true
   }
@@ -181,4 +184,10 @@ build {
     execute_command   = "sudo {{ .Path }}"
     expect_disconnect = false
   }
+
+  provisioner "shell" {
+    name              = "Download docker images using ctr"
+    script            = "./pre_cache.sh"
+    execute_command   = "sudo {{ .Path }}"
+    expect_disconnect = false
 }
