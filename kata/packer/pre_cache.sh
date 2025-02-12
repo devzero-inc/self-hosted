@@ -8,7 +8,7 @@ sudo systemctl start containerd
 # These images are hard coded here and duplicated into terraform so if this gets stale, terraform will still download those.
 pull_image() {
   echo "Pulling image with ctr $1"
-  ctr -n k8s.io images pull "$1" &
+  ctr -n k8s.io images pull "$1" > /dev/null 2>&1 &
 }
 
 # github runner
