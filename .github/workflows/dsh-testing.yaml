@@ -182,13 +182,34 @@ jobs:
 
       - name: Destroy AWS Dependencies
         if: always()
-        run: |
-          aws ec2 delete-internet-gateway --internet-gateway-id $(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text) || true
-          aws ec2 delete-nat-gateway --nat-gateway-id $(aws ec2 describe-nat-gateways --filter "Name=vpc-id,Values=$VPC_ID" --query 'NatGateways[0].NatGatewayId' --output text) || true
-          aws ec2 delete-route-table --route-table-id $(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[?Associations[0].Main!=`true`].RouteTableId' --output text) || true
+        run: |  
+          IGW_ID=$(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text)
+          if [ "$IGW_ID" != "None" ]; then
+            aws ec2 detach-internet-gateway --internet-gateway-id $IGW_ID --vpc-id $VPC_ID || true
+            aws ec2 delete-internet-gateway --internet-gateway-id $IGW_ID || true
+          fi
+
+          for nat in $(aws ec2 describe-nat-gateways --filter "Name=vpc-id,Values=$VPC_ID" --query 'NatGateways[*].NatGatewayId' --output text); do
+            ALLOC_ID=$(aws ec2 describe-nat-gateways --nat-gateway-ids $nat --query 'NatGateways[0].NatGatewayAddresses[0].AllocationId' --output text)
+            aws ec2 delete-nat-gateway --nat-gateway-id $nat || true
+            aws ec2 release-address --allocation-id $ALLOC_ID || true
+          done
+
+          for eni in $(aws ec2 describe-network-interfaces --filters "Name=vpc-id,Values=$VPC_ID" --query 'NetworkInterfaces[*].NetworkInterfaceId' --output text); do
+            aws ec2 delete-network-interface --network-interface-id $eni || true
+          done
+
+          for rtb in $(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[*].RouteTableId' --output text); do
+            for assoc in $(aws ec2 describe-route-tables --route-table-ids $rtb --query 'RouteTables[0].Associations[*].RouteTableAssociationId' --output text); do
+              aws ec2 disassociate-route-table --association-id $assoc || true
+            done
+            aws ec2 delete-route-table --route-table-id $rtb || true
+          done
+
           for subnet in $(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[*].SubnetId' --output text); do
             aws ec2 delete-subnet --subnet-id $subnet || true
           done
+
           for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
             aws ec2 delete-security-group --group-id $sg || true
           done
