@@ -182,9 +182,14 @@ jobs:
 
       - name: Destroy AWS Dependencies
         if: always()
-        run: |  
+        run: |
           IGW_ID=$(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text)
           if [ "$IGW_ID" != "None" ]; then
+            # Unmap Elastic IPs associated with the IGW
+            for eip in $(aws ec2 describe-addresses --filters "Name=domain,Values=vpc" --query 'Addresses[*].AllocationId' --output text); do
+              aws ec2 release-address --allocation-id $eip || true
+            done
+
             aws ec2 detach-internet-gateway --internet-gateway-id $IGW_ID --vpc-id $VPC_ID || true
             aws ec2 delete-internet-gateway --internet-gateway-id $IGW_ID || true
           fi
@@ -193,6 +198,11 @@ jobs:
             ALLOC_ID=$(aws ec2 describe-nat-gateways --nat-gateway-ids $nat --query 'NatGateways[0].NatGatewayAddresses[0].AllocationId' --output text)
             aws ec2 delete-nat-gateway --nat-gateway-id $nat || true
             aws ec2 release-address --allocation-id $ALLOC_ID || true
+          done
+
+          for instance in $(aws ec2 describe-instances --filters "Name=vpc-id,Values=$VPC_ID" --query 'Reservations[*].Instances[*].InstanceId' --output text); do
+            aws ec2 terminate-instances --instance-ids $instance || true
+            aws ec2 wait instance-terminated --instance-ids $instance || true
           done
 
           for eni in $(aws ec2 describe-network-interfaces --filters "Name=vpc-id,Values=$VPC_ID" --query 'NetworkInterfaces[*].NetworkInterfaceId' --output text); do
@@ -206,6 +216,10 @@ jobs:
             aws ec2 delete-route-table --route-table-id $rtb || true
           done
 
+          for lb in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[*].LoadBalancerArn' --output text); do
+            aws elbv2 delete-load-balancer --load-balancer-arn $lb || true
+          done
+
           for subnet in $(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[*].SubnetId' --output text); do
             aws ec2 delete-subnet --subnet-id $subnet || true
           done
@@ -213,6 +227,7 @@ jobs:
           for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
             aws ec2 delete-security-group --group-id $sg || true
           done
+
 
       - name: Run Destroy base-cluster
         if: always()
