@@ -190,4 +190,5 @@ build {
     script            = "./pre_cache.sh"
     execute_command   = "sudo {{ .Path }}"
     expect_disconnect = false
+  }
 }
