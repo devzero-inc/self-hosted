@@ -131,7 +131,7 @@ install-timescaledb:
 		VERSION=0.23.0 \
 		NAMESPACE=devzero
 
-	kubectl apply -f timescaledb-secret.yaml
+	kubectl apply -f timescaledb-secret.yaml -n devzero
 
 	@$(MAKE) _install-helm-chart \
 		APP_NAME=timescaledb \
