@@ -2,6 +2,9 @@
 
 set -e
 
+sudo dnf install -y containerd
+sudo systemctl status containerd
+
 # Download the images that are not available in the EKS distro before connecting to the cluster
 # These images are hard coded here and duplicated into terraform so if this gets stale, terraform will still download those.
 pull_image() {
