@@ -54,7 +54,7 @@ jobs:
         run: |
           cd self-hosted/terraform/examples/aws/base-cluster
           terraform init
-          terraform apply -auto-approve
+          terraform apply -auto-approve -var="cluster_name=devzero-dsh-testing"
           echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_ENV
           echo "VPC_ID=$(terraform output -raw vpc_id)" >> $GITHUB_ENV
           echo "PUBLIC_SUBNET_IDS=$(terraform output -json public_subnet_ids | jq -c .)" >> $GITHUB_ENV
