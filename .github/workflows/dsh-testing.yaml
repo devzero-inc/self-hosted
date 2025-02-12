@@ -106,13 +106,13 @@ jobs:
 
       - name: Update values.yaml for Control Plane
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           BACKEND_LICENSE_KEY: ${{ secrets.BACKEND_LICENSE_KEY }}
         run: |
           yq e -i '
             .credentials.registry = "docker.io" |
-            .credentials.username = strenv(DOCKER_USERNAME) |
+            .credentials.username = strenv(DOCKERHUB_USERNAME) |
             .credentials.password = strenv(DOCKERHUB_TOKEN) |
             .credentials.email = "garvit@devzero.io" |
             .backend.licenseKey = strenv(BACKEND_LICENSE_KEY)
