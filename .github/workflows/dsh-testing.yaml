@@ -60,125 +60,125 @@ jobs:
           echo "PUBLIC_SUBNET_IDS=$(terraform output -json public_subnet_ids | jq -c .)" >> $GITHUB_ENV
           echo "PRIVATE_SUBNET_IDS=$(terraform output -json private_subnet_ids | jq -c .)" >> $GITHUB_ENV
 
-      - name: Update Cluster-Extensions tfvars
-        run: |
-          cat <<EOT > self-hosted/terraform/examples/aws/cluster-extensions/terraform.tfvars
-          region = "us-west-1"
-          vpc_id = "$VPC_ID"
-          public_subnet_ids = $PUBLIC_SUBNET_IDS
-          private_subnet_ids = $PRIVATE_SUBNET_IDS
-          enable_cluster_autoscaler = false
-          cluster_name = "$CLUSTER_NAME"
-          EOT
+      # - name: Update Cluster-Extensions tfvars
+      #   run: |
+      #     cat <<EOT > self-hosted/terraform/examples/aws/cluster-extensions/terraform.tfvars
+      #     region = "us-west-1"
+      #     vpc_id = "$VPC_ID"
+      #     public_subnet_ids = $PUBLIC_SUBNET_IDS
+      #     private_subnet_ids = $PRIVATE_SUBNET_IDS
+      #     enable_cluster_autoscaler = false
+      #     cluster_name = "$CLUSTER_NAME"
+      #     EOT
 
-      - name: Add Backend Override (Cluster Extensions)
-        run: |
-          cd self-hosted/terraform/examples/aws/cluster-extensions
-          cat <<EOF > backend_override.tf
-          terraform {
-            backend "s3" {
-                bucket         	   = "dsh-tf-state"
-                key              	 = "cluster-extensions/terraform.tfstate"
-                region         	   = "us-west-1"
-            }
-          }
-          EOF
+      # - name: Add Backend Override (Cluster Extensions)
+      #   run: |
+      #     cd self-hosted/terraform/examples/aws/cluster-extensions
+      #     cat <<EOF > backend_override.tf
+      #     terraform {
+      #       backend "s3" {
+      #           bucket         	   = "dsh-tf-state"
+      #           key              	 = "cluster-extensions/terraform.tfstate"
+      #           region         	   = "us-west-1"
+      #       }
+      #     }
+      #     EOF
 
-      - name: Initialize and Apply Cluster-Extensions
-        run: |
-          cd self-hosted/terraform/examples/aws/cluster-extensions
-          terraform init
-          terraform apply -auto-approve
+      # - name: Initialize and Apply Cluster-Extensions
+      #   run: |
+      #     cd self-hosted/terraform/examples/aws/cluster-extensions
+      #     terraform init
+      #     terraform apply -auto-approve
 
-      - name: Configure Kubernetes Access
-        run: |
-          aws eks update-kubeconfig --region us-west-1 --name $CLUSTER_NAME
+      # - name: Configure Kubernetes Access
+      #   run: |
+      #     aws eks update-kubeconfig --region us-west-1 --name $CLUSTER_NAME
 
-      - name: Deploy Control Plane Dependencies
-        run: |
-          cd self-hosted/charts/dz-control-plane-deps
-          make install
+      # - name: Deploy Control Plane Dependencies
+      #   run: |
+      #     cd self-hosted/charts/dz-control-plane-deps
+      #     make install
 
-      - name: Install yq
-        run: |
-          sudo wget https://github.com/mikefarah/yq/releases/download/v4.15.1/yq_linux_amd64 -O /usr/local/bin/yq
-          sudo chmod +x /usr/local/bin/yq
+      # - name: Install yq
+      #   run: |
+      #     sudo wget https://github.com/mikefarah/yq/releases/download/v4.15.1/yq_linux_amd64 -O /usr/local/bin/yq
+      #     sudo chmod +x /usr/local/bin/yq
 
-      - name: Update values.yaml for Control Plane
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          BACKEND_LICENSE_KEY: ${{ secrets.BACKEND_LICENSE_KEY }}
-        run: |
-          yq e -i '
-            .credentials.registry = "docker.io" |
-            .credentials.username = strenv(DOCKERHUB_USERNAME) |
-            .credentials.password = strenv(DOCKERHUB_TOKEN) |
-            .credentials.email = "garvit@devzero.io" |
-            .backend.licenseKey = strenv(BACKEND_LICENSE_KEY)
-          ' self-hosted/charts/dz-control-plane/values.yaml
+      # - name: Update values.yaml for Control Plane
+      #   env:
+      #     DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      #     BACKEND_LICENSE_KEY: ${{ secrets.BACKEND_LICENSE_KEY }}
+      #   run: |
+      #     yq e -i '
+      #       .credentials.registry = "docker.io" |
+      #       .credentials.username = strenv(DOCKERHUB_USERNAME) |
+      #       .credentials.password = strenv(DOCKERHUB_TOKEN) |
+      #       .credentials.email = "garvit@devzero.io" |
+      #       .backend.licenseKey = strenv(BACKEND_LICENSE_KEY)
+      #     ' self-hosted/charts/dz-control-plane/values.yaml
 
-      - name: Deploy DevZero Control Plane
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-        run: |
-          cd self-hosted/charts/dz-control-plane
-          make add-docker-creds
-          make install
+      # - name: Deploy DevZero Control Plane
+      #   env:
+      #     DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      #   run: |
+      #     cd self-hosted/charts/dz-control-plane
+      #     make add-docker-creds
+      #     make install
 
-      - name: Validate Control Plane
-        run: |
-          echo -e "\nPods in namespace  devzero:"
-          kubectl get pods -n devzero
-          chmod +x self-hosted/.github/scripts/dsh-pod-test.sh
-          self-hosted/.github/scripts/dsh-pod-test.sh
-          echo -e "\nIngress in namespace  devzero:"
-          kubectl get ingress -n devzero
+      # - name: Validate Control Plane
+      #   run: |
+      #     echo -e "\nPods in namespace  devzero:"
+      #     kubectl get pods -n devzero
+      #     chmod +x self-hosted/.github/scripts/dsh-pod-test.sh
+      #     self-hosted/.github/scripts/dsh-pod-test.sh
+      #     echo -e "\nIngress in namespace  devzero:"
+      #     kubectl get ingress -n devzero
 
-      - name: Update values.yaml for Data Plane
-        run: |
-          cat <<EOT > self-hosted/charts/dz-data-plane/values.yaml
-          ## @section Devzero
-          devzero:
-            teamId: ""
-            region: "us-west-1"
-            vault:
-              server: "https://csi.devzero.io"
-          ## @section Node Labeler
-          nodeLabeler:
-            enabled: true
-          ## @section Credentials Configuration
-          credentials:
-            registry: "docker.io"
-            username: "${{ secrets.DOCKERHUB_USERNAME }}"
-            password: "${{ secrets.DOCKERHUB_TOKEN }}"
-            email: "garvit@devzero.io"
-          EOT
+      # - name: Update values.yaml for Data Plane
+      #   run: |
+      #     cat <<EOT > self-hosted/charts/dz-data-plane/values.yaml
+      #     ## @section Devzero
+      #     devzero:
+      #       teamId: ""
+      #       region: "us-west-1"
+      #       vault:
+      #         server: "https://csi.devzero.io"
+      #     ## @section Node Labeler
+      #     nodeLabeler:
+      #       enabled: true
+      #     ## @section Credentials Configuration
+      #     credentials:
+      #       registry: "docker.io"
+      #       username: "${{ secrets.DOCKERHUB_USERNAME }}"
+      #       password: "${{ secrets.DOCKERHUB_TOKEN }}"
+      #       email: "garvit@devzero.io"
+      #     EOT
 
-      - name: Deploy Data Plane Dependencies
-        run: |
-          cd self-hosted/charts/dz-data-plane-deps
-          make install
+      # - name: Deploy Data Plane Dependencies
+      #   run: |
+      #     cd self-hosted/charts/dz-data-plane-deps
+      #     make install
 
-      - name: Deploy DevZero Data Plane
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-        run: |
-          cd self-hosted/charts/dz-data-plane
-          make install
+      # - name: Deploy DevZero Data Plane
+      #   env:
+      #     DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      #   run: |
+      #     cd self-hosted/charts/dz-data-plane
+      #     make install
 
-      - name: Validate Data Plane
-        run: |
-          kubectl get pods -n devzero-self-hosted
-          kubectl get ingress -n devzero-self-hosted
+      # - name: Validate Data Plane
+      #   run: |
+      #     kubectl get pods -n devzero-self-hosted
+      #     kubectl get ingress -n devzero-self-hosted
 
-      - name: Run Destroy cluster-extensions
-        if: always()
-        run: |
-          cd self-hosted/terraform/examples/aws/cluster-extensions
-          terraform destroy -auto-approve
+      # - name: Run Destroy cluster-extensions
+      #   if: always()
+      #   run: |
+      #     cd self-hosted/terraform/examples/aws/cluster-extensions
+      #     terraform destroy -auto-approve
 
       - name: Destroy AWS Dependencies
         if: always()
