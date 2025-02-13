@@ -113,8 +113,8 @@ module "kata_node_group" {
   ]
 
   block_device_mappings = {
-    sda = {
-      device_name = "/dev/sda1"
+    xvda = {
+      device_name = "/dev/xvda"
       ebs = {
         delete_on_termination = true
         encrypted             = true
