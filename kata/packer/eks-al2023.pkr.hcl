@@ -103,7 +103,7 @@ source "amazon-ebs" "al2023_1_31_eks" {
 }
 
 build {
-  name = "upgrade-kernel"
+  name = "build-al2023-with-pvm"
   sources = [
     "source.amazon-ebs.al2023_1_29_eks",
     "source.amazon-ebs.al2023_1_30_eks",
@@ -111,18 +111,13 @@ build {
   ]
 
   provisioner "file" {
-    source      = "./kernel.rpm"
-    destination = "/tmp/kernel.rpm"
-  }
-
-  provisioner "file" {
-    source      = "./kernel-devel.rpm"
-    destination = "/tmp/kernel-devel.rpm"
-  }
-
-  provisioner "file" {
-    source      = "./kernel-headers.rpm"
-    destination = "/tmp/kernel-headers.rpm"
+    sources = [
+      "./kernel.rpm",
+      "./kernel-devel.rpm",
+      "./kernel-headers.rpm",
+    ]
+    destination = "/tmp/"
+    max_retries = 3
   }
 
   provisioner "shell" {
@@ -152,23 +147,14 @@ build {
   }
 
   provisioner "file" {
-    source      = "./guest-vmlinux"
-    destination = "/tmp/vmlinux"
-  }
-
-  provisioner "file" {
-    source      = "./containerd.toml"
-    destination = "/tmp/containerd.toml"
-  }
-
-  provisioner "file" {
-    source      = "./configuration-clh.toml"
-    destination = "/tmp/configuration-clh.toml"
-  }
-
-  provisioner "file" {
-    source      = "./configuration-qemu.toml"
-    destination = "/tmp/configuration-qemu.toml"
+    sources = [
+      "./guest-vmlinux",
+      "./containerd.toml",
+      "./configuration-clh.toml",
+      "./configuration-qemu.toml"
+    ]
+    destination = "/tmp/"
+    max_retries = 3
   }
 
   provisioner "shell" {

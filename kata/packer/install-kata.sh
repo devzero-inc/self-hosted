@@ -111,7 +111,7 @@ main() {
     copy_file "/tmp/configuration-clh.toml" "/etc/kata-containers/configuration-clh.toml"
     copy_file "/tmp/configuration-qemu.toml" "/etc/kata-containers/configuration-qemu.toml"
     mkdir -p /opt/kata/share/kata-containers
-    copy_file "/tmp/vmlinux" "/opt/kata/share/kata-containers/vmlinux-6.7-pvm"
+    copy_file "/tmp/guest-vmlinux" "/opt/kata/share/kata-containers/vmlinux-6.7-pvm"
 
     log_info "Configuring Containerd..."
     mkdir -p /etc/containerd
