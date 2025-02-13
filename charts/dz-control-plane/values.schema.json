@@ -476,13 +476,43 @@
                     "type": "object",
                     "properties": {
                         "appId": {
-                            "type": "string",
+                            "type": "number",
                             "description": "GitHub App ID",
-                            "default": ""
+                            "default": 0
                         },
                         "appPrivateKey": {
                             "type": "string",
                             "description": "GitHub App Private Key",
+                            "default": ""
+                        },
+                        "appUrl": {
+                            "type": "string",
+                            "description": "GitHub App url",
+                            "default": ""
+                        },
+                        "clientId": {
+                            "type": "string",
+                            "description": "GitHub App client ID",
+                            "default": ""
+                        },
+                        "clientSecret": {
+                            "type": "string",
+                            "description": "GitHub App client secret",
+                            "default": ""
+                        },
+                        "permitUrl": {
+                            "type": "string",
+                            "description": "GitHub App permit url",
+                            "default": ""
+                        },
+                        "tokenExchangeUrl": {
+                            "type": "string",
+                            "description": "GitHub App token url",
+                            "default": ""
+                        },
+                        "enterpriseUrl": {
+                            "type": "string",
+                            "description": "GitHub enterprise server url",
                             "default": ""
                         }
                     }

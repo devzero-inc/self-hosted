@@ -235,9 +235,21 @@ backend:
   ## @subsection Backend GitHub Configuration
   github:
     ## @param backend.github.appId GitHub App ID
-    appId: ""
+    appId: 0
     ## @param backend.github.appPrivateKey GitHub App Private Key
     appPrivateKey: ""
+    ## @param backend.github.appUrl GitHub App url
+    appUrl: ""
+    ## @param backend.github.clientId GitHub App client ID
+    clientId: ""
+    ## @param backend.github.clientSecret GitHub App client secret
+    clientSecret: ""
+    ## @param backend.github.permitUrl GitHub App permit url
+    permitUrl: ""
+    ## @param backend.github.tokenExchangeUrl GitHub App token url
+    tokenExchangeUrl: ""
+    ## @param backend.github.enterpriseUrl GitHub enterprise server url
+    enterpriseUrl: ""
 
   ## @subsection Backend Mimir Configuration
   mimir:
