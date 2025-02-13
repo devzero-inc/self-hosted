@@ -205,10 +205,6 @@ jobs:
             aws ec2 wait instance-terminated --instance-ids $instance || true
           done
 
-          for eni in $(aws ec2 describe-network-interfaces --filters "Name=vpc-id,Values=$VPC_ID" --query 'NetworkInterfaces[*].NetworkInterfaceId' --output text); do
-            aws ec2 delete-network-interface --network-interface-id $eni || true
-          done
-
           for rtb in $(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[*].RouteTableId' --output text); do
             for assoc in $(aws ec2 describe-route-tables --route-table-ids $rtb --query 'RouteTables[0].Associations[*].RouteTableAssociationId' --output text); do
               aws ec2 disassociate-route-table --association-id $assoc || true
@@ -225,7 +221,23 @@ jobs:
           done
 
           for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
+            for instance in $(aws ec2 describe-instances --filters "Name=security-group-id,Values=$sg" --query 'Reservations[*].Instances[*].InstanceId' --output text); do
+              aws ec2 modify-instance-attribute --instance-id $instance --no-security-groups || true
+            done
+          done
+
+          for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
+            for eni in $(aws ec2 describe-network-interfaces --filters "Name=group-id,Values=$sg" --query 'NetworkInterfaces[*].NetworkInterfaceId' --output text); do
+              aws ec2 modify-network-interface-attribute --network-interface-id $eni --no-security-groups || true
+            done
+          done
+
+          for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
             aws ec2 delete-security-group --group-id $sg || true
+          done
+
+          for eni in $(aws ec2 describe-network-interfaces --filters "Name=vpc-id,Values=$VPC_ID" --query 'NetworkInterfaces[*].NetworkInterfaceId' --output text); do
+            aws ec2 delete-network-interface --network-interface-id $eni || true
           done
 
 
