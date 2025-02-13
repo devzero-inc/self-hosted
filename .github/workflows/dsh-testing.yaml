@@ -6,8 +6,6 @@ on:
       - 'self-hosted/terraform/examples/aws/**'
     branches:
       - main
-  schedule:
-    - cron: '0 3 * * *'
   workflow_dispatch:
 
 jobs:
