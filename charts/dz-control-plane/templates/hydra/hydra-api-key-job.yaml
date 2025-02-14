@@ -57,6 +57,12 @@ spec:
       labels:
         {{- include "devzero.podLabels" (dict "ctx" . "component" "hydra") | nindent 8 }}
     spec:
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
       serviceAccountName: hydra-job-sa
       restartPolicy: Never
       containers:

@@ -116,7 +116,7 @@
                         "cliImage": {
                             "type": "string",
                             "description": "Base image for cli deployment",
-                            "default": "public.ecr.aws/v1i4e1r2/dzcmd:24434f9"
+                            "default": "public.ecr.aws/v1i4e1r2/dzcmd:b53fa1a"
                         }
                     }
                 }
@@ -1484,6 +1484,11 @@
                     "description": "Annotations for Polland",
                     "default": {}
                 },
+                "vaultEndpoint": {
+                    "type": "string",
+                    "description": "vaultEndpoint for Polland",
+                    "default": "http://vault:8200"
+                },
                 "env": {
                     "type": "object",
                     "properties": {
@@ -1580,7 +1585,7 @@
                         "VAULT_AUTH_METHOD": {
                             "type": "string",
                             "description": "Vault auth method",
-                            "default": "kubernetes"
+                            "default": "token"
                         },
                         "VAULT_SECRETS_MOUNT_POINT": {
                             "type": "string",
@@ -2507,6 +2512,26 @@
                             "type": "string",
                             "description": "Vault address for job",
                             "default": "vault:8200"
+                        }
+                    }
+                },
+                "secrets": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable Vault job",
+                            "default": true
+                        },
+                        "address": {
+                            "type": "string",
+                            "description": "Vault address for job",
+                            "default": "http://vault:8200"
+                        },
+                        "path": {
+                            "type": "string",
+                            "description": "Vault address for job",
+                            "default": "devzero"
                         }
                     }
                 }

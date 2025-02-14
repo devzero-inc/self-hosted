@@ -83,6 +83,7 @@ data:
       cli_image: {{ .Values.workspace.baseImages.cliImage }}
     default_dz_base_image_tag: base-latest
     vault_endpoint: "http://vault:8200"
+    vault_token: ""
     vault_auth_method: "token"
     vault_store_mount_point: "devzero"
     vault_auth_secret_mount_point: "vault-csi-production-writer"

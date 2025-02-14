@@ -160,7 +160,7 @@ The Helm chart installs the following components:
 | --------------------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
 | `workspace.baseImages.sysboxBase` | Base image for sysbox deployment | `public.ecr.aws/v1i4e1r2/ubuntu-devbox-base:base-2024-12-17--06-31--c705618e0d55` |
 | `workspace.baseImages.kataBase`   | Base image for kata deployment   | `public.ecr.aws/v1i4e1r2/kata-devbox-base:base-2025-01-13--18-11--7bb0a987f303`   |
-| `workspace.baseImages.cliImage`   | Base image for cli deployment    | `public.ecr.aws/v1i4e1r2/dzcmd:24434f9`                                           |
+| `workspace.baseImages.cliImage`   | Base image for cli deployment    | `public.ecr.aws/v1i4e1r2/dzcmd:b53fa1a`                                           |
 
 ### Global Configuration
 
@@ -422,6 +422,7 @@ The Helm chart installs the following components:
 | `polland.podLabels`                                     | Pod labels for Polland                           | `{}`                                             |
 | `polland.podAnnotations`                                | Pod annotations for Polland                      | `{}`                                             |
 | `polland.annotations`                                   | Annotations for Polland                          | `{}`                                             |
+| `polland.vaultEndpoint`                                 | vaultEndpoint for Polland                        | `http://vault:8200`                              |
 | `polland.env.USE_POSTGRES_DB`                           | Use PostgreSQL database                          | `true`                                           |
 | `polland.env.POSTGRES_PORT`                             | PostgreSQL port                                  | `5432`                                           |
 | `polland.env.POSTGRES_DB`                               | PostgreSQL database name                         | `polland`                                        |
@@ -440,7 +441,7 @@ The Helm chart installs the following components:
 | `polland.env.USE_INSECURE_REGISTRY`                     | Use insecure registry                            | `True`                                           |
 | `polland.env.USE_ECR_REGISTRY`                          | Use ECR registry                                 | `False`                                          |
 | `polland.env.USE_LOCAL_LOGSRV`                          | Use local LogSrv                                 | `True`                                           |
-| `polland.env.VAULT_AUTH_METHOD`                         | Vault auth method                                | `kubernetes`                                     |
+| `polland.env.VAULT_AUTH_METHOD`                         | Vault auth method                                | `token`                                          |
 | `polland.env.VAULT_SECRETS_MOUNT_POINT`                 | Vault secrets mount point                        | `vault-csi-production-writer`                    |
 | `polland.env.LOGSRV_DEFAULT_QUEUE`                      | Default LogSrv queue URL                         | `http://elasticmq:9324/queue/logsrv.fifo`        |
 | `polland.env.LOGSRV_DEFAULT_REGION`                     | Default LogSrv region                            | `elasticmq`                                      |
@@ -593,10 +594,13 @@ The Helm chart installs the following components:
 
 ### Vault Configuration
 
-| Name                | Description           | Value        |
-| ------------------- | --------------------- | ------------ |
-| `vault.job.enabled` | Enable Vault job      | `true`       |
-| `vault.job.address` | Vault address for job | `vault:8200` |
+| Name                    | Description           | Value               |
+| ----------------------- | --------------------- | ------------------- |
+| `vault.job.enabled`     | Enable Vault job      | `true`              |
+| `vault.job.address`     | Vault address for job | `vault:8200`        |
+| `vault.secrets.enabled` | Enable Vault job      | `true`              |
+| `vault.secrets.address` | Vault address for job | `http://vault:8200` |
+| `vault.secrets.path`    | Vault address for job | `devzero`           |
 
 ## Uninstallation
 
