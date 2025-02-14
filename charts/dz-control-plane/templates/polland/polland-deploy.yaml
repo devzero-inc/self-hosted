@@ -88,6 +88,11 @@ spec:
           env:
             - name: ENVIRONMENT
               value: "self_hosted"
+            - name: VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: vault-unseal-keys
+                  key: root-token
           envFrom:
             - configMapRef:
                 name: {{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}

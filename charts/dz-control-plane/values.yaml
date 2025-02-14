@@ -66,7 +66,7 @@ workspace:
     ## @param workspace.baseImages.kataBase Base image for kata deployment
     kataBase: public.ecr.aws/v1i4e1r2/kata-devbox-base:base-2025-01-13--18-11--7bb0a987f303
     ## @param workspace.baseImages.cliImage Base image for cli deployment
-    cliImage: public.ecr.aws/v1i4e1r2/dzcmd:24434f9
+    cliImage: public.ecr.aws/v1i4e1r2/dzcmd:b53fa1a
 
 ## @section Global Configuration
 ## @param global.podAnnotations Global pod annotations
@@ -235,9 +235,21 @@ backend:
   ## @subsection Backend GitHub Configuration
   github:
     ## @param backend.github.appId GitHub App ID
-    appId: ""
+    appId: 0
     ## @param backend.github.appPrivateKey GitHub App Private Key
     appPrivateKey: ""
+    ## @param backend.github.appUrl GitHub App url
+    appUrl: ""
+    ## @param backend.github.clientId GitHub App client ID
+    clientId: ""
+    ## @param backend.github.clientSecret GitHub App client secret
+    clientSecret: ""
+    ## @param backend.github.permitUrl GitHub App permit url
+    permitUrl: ""
+    ## @param backend.github.tokenExchangeUrl GitHub App token url
+    tokenExchangeUrl: ""
+    ## @param backend.github.enterpriseUrl GitHub enterprise server url
+    enterpriseUrl: ""
 
   ## @subsection Backend Mimir Configuration
   mimir:
@@ -765,6 +777,9 @@ polland:
   ## @param polland.annotations Annotations for Polland
   annotations: {}
 
+  ## @param polland.vaultEndpoint vaultEndpoint for Polland
+  vaultEndpoint: "http://vault:8200"
+
   ## @subsection Polland Environment Configuration
   env:
     ## @param polland.env.USE_POSTGRES_DB Use PostgreSQL database
@@ -809,7 +824,7 @@ polland:
     USE_LOCAL_LOGSRV: "True"
 
     ## @param polland.env.VAULT_AUTH_METHOD Vault auth method
-    VAULT_AUTH_METHOD: "kubernetes"
+    VAULT_AUTH_METHOD: "token"
     ## @param polland.env.VAULT_SECRETS_MOUNT_POINT Vault secrets mount point
     VAULT_SECRETS_MOUNT_POINT: "vault-csi-production-writer"
     ## @param polland.env.LOGSRV_DEFAULT_QUEUE Default LogSrv queue URL
@@ -1243,3 +1258,11 @@ vault:
     enabled: true
     ## @param vault.job.address Vault address for job
     address: "vault:8200"
+  ## @subsection Vault secrets engine Configuration
+  secrets:
+    ## @param vault.secrets.enabled Enable Vault job
+    enabled: true
+    ## @param vault.secrets.address Vault address for job
+    address: "http://vault:8200"
+    ## @param vault.secrets.path Vault address for job
+    path: "devzero"

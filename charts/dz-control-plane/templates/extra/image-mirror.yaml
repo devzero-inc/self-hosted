@@ -10,6 +10,12 @@ spec:
   backoffLimit: 1
   template:
     spec:
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
       containers:
         - name: image-mirror
           image: docker:24.0-dind

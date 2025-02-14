@@ -51,8 +51,6 @@ data:
     devzero_team_id: {{ .Values.backend.mainTeamId }}
     logsrv_default_queue: {{ .Values.backend.logsrv.queue }}
     logsrv_default_region: {{ .Values.backend.logsrv.region }}
-    github_app_id: {{ .Values.backend.github.appId }}
-    github_app_private_key: {{ .Values.backend.github.appPrivateKey }}
     stripe:
       api_key: ""
       webhook_signing_secret: ""
@@ -85,16 +83,19 @@ data:
       cli_image: {{ .Values.workspace.baseImages.cliImage }}
     default_dz_base_image_tag: base-latest
     vault_endpoint: "http://vault:8200"
+    vault_token: ""
     vault_auth_method: "token"
     vault_store_mount_point: "devzero"
     vault_auth_secret_mount_point: "vault-csi-production-writer"
     vault_auth_role: "customer-secret-writer"
-    github_app_install_url: ""
-    github_app_client_id: ""
-    github_app_client_secret: ""
+    github_app_id: {{ .Values.backend.github.appId }}
+    github_app_url: {{ .Values.backend.github.appUrl }} 
+    github_app_client_id: {{ .Values.backend.github.clientId }}
+    github_app_client_secret: {{ .Values.backend.github.clientSecret }}
+    github_app_permit_url: {{ .Values.backend.github.permitUrl }}
+    github_app_token_exchange_url: {{ .Values.backend.github.tokenExchangeUrl }}
+    github_enterprise_url: {{ .Values.backend.github.enterpriseUrl }}
+    github_app_private_key: {{- .Values.backend.github.appPrivateKey | toYaml | indent 3}}
     github_webhook_secret: ""
     nats_endpoint: ""
     nats_token: ""
-
-
-
