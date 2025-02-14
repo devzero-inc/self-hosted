@@ -176,6 +176,15 @@ jobs:
       - name: Run Destroy cluster-extensions
         if: always()
         run: |
+          for lb in $(kubectl get svc -A --field-selector spec.type=LoadBalancer -o jsonpath='{range .items[*]}{.metadata.namespace}{"|"}{.metadata.name}{"\n"}{end}'); do
+            [[ -z "$lb" ]] && continue  # Skip if empty result
+            NS=$(echo "$lb" | awk -F '|' '{print $1}')
+            SVC=$(echo "$lb" | awk -F '|' '{print $2}')
+            [[ -z "$NS" || -z "$SVC" ]] && continue  # Skip if parsing failed
+            echo "Deleting Kubernetes LoadBalancer service: $SVC in namespace: $NS"
+            kubectl delete svc "$SVC" -n "$NS" || true
+          done
+
           cd self-hosted/terraform/examples/aws/cluster-extensions
           terraform destroy -auto-approve
 
