@@ -176,11 +176,11 @@ jobs:
       - name: Run Destroy cluster-extensions
         if: always()
         run: |
-          for lb in $(kubectl get svc -A --field-selector spec.type=LoadBalancer -o jsonpath='{range .items[*]}{.metadata.namespace}{"|"}{.metadata.name}{"\n"}{end}'); do
-            [[ -z "$lb" ]] && continue  # Skip if empty result
+          for lb in $(kubectl get svc -A -o json | jq -r '.items[] | select(.spec.type=="LoadBalancer") | "\(.metadata.namespace)|\(.metadata.name)"'); do
+            [[ -z "$lb" ]] && continue
             NS=$(echo "$lb" | awk -F '|' '{print $1}')
             SVC=$(echo "$lb" | awk -F '|' '{print $2}')
-            [[ -z "$NS" || -z "$SVC" ]] && continue  # Skip if parsing failed
+            [[ -z "$NS" || -z "$SVC" ]] && continue
             echo "Deleting Kubernetes LoadBalancer service: $SVC in namespace: $NS"
             kubectl delete svc "$SVC" -n "$NS" || true
           done
