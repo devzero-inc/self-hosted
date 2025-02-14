@@ -182,6 +182,10 @@ jobs:
       - name: Destroy AWS Dependencies
         if: always()
         run: |
+          cd self-hosted/terraform/examples/aws/base-cluster
+          terraform destroy -target=module.kata_node_group -auto-approve
+          terraform destroy -target=module.eks -auto-approve
+          
           IGW_ID=$(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text)
           if [ "$IGW_ID" != "None" ]; then
             for eip in $(aws ec2 describe-addresses --filters "Name=domain,Values=vpc" --query 'Addresses[*].AllocationId' --output text); do

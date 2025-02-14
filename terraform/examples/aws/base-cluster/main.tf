@@ -433,25 +433,3 @@ resource "aws_kms_key_policy" "vault-auto-unseal" {
     Version = "2012-10-17"
   })
 }
-
-################################################################################
-# Cleanup Scripts
-################################################################################
-
-resource "null_resource" "cleanup_sgs" {
-  depends_on = [module.eks] # Ensures Kubernetes is deleted first
-
-  triggers = {
-    vpc_id = local.vpc_id
-  }
-
-  provisioner "local-exec" {
-    when = destroy
-    command = <<EOT
-      echo "Deleting Security Groups before destroying VPC..."
-      for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=${self.triggers.vpc_id}" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
-          aws ec2 delete-security-group --group-id $sg || true
-      done
-    EOT
-  }
-}
