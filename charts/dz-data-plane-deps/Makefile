@@ -86,4 +86,4 @@ install-prometheus:
 .PHONY: delete-prometheus
 delete-prometheus:
 	helm delete prometheus -n devzero --ignore-not-found
-	kubectl delete podmonitor/vclustermonitor -n kube-prometheus-metrics
+	kubectl delete podmonitor/vclustermonitor -n kube-prometheus-stack
