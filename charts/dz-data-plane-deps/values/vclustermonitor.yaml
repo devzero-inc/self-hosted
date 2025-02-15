@@ -1,0 +1,20 @@
+# anything including the prometheus.io pod annotation & including the vcluster loft labels should be scraped
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: vclustermonitor
+  namespace: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    any: true
+  podMetricsEndpoints:
+   - relabelings:
+     - action: keep
+       regex: "true"
+       sourceLabels:
+        - __meta_kubernetes_pod_annotation_prometheus_io_scrape
+     - action: keep
+       regex: "true"
+       sourceLabels:
+        - __meta_kubernetes_pod_annotationpresent_vcluster_loft_sh_labels
+  selector: {}
