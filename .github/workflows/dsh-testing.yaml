@@ -181,13 +181,9 @@ jobs:
       - name: Destroy AWS Dependencies
         if: always()
         run: |
-          for lb in $(kubectl get svc -A -o json | jq -r '.items[] | select(.spec.type=="LoadBalancer") | "\(.metadata.namespace)|\(.metadata.name)"'); do
-            [[ -z "$lb" ]] && continue
-            NS=$(echo "$lb" | awk -F '|' '{print $1}')
-            SVC=$(echo "$lb" | awk -F '|' '{print $2}')
-            [[ -z "$NS" || -z "$SVC" ]] && continue
-            echo "Deleting Kubernetes LoadBalancer service: $SVC in namespace: $NS"
-            kubectl delete svc "$SVC" -n "$NS" || true
+          kubectl get svc -A -o json | jq -r '.items[] | select(.spec.type=="LoadBalancer") | select(.metadata.namespace | startswith("devzero")) | "\(.metadata.namespace) \(.metadata.name)"' | while read ns svc; do
+            echo "Deleting LoadBalancer service: $svc in namespace: $ns"
+            kubectl delete svc "$svc" -n "$ns" || true
           done
 
       - name: Run Destroy base-cluster
