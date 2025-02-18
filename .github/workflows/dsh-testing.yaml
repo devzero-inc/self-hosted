@@ -23,6 +23,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::484907513542:role/github-actions-oidc-role
           aws-region: us-west-1
+          role-duration-seconds: 7200
 
       - name: Clone DevZero Self-Hosted Repository
         env:
@@ -175,15 +176,67 @@ jobs:
       - name: Run Destroy cluster-extensions
         if: always()
         run: |
+          for lb in $(kubectl get svc -A -o json | jq -r '.items[] | select(.spec.type=="LoadBalancer") | "\(.metadata.namespace)|\(.metadata.name)"'); do
+            [[ -z "$lb" ]] && continue
+            NS=$(echo "$lb" | awk -F '|' '{print $1}')
+            SVC=$(echo "$lb" | awk -F '|' '{print $2}')
+            [[ -z "$NS" || -z "$SVC" ]] && continue
+            echo "Deleting Kubernetes LoadBalancer service: $SVC in namespace: $NS"
+            kubectl delete svc "$SVC" -n "$NS" || true
+          done
+
           cd self-hosted/terraform/examples/aws/cluster-extensions
           terraform destroy -auto-approve
 
       - name: Destroy AWS Dependencies
         if: always()
         run: |
-          kubectl get svc -A -o json | jq -r '.items[] | select(.spec.type=="LoadBalancer") | select(.metadata.namespace | startswith("devzero")) | "\(.metadata.namespace) \(.metadata.name)"' | while read ns svc; do
-            echo "Deleting LoadBalancer service: $svc in namespace: $ns"
-            kubectl delete svc "$svc" -n "$ns" || true
+          cd self-hosted/terraform/examples/aws/base-cluster
+          terraform destroy -target=module.kata_node_group -auto-approve
+          terraform destroy -target=module.eks -auto-approve
+          
+          IGW_ID=$(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text)
+          if [ "$IGW_ID" != "None" ]; then
+            for eip in $(aws ec2 describe-addresses --filters "Name=domain,Values=vpc" --query 'Addresses[*].AllocationId' --output text); do
+              aws ec2 release-address --allocation-id $eip || true
+            done
+
+            aws ec2 detach-internet-gateway --internet-gateway-id $IGW_ID --vpc-id $VPC_ID || true
+            aws ec2 delete-internet-gateway --internet-gateway-id $IGW_ID || true
+          fi
+
+          for nat in $(aws ec2 describe-nat-gateways --filter "Name=vpc-id,Values=$VPC_ID" --query 'NatGateways[*].NatGatewayId' --output text); do
+            ALLOC_ID=$(aws ec2 describe-nat-gateways --nat-gateway-ids $nat --query 'NatGateways[0].NatGatewayAddresses[0].AllocationId' --output text)
+            aws ec2 delete-nat-gateway --nat-gateway-id $nat || true
+            aws ec2 release-address --allocation-id $ALLOC_ID || true
+          done
+
+          for instance in $(aws ec2 describe-instances --filters "Name=vpc-id,Values=$VPC_ID" --query 'Reservations[*].Instances[*].InstanceId' --output text); do
+            aws ec2 terminate-instances --instance-ids $instance || true
+            aws ec2 wait instance-terminated --instance-ids $instance || true
+          done
+
+          for rtb in $(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[*].RouteTableId' --output text); do
+            for assoc in $(aws ec2 describe-route-tables --route-table-ids $rtb --query 'RouteTables[0].Associations[*].RouteTableAssociationId' --output text); do
+              aws ec2 disassociate-route-table --association-id $assoc || true
+            done
+            aws ec2 delete-route-table --route-table-id $rtb || true
+          done
+
+          for lb in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[*].LoadBalancerArn' --output text); do
+            aws elbv2 delete-load-balancer --load-balancer-arn $lb || true
+          done
+
+          for subnet in $(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[*].SubnetId' --output text); do
+            aws ec2 delete-subnet --subnet-id $subnet || true
+          done
+
+          for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text); do
+            aws ec2 delete-security-group --group-id $sg || true
+          done
+
+          for eni in $(aws ec2 describe-network-interfaces --filters "Name=vpc-id,Values=$VPC_ID" --query 'NetworkInterfaces[*].NetworkInterfaceId' --output text); do
+            aws ec2 delete-network-interface --network-interface-id $eni || true
           done
 
       - name: Run Destroy base-cluster
