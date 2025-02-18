@@ -66,7 +66,7 @@ workspace:
     ## @param workspace.baseImages.kataBase Base image for kata deployment
     kataBase: public.ecr.aws/v1i4e1r2/kata-devbox-base:base-2025-01-13--18-11--7bb0a987f303
     ## @param workspace.baseImages.cliImage Base image for cli deployment
-    cliImage: public.ecr.aws/v1i4e1r2/dzcmd:b53fa1a
+    cliImage: public.ecr.aws/v1i4e1r2/dzcmd:ffc8beb 
 
 ## @section Global Configuration
 ## @param global.podAnnotations Global pod annotations
