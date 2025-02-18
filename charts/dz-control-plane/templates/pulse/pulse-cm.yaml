@@ -19,9 +19,14 @@ data:
     postgres_port: {{ .Values.pulse.postgres.port }}
     postgres_database: {{ .Values.pulse.postgres.database | quote }}
     postgres_ssl: {{ .Values.pulse.postgres.ssl }}
-    mysql_user: {{ .Values.pulse.mysql.user | quote }}
-    mysql_password: {{ .Values.pulse.mysql.password | quote }}
-    mysql_host: {{ .Values.pulse.mysql.host | quote }}
-    mysql_port: {{ .Values.pulse.mysql.port }}
-    mysql_database: {{ .Values.pulse.mysql.database | quote }}
+    dev_lake_database:
+      force_migration: true
+      type: mysql 
+      mysql:
+        host: {{ .Values.pulse.mysql.host | quote }}
+        port: {{ .Values.pulse.mysql.port }}
+        name: {{ .Values.pulse.mysql.database | quote }}
+        user: {{ .Values.pulse.mysql.user | quote }}
+        pass: {{ .Values.pulse.mysql.password | quote }}
     open_api_token: {{ .Values.pulse.openApi.token | quote }}
+    dev_lake_encryption_secret:

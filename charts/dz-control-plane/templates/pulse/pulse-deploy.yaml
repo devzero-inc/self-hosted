@@ -72,6 +72,11 @@ spec:
           env:
             - name: CONFIG_FILENAME
               value: "self_hosted"
+            - name: DEV_LAKE_ENCRYPTION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: devlake-secret
+                  key: token
           envFrom:
             - secretRef:
                 name: {{ include "devzero.resourceName" (dict "ctx" . "component" "pulse") }}-secret
