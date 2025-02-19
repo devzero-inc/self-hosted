@@ -39,7 +39,7 @@ datasources:
       type: prometheus
       uid: "mimir"
       url: http://mimir-nginx:80
-    - name: pulse
+    - name: mysql
       access: proxy
       orgId: 1
       version: 1
@@ -57,12 +57,14 @@ datasources:
       version: 1
       uid: "timescale"
       type: "postgres"
-      url: http://timescaledb-single:5432
-      user: "postgres"
+      url: timescaledb-cluster-rw:5432
+      user: "pulse"
       secureJsonData:
         password: "pulse"
       jsonData:
-        database: "postgres"
+        database: "pulse"
+        timescaledb: true
+        sslmode: "disable"
 extraSecretMounts:
 - name: auth-secret
   mountPath: /etc/secrets
