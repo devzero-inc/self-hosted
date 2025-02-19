@@ -90,4 +90,4 @@ self-hosted/
 
 For detailed instructions, refer to the specific README files within each folder.
 
-
+This project has a [Code of Conduct](/CODE_OF_CONDUCT.md).
