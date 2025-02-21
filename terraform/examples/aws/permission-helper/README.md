@@ -28,9 +28,9 @@ environments.
 
 ### Before you start
 
-Replace the aws provider region on main.tf with the region you want to test.
+#### Replace the aws provider region on main.tf with the region you want to test.
 
-Check the variables on terraform.tfvars and adjust them to your needs.
+#### Check the variables on terraform.tfvars and adjust them to your needs.
 
 ### Creating resources
 The module creates(optionally) a temporary IAM user and iteratively adds required permissions until the target module
@@ -67,6 +67,40 @@ be deleted using `terraform destroy`.
 
 You can use the variables `condition_resources` and `condition_requests` to add more fine grained restrictions to the
 policies (Some examples on `terraform.tfvars` file). 
+
+### condition_resources
+
+Ensures proper tagging/attribution for the resources being created.
+
+Example:
+```
+condition_resources = {
+  Condition = {
+    StringEquals = {
+      "aws:RequestTag/ProjectName" : "DevZero"
+      "aws:RequestTag/CompanyXOwner" : "foo.bar@company.com"
+      "aws:RequestTag/CompanyXCostCenter" : "engineering"
+    }
+  }
+}
+```
+
+### condition_requests
+
+Ensures only those tagged/attributed resources can be deleted.
+
+Example:
+```
+condition_requests = {
+  Condition = {
+    StringEquals = {
+      "aws:RequestTag/ProjectName" : "DevZero"
+      "aws:RequestTag/CompanyXOwner" : "foo.bar@company.com"
+      "aws:RequestTag/CompanyXCostCenter" : "engineering"
+    }
+  }
+}
+```
 
 ## Variables
 
