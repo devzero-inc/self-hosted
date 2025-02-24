@@ -163,14 +163,14 @@ jobs:
           echo "🔍 Checking diff against base branch..."
           git diff origin/${{ env.CURRENT_BRANCH }}
 
-      - name: Create Pull Request from New Branch to Running Branch
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: ${{ env.CURRENT_BRANCH }}
-          branch: ${{ env.NEW_BRANCH }}
-          title: "chore: bump Helm chart versions"
-          body: "This PR updates the Helm chart versions based on the selected version change type."
-          labels: "helm, automated PR"
-          reviewers: ${{ github.actor }}
-          delete-branch: false
+      - name: Create Pull Request Using gh CLI
+        run: |
+          gh pr create \
+            --base "${{ env.CURRENT_BRANCH }}" \
+            --head "${{ env.NEW_BRANCH }}" \
+            --title "chore: bump Helm chart versions" \
+            --body "This PR updates the Helm chart versions based on the selected version change type." \
+            --label "helm, automated PR" \
+            --reviewer "${{ github.actor }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
