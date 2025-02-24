@@ -86,14 +86,8 @@ jobs:
           helm package charts/${{ matrix.chart }}
 
       - name: Push Helm Chart to Docker Hub (OCI)
-        uses: helm/kind-action@v1.7.0
-        with:
-          registry: docker.io
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          command: push
-          chart: ${{ matrix.chart }}-*.tgz
-          repo: devzeroinc
+        run: |
+          helm push ${{ matrix.chart }}-*.tgz oci://docker.io/devzeroinc
 
       - name: Upload Updated Chart.yaml as Artifact
         uses: actions/upload-artifact@v4
@@ -101,8 +95,8 @@ jobs:
           name: chart-${{ matrix.chart }}
           path: charts/${{ matrix.chart }}/Chart.yaml
 
-  commit-and-push:
-    name: Commit & Push Chart Updates
+  create-pr:
+    name: Create Pull Request for Chart Updates
     runs-on: ubuntu-latest
     needs: package-and-push
     steps:
@@ -124,12 +118,28 @@ jobs:
             fi
           done
 
-      - name: Commit & Push Updated Chart.yaml Files
+      - name: Create a New Branch for PR
+        run: |
+          BRANCH_NAME="bump-helm-charts-$(date +%Y%m%d%H%M%S)"
+          git checkout -b "$BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Commit Updated Chart.yaml Files
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
           git add charts/*/Chart.yaml
           git commit -m "chore: bump Helm chart versions" || echo "No changes to commit"
-          git pull --rebase || (git stash && git pull --rebase && git stash pop)
-          git push --force-with-lease || (sleep 5 && git push --force-with-lease)
+          git push origin "$BRANCH_NAME"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.BRANCH_NAME }}
+          base: main
+          title: "chore: bump Helm chart versions"
+          body: "This PR updates the Helm chart versions based on the selected version change type."
+          labels: "helm, automated PR"
+          reviewers: ${{ github.actor }}
