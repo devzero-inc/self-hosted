@@ -81,7 +81,9 @@ install-prometheus:
 		REPO_APP_NAME=prometheus \
 		VERSION=26.0.1 \
 		NAMESPACE=devzero
+	kubectl apply -f ./values/vclustermonitor.yaml
 
 .PHONY: delete-prometheus
 delete-prometheus:
 	helm delete prometheus -n devzero --ignore-not-found
+	kubectl delete podmonitor/vclustermonitor -n kube-prometheus-stack
