@@ -1,5 +1,5 @@
 apiVersion: v2
-name: control-plane
+name: dz-control-plane
 description: DevZero Self Hosted Control Plane
 type: application
 version: 0.0.1
