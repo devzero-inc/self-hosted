@@ -71,19 +71,3 @@ install-metacontroller:
 delete-metacontroller:
 	helm delete metacontroller -n devzero --ignore-not-found
 	kubectl get crds -o name | grep 'metacontroller.k8s.io' | xargs kubectl delete
-
-.PHONY: install-prometheus
-install-prometheus:
-	@$(MAKE) _install-helm-chart \
-		APP_NAME=prometheus \
-		REPO_NAME=prometheus-community \
-		REPO_URL=https://prometheus-community.github.io/helm-charts \
-		REPO_APP_NAME=prometheus \
-		VERSION=26.0.1 \
-		NAMESPACE=devzero
-	kubectl apply -f ./values/vclustermonitor.yaml
-
-.PHONY: delete-prometheus
-delete-prometheus:
-	helm delete prometheus -n devzero --ignore-not-found
-	kubectl delete podmonitor/vclustermonitor -n kube-prometheus-stack

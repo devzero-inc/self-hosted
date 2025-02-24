@@ -13,6 +13,7 @@ The **DevZero Control Plane Dependencies Helm Chart** installs the following com
 5. **Docker Registry:** Hosts container images internally.
 6. **Grafana & Mimir:** Offers monitoring, metrics, and visualisation capabilities.
 7. **Vault:** Manages secrets and sensitive data securely.
+8. **Prometheus:** Offers powerful monitoring and alerting capabilities.
 
 These components ensure secure communication, data persistence, application routing, monitoring, and secret management within the DevZero control plane.
 
@@ -72,6 +73,12 @@ You can also install each dependency individually using the Makefile commands:
   make install-vault
   ```
 
+- **Prometheus:**
+  ```bash
+  make install-prometheus
+  ```
+
+
 ## Uninstallation
 
 To delete all dependencies:
@@ -107,6 +114,11 @@ make delete
   make delete-vault
   ```
 
+- **Prometheus:**
+  ```bash
+  make delete-prometheus
+  ```
+
 ## Makefile Commands
 
 - **Install All Dependencies:**
@@ -130,6 +142,7 @@ make delete
   - `mongodb`
   - `redis`
   - `vault`
+  - `prometheus`
   - ... (and others as needed)
 
 - **Uninstall Specific Dependency:**

@@ -32,6 +32,13 @@ datasources:
   datasources.yaml:
     apiVersion: 1
     datasources:
+    - name: prometheus
+      access: proxy
+      orgId: 1
+      version: 1
+      type: prometheus
+      uid: "prometheus"
+      url: http://prometheus-server
     - name: mimir
       access: proxy
       orgId: 1
@@ -65,6 +72,24 @@ datasources:
         database: "pulse"
         timescaledb: true
         sslmode: "disable"
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: true
+      editable: true
+      options:
+        path: /var/lib/grafana/dashboards/default
+dashboards:
+  default:
+    kubernetes-cluster-autoscaler-via-prometheus:
+      gnetId: 3831
+      revision: 1
+      datasource: prometheus 
 extraSecretMounts:
 - name: auth-secret
   mountPath: /etc/secrets
