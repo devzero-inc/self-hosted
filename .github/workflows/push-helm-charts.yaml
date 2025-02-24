@@ -143,18 +143,34 @@ jobs:
           git config --global user.email "github-actions@github.com"
 
           git add charts/*/Chart.yaml
+
+          echo "🔍 Checking for changes before commit..."
           git status
-          git commit -m "chore: bump Helm chart versions" || echo "No changes to commit"
+          git diff --cached
+
+          if git diff --cached --quiet; then
+            echo "❌ No changes detected. Skipping commit."
+            exit 0
+          fi
+
+          git commit -m "chore: bump Helm chart versions"
           git push origin "$NEW_BRANCH"
+
+      - name: Verify Changes Before PR Creation
+        run: |
+          echo "🔍 Verifying commit history..."
+          git log -n 3 --oneline
+          echo "🔍 Checking diff against base branch..."
+          git diff origin/${{ env.CURRENT_BRANCH }}
 
       - name: Create Pull Request from New Branch to Running Branch
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          base: ${{ env.CURRENT_BRANCH }} 
-          branch: ${{ env.NEW_BRANCH }}  
+          base: ${{ env.CURRENT_BRANCH }}
+          branch: ${{ env.NEW_BRANCH }}
           title: "chore: bump Helm chart versions"
           body: "This PR updates the Helm chart versions based on the selected version change type."
           labels: "helm, automated PR"
           reviewers: ${{ github.actor }}
-          delete-branch: true
+          delete-branch: false
