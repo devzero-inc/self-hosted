@@ -170,7 +170,6 @@ jobs:
             --head "${{ env.NEW_BRANCH }}" \
             --title "chore: bump Helm chart versions" \
             --body "This PR updates the Helm chart versions based on the selected version change type." \
-            --label "helm, automated PR" \
             --reviewer "${{ github.actor }}"
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
