@@ -68,7 +68,7 @@
                 "tag": {
                     "type": "string",
                     "description": "Devzero container image tag",
-                    "default": "v1.0.0"
+                    "default": "v1.0.1"
                 },
                 "pullPolicy": {
                     "type": "string",
@@ -116,7 +116,7 @@
                         "cliImage": {
                             "type": "string",
                             "description": "Base image for cli deployment",
-                            "default": "public.ecr.aws/v1i4e1r2/dzcmd:b53fa1a"
+                            "default": "public.ecr.aws/v1i4e1r2/dzcmd:ffc8beb"
                         }
                     }
                 }
@@ -559,6 +559,11 @@
                             "type": "string",
                             "description": "Main datasource ID",
                             "default": "mimir"
+                        },
+                        "arcDatasourceId": {
+                            "type": "string",
+                            "description": "ARC datasource ID",
+                            "default": "prometheus"
                         },
                         "doraDatasourceId": {
                             "type": "string",
