@@ -11,9 +11,8 @@ install:
 	@$(MAKE) install-timescaledb
 	@$(MAKE) install-elasticmq
 	@$(MAKE) install-docker-registry
-	@$(MAKE) install-prometheus
-	@$(MAKE) install-grafana
 	@$(MAKE) install-mimir
+	@$(MAKE) install-grafana
 	@$(MAKE) install-vault
 
 .PHONY: delete
@@ -27,9 +26,8 @@ delete:
 	@$(MAKE) delete-timescaledb
 	@$(MAKE) delete-elasticmq
 	@$(MAKE) delete-docker-registry
-	@$(MAKE) delete-prometheus
-	@$(MAKE) delete-grafana
 	@$(MAKE) delete-mimir
+	@$(MAKE) delete-grafana
 	@$(MAKE) delete-vault
 
 .PHONY: install-cert-manager
@@ -179,31 +177,6 @@ install-docker-registry:
 .PHONY: delete-docker-registry
 delete-docker-registry:
 	helm delete docker-registry -n devzero --ignore-not-found
-
-.PHONY: install-prometheus
-install-prometheus:
-	@$(MAKE) _install-helm-chart \
-		APP_NAME=prometheus \
-		REPO_NAME=prometheus-community \
-		REPO_URL=https://prometheus-community.github.io/helm-charts \
-		REPO_APP_NAME=prometheus \
-		VERSION=26.0.1 \
-		NAMESPACE=devzero
-
-	@$(MAKE) _install-helm-chart \
-		APP_NAME=prometheus-operator-crds \
-		REPO_NAME=prometheus-community \
-		REPO_URL=https://prometheus-community.github.io/helm-charts \
-		REPO_APP_NAME=prometheus-operator-crds \
-		VERSION=18.0.0 \
-		NAMESPACE=devzero
-
-	kubectl apply -f ./values/vclustermonitor.yaml -n devzero
-
-.PHONY: delete-prometheus
-delete-prometheus:
-	helm delete prometheus -n devzero --ignore-not-found
-	helm delete prometheus-operator-crds -n devzero --ignore-not-found
 
 .PHONY: install-grafana
 install-grafana:

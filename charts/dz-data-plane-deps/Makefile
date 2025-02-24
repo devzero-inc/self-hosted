@@ -3,10 +3,14 @@ include ../Makefile.common
 .PHONY: install
 install:
 	@$(MAKE) install-devzero-data-ingress
+	@$(MAKE) install-prometheus-operator
+	@$(MAKE) install-prometheus
 
 .PHONY: delete
 delete:
-	@$(MAKE)  delete-devzero-data-ingress
+	@$(MAKE) delete-devzero-data-ingress
+	@$(MAKE) delete-prometheus
+	@$(MAKE) delete-prometheus-operator
 
 .PHONY: install-devzero-data-ingress
 install-devzero-data-ingress:
@@ -71,3 +75,33 @@ install-metacontroller:
 delete-metacontroller:
 	helm delete metacontroller -n devzero --ignore-not-found
 	kubectl get crds -o name | grep 'metacontroller.k8s.io' | xargs kubectl delete
+
+.PHONY: install-prometheus-operator
+install-prometheus-operator:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=prometheus-operator-crds \
+		REPO_NAME=prometheus-community \
+		REPO_URL=https://prometheus-community.github.io/helm-charts \
+		REPO_APP_NAME=prometheus-operator-crds \
+		VERSION=18.0.0 \
+		NAMESPACE=devzero
+
+.PHONY: delete-prometheus-operator
+delete-prometheus-operator:
+	helm delete prometheus-operator-crds -n devzero --ignore-not-found
+
+.PHONY: install-prometheus
+install-prometheus:
+	@$(MAKE) _install-helm-chart \
+		APP_NAME=prometheus \
+		REPO_NAME=prometheus-community \
+		REPO_URL=https://prometheus-community.github.io/helm-charts \
+		REPO_APP_NAME=prometheus \
+		VERSION=26.0.1 \
+		NAMESPACE=devzero
+
+	kubectl apply -f ./values/vclustermonitor.yaml -n devzero
+
+.PHONY: delete-prometheus
+delete-prometheus:
+	helm delete prometheus -n devzero --ignore-not-found

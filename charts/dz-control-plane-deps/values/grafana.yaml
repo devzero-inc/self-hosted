@@ -45,7 +45,7 @@ datasources:
       version: 1
       type: prometheus
       uid: "mimir"
-      url: http://mimir-nginx:80
+      url: http://mimir-nginx/prometheus
     - name: mysql
       access: proxy
       orgId: 1
@@ -90,6 +90,1386 @@ dashboards:
       gnetId: 3831
       revision: 1
       datasource: prometheus 
+    arc-performance:
+      json: |
+        {
+          "annotations": {
+            "list": [
+              {
+                "builtIn": 1,
+                "datasource": {
+                  "type": "grafana",
+                  "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+              }
+            ]
+          },
+          "editable": true,
+          "fiscalYearStartMonth": 0,
+          "graphTooltip": 0,
+          "id": 218,
+          "links": [],
+          "liveNow": true,
+          "panels": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": [
+                  {
+                    "__systemRef": "hideSeriesFrom",
+                    "matcher": {
+                      "id": "byNames",
+                      "options": {
+                        "mode": "exclude",
+                        "names": [
+                          "Value"
+                        ],
+                        "prefix": "All except:",
+                        "readOnly": true
+                      }
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.hideFrom",
+                        "value": {
+                          "legend": false,
+                          "tooltip": false,
+                          "viz": true
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 0
+              },
+              "id": 24,
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "# sum(gha_started_jobs_total{repository=~\"$Repository\"}) by (repository)\nsum by (repository) (\n  gha_job_execution_duration_seconds_count{repository=~\"$Repository\"}\n)",
+                  "instant": false,
+                  "legendFormat": "{{repository}}",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "title": "Running Jobs",
+              "type": "timeseries"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "displayName": "${__field.labels.job_workflow_ref}",
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "s"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 10,
+                "w": 12,
+                "x": 12,
+                "y": 0
+              },
+              "id": 12,
+              "options": {
+                "displayMode": "gradient",
+                "maxVizHeight": 300,
+                "minVizHeight": 10,
+                "minVizWidth": 0,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+              },
+              "pluginVersion": "10.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "sum(gha_job_execution_duration_seconds_sum) by (repository) / sum ((gha_job_execution_duration_seconds_count) or vector(1)) by (repository) > 0",
+                  "format": "time_series",
+                  "instant": false,
+                  "legendFormat": "{{job_workflow_ref}}",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "title": "Average Execution Time",
+              "transformations": [
+                {
+                  "id": "renameByRegex",
+                  "options": {
+                    "regex": "([^/]+)/([^/]+)/.github/workflows/([^@]+)@refs/heads/(.+)",
+                    "renamePattern": "$2/$3@$4"
+                  }
+                }
+              ],
+              "type": "bargauge"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 8
+              },
+              "id": 23,
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "sum by(runner_name) (gha_controller_running_ephemeral_runners{namespace=~\"$RunnerNamespace\"})",
+                  "instant": false,
+                  "legendFormat": "Running",
+                  "range": true,
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "sum by(runner_name) (gha_desired_runners{ namespace=~\"$RunnerNamespace\"})",
+                  "hide": false,
+                  "instant": false,
+                  "legendFormat": "Desired",
+                  "range": true,
+                  "refId": "B"
+                }
+              ],
+              "title": "Active vs Desired Runners",
+              "type": "timeseries"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "description": "",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "min": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 10
+              },
+              "id": 19,
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "builder",
+                  "expr": "avg by(job) (gha_job_startup_duration_seconds_sum)",
+                  "instant": false,
+                  "legendFormat": "{{job}}",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "title": "Average startup duration",
+              "type": "timeseries"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "description": "Registered runners without jobs",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 54,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 6,
+                "w": 12,
+                "x": 0,
+                "y": 16
+              },
+              "id": 16,
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "sum(gha_idle_runners{namespace=~\"$RunnerNamespace\"})",
+                  "instant": false,
+                  "legendFormat": "Idle",
+                  "range": true,
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "builder",
+                  "expr": "sum(gha_controller_pending_ephemeral_runners)",
+                  "hide": false,
+                  "instant": false,
+                  "legendFormat": "Pending",
+                  "range": true,
+                  "refId": "B"
+                }
+              ],
+              "title": "Idle Runners & Pending Runners",
+              "type": "timeseries"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "min": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 18
+              },
+              "id": 20,
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "mean"
+                  ],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "builder",
+                  "expr": "avg by(job) (gha_job_execution_duration_seconds_sum)",
+                  "instant": false,
+                  "legendFormat": "{{job}}",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "title": "Average execution duration (seconds)",
+              "type": "timeseries"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "description": "Number of runners that are pending (ContainerCreating)",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 54,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 6,
+                "w": 12,
+                "x": 0,
+                "y": 22
+              },
+              "id": 17,
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "sum(gha_controller_pending_ephemeral_runners{ namespace=~\"$RunnerNamespace\"})",
+                  "instant": false,
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "title": "Pending Runners",
+              "type": "timeseries"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "description": "Total number of jobs that are assigned to the runner scale set but that are not yet accepted vs the number of accepted and running jobs",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 7,
+                "w": 8,
+                "x": 12,
+                "y": 26
+              },
+              "id": 22,
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "pluginVersion": "10.0.0",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "builder",
+                  "expr": "sum by(job) (gha_assigned_jobs)",
+                  "instant": false,
+                  "legendFormat": "assigned job - {{job}}",
+                  "range": true,
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "builder",
+                  "expr": "sum by(job) (gha_running_jobs)",
+                  "hide": false,
+                  "instant": false,
+                  "legendFormat": "running_jobs - {{job}}",
+                  "range": true,
+                  "refId": "B"
+                }
+              ],
+              "title": "Assigned vs running jobs",
+              "type": "timeseries"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "description": "Total number of failed runners across namespaces",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "#EAB839",
+                        "value": 1
+                      },
+                      {
+                        "color": "dark-red",
+                        "value": 5
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 7,
+                "w": 4,
+                "x": 20,
+                "y": 26
+              },
+              "id": 21,
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "textMode": "auto"
+              },
+              "pluginVersion": "10.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "builder",
+                  "exemplar": false,
+                  "expr": "sum by(namespace) (gha_controller_failed_ephemeral_runners)",
+                  "instant": false,
+                  "interval": "",
+                  "legendFormat": "__auto",
+                  "range": true,
+                  "refId": "Failed"
+                }
+              ],
+              "title": "Failed Runners",
+              "type": "stat"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "description": "The number of active job listeners",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [],
+                  "noValue": "0",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 5,
+                "w": 3,
+                "x": 0,
+                "y": 28
+              },
+              "id": 5,
+              "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+              },
+              "pluginVersion": "10.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "disableTextWrap": false,
+                  "editorMode": "code",
+                  "expr": "sum(gha_controller_running_listeners)",
+                  "fullMetaSearch": false,
+                  "includeNullMetadata": false,
+                  "instant": false,
+                  "legendFormat": "__auto",
+                  "range": true,
+                  "refId": "A",
+                  "useBackend": false
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "max(max_over_time(gha_controller_running_listeners[1h]))",
+                  "hide": false,
+                  "instant": false,
+                  "legendFormat": "__auto",
+                  "range": true,
+                  "refId": "MaxListeners"
+                }
+              ],
+              "title": "Listeners",
+              "transformations": [
+                {
+                  "id": "configFromData",
+                  "options": {
+                    "configRefId": "MaxListeners",
+                    "mappings": [
+                      {
+                        "fieldName": "Time",
+                        "handlerKey": "__ignore"
+                      },
+                      {
+                        "fieldName": "max(max_over_time(gha_controller_running_listeners[1h]))",
+                        "handlerKey": "max"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "gauge"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "description": "The number of runners registered for processing queued jobs",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [],
+                  "noValue": "0",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 5,
+                "w": 3,
+                "x": 3,
+                "y": 28
+              },
+              "id": 8,
+              "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "last"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+              },
+              "pluginVersion": "10.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "sum(gha_registered_runners{actions_github_com_scale_set_name=~\"$Scaleset\", namespace=~\"$RunnerNamespace\"})",
+                  "instant": false,
+                  "legendFormat": "__auto",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "title": "Registered Runners",
+              "type": "gauge"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "continuous-RdYlGr"
+                  },
+                  "mappings": [],
+                  "min": 0,
+                  "noValue": "No active pods",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "yellow",
+                        "value": null
+                      },
+                      {
+                        "color": "green",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 5,
+                "w": 6,
+                "x": 6,
+                "y": 28
+              },
+              "id": 11,
+              "links": [],
+              "options": {
+                "displayMode": "lcd",
+                "maxVizHeight": 300,
+                "minVizHeight": 10,
+                "minVizWidth": 0,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                  "calcs": [
+                    "last"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+              },
+              "pluginVersion": "10.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "disableTextWrap": false,
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sum(kube_pod_container_status_ready{namespace=~\"$RunnerNamespace\"}) != 0 or vector(0)",
+                  "format": "time_series",
+                  "fullMetaSearch": false,
+                  "hide": false,
+                  "includeNullMetadata": true,
+                  "instant": false,
+                  "interval": "",
+                  "legendFormat": "Ready",
+                  "range": true,
+                  "refId": "B",
+                  "useBackend": false
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "sum(kube_pod_container_status_waiting{namespace=~\"$RunnerNamespace\"}) != 0 or vector(0)",
+                  "hide": false,
+                  "instant": false,
+                  "legendFormat": "Waiting",
+                  "range": true,
+                  "refId": "C"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "sum(kube_pod_container_status_terminated_reason{namespace=~\"$RunnerNamespace\", reason=\"Completed\"}) != 0 or vector(0)",
+                  "hide": false,
+                  "instant": false,
+                  "interval": "",
+                  "legendFormat": "Completed",
+                  "range": true,
+                  "refId": "D"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": "sum(kube_pod_container_status_terminated_reason{namespace=~\"$RunnerNamespace\", reason=\"Error\"}) != 0 or vector(0)",
+                  "hide": false,
+                  "instant": false,
+                  "legendFormat": "Error",
+                  "range": true,
+                  "refId": "E"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "disableTextWrap": false,
+                  "editorMode": "code",
+                  "expr": "sum(gha_desired_runners) > 0",
+                  "fullMetaSearch": false,
+                  "hide": false,
+                  "includeNullMetadata": true,
+                  "instant": false,
+                  "legendFormat": "__auto",
+                  "range": true,
+                  "refId": "DesiredRunners",
+                  "useBackend": false
+                }
+              ],
+              "title": "Container Pod Status",
+              "transformations": [
+                {
+                  "id": "configFromData",
+                  "options": {
+                    "configRefId": "DesiredRunners",
+                    "mappings": [
+                      {
+                        "fieldName": "Time",
+                        "handlerKey": "__ignore"
+                      },
+                      {
+                        "fieldName": "sum(gha_desired_runners) > 0",
+                        "handlerKey": "threshold1"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "bargauge"
+            }
+          ],
+          "refresh": "30s",
+          "schemaVersion": 38,
+          "style": "dark",
+          "tags": [],
+          "templating": {
+            "list": [
+              {
+                "current": {
+                  "selected": true,
+                  "text": [
+                    "All"
+                  ],
+                  "value": [
+                    "$__all"
+                  ]
+                },
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "definition": "label_values(gha_controller_running_listeners,namespace)",
+                "description": "The ARC system namespace",
+                "hide": 0,
+                "includeAll": true,
+                "label": "ARC System Namespace",
+                "multi": true,
+                "name": "SystemNamespace",
+                "options": [],
+                "query": {
+                  "qryType": 1,
+                  "query": "label_values(gha_controller_running_listeners,namespace)",
+                  "refId": "PrometheusVariableQueryEditor-VariableQuery"
+                },
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 0,
+                "type": "query"
+              },
+              {
+                "current": {
+                  "selected": true,
+                  "text": [
+                    "All"
+                  ],
+                  "value": [
+                    "$__all"
+                  ]
+                },
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "definition": "label_values(gha_desired_runners,actions_github_com_scale_set_name)",
+                "description": "The name of the runner scale set",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Scale Set",
+                "multi": true,
+                "name": "Scaleset",
+                "options": [],
+                "query": {
+                  "qryType": 1,
+                  "query": "label_values(gha_desired_runners,actions_github_com_scale_set_name)",
+                  "refId": "PrometheusVariableQueryEditor-VariableQuery"
+                },
+                "refresh": 2,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 0,
+                "type": "query"
+              },
+              {
+                "current": {
+                  "selected": true,
+                  "text": [
+                    "All"
+                  ],
+                  "value": [
+                    "$__all"
+                  ]
+                },
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "definition": "label_values(gha_desired_runners{actions_github_com_scale_set_name=~\"$Scaleset\"},namespace)",
+                "description": "Namespace containing the runners",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Runner Namespace",
+                "multi": true,
+                "name": "RunnerNamespace",
+                "options": [],
+                "query": {
+                  "qryType": 1,
+                  "query": "label_values(gha_desired_runners{actions_github_com_scale_set_name=~\"$Scaleset\"},namespace)",
+                  "refId": "PrometheusVariableQueryEditor-VariableQuery"
+                },
+                "refresh": 2,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 0,
+                "type": "query"
+              },
+              {
+                "current": {
+                  "selected": true,
+                  "text": [
+                    "All"
+                  ],
+                  "value": [
+                    "$__all"
+                  ]
+                },
+                "definition": "label_values(repository)",
+                "hide": 0,
+                "includeAll": true,
+                "label": "repository",
+                "multi": true,
+                "name": "Repository",
+                "options": [],
+                "query": {
+                  "query": "label_values(repository)",
+                  "refId": "PrometheusVariableQueryEditor-VariableQuery"
+                },
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 0,
+                "type": "query"
+              }
+            ]
+          },
+          "time": {
+            "from": "now-2d",
+            "to": "now"
+          },
+          "timepicker": {},
+          "timezone": "",
+          "title": "ARC Performance Unified",
+          "uid": "af21e938-d1a8-460c-8dc6-unified",
+          "version": 19,
+          "weekStart": ""
+        }
 extraSecretMounts:
 - name: auth-secret
   mountPath: /etc/secrets
@@ -102,7 +1482,7 @@ ingress:
     cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   ingressClassName: "nginx"
-  hosts:
+    hosts:
   - "grafana.example.com"
   tls:
   - secretName: devzero-grafana-tls

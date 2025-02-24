@@ -10,6 +10,7 @@ The **DevZero Data Plane Dependencies Helm Chart** installs the following compon
 2. **Rook-Ceph:** Provides distributed, highly available storage solutions for persistent data.
 3. **Rook-Ceph Cluster:** Manages Ceph clusters for robust data storage management.
 4. **Metacontroller:** Extends Kubernetes with custom controllers to enhance automation.
+5. **Prometheus:** Offers powerful monitoring and alerting capabilities.
 
 These components form the backbone of the data plane, ensuring efficient traffic routing, storage management, and observability.
 
@@ -57,6 +58,11 @@ Alternatively, you can install each component individually:
   make install-metacontroller
   ```
 
+- **Prometheus:**
+  ```bash
+  make install-prometheus
+  ```
+
 ## Uninstallation
 
 To delete all dependencies:
@@ -87,6 +93,11 @@ Or remove each component individually:
   make delete-metacontroller
   ```
 
+- **Prometheus:**
+  ```bash
+  make delete-prometheus
+  ```
+
 ## Makefile Commands
 
 - **Install All Dependencies:**
@@ -108,6 +119,7 @@ Or remove each component individually:
   - `rook-ceph`
   - `rook-ceph-cluster`
   - `metacontroller`
+  - `prometheus`
 
 - **Uninstall Specific Dependency:**
   ```bash
