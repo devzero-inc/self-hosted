@@ -123,11 +123,19 @@ jobs:
             fi
           done
 
+      - name: Get Current Branch Name
+        id: get-branch
+        run: |
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          echo "CURRENT_BRANCH=$CURRENT_BRANCH" >> $GITHUB_ENV
+          echo "Running on branch: $CURRENT_BRANCH"
+
       - name: Create a New Branch for PR
         run: |
-          BRANCH_NAME="bump-helm-charts-$(date +%Y%m%d%H%M%S)"
-          git checkout -b "$BRANCH_NAME"
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          NEW_BRANCH="bump-helm-charts-$(date +%Y%m%d%H%M%S)"
+          git checkout -b "$NEW_BRANCH"
+          echo "NEW_BRANCH=$NEW_BRANCH" >> $GITHUB_ENV
+          echo "New branch created: $NEW_BRANCH"
 
       - name: Commit Updated Chart.yaml Files
         run: |
@@ -137,15 +145,16 @@ jobs:
           git add charts/*/Chart.yaml
           git status
           git commit -m "chore: bump Helm chart versions" || echo "No changes to commit"
-          git push origin "$BRANCH_NAME"
+          git push origin "$NEW_BRANCH"
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+      - name: Create Pull Request from New Branch to Running Branch
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ env.BRANCH_NAME }}
-          base: main
+          base: ${{ env.CURRENT_BRANCH }} 
+          branch: ${{ env.NEW_BRANCH }}  
           title: "chore: bump Helm chart versions"
           body: "This PR updates the Helm chart versions based on the selected version change type."
           labels: "helm, automated PR"
           reviewers: ${{ github.actor }}
+          delete-branch: true
