@@ -1482,7 +1482,7 @@ ingress:
     cert-manager.io/cluster-issuer: "letsencrypt-self-hosted"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   ingressClassName: "nginx"
-    hosts:
+  hosts:
   - "grafana.example.com"
   tls:
   - secretName: devzero-grafana-tls
