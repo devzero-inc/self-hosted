@@ -93,6 +93,10 @@ self-hosted/
 
 For detailed instructions, refer to the specific README files within each folder.
 
+## Code of conduct
+
+This project has a [Code of Conduct](/CODE_OF_CONDUCT.md).
+
 ## License
 
 The contents of this repository are licensed under `CC BY-NC 4.0`. For more information, see [LICENSE](LICENSE).
