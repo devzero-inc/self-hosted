@@ -17,7 +17,7 @@ docs:
 		--workdir /docs \
 		-v $(PWD):/docs \
 		devzeroinc/readme-generator-for-helm:latest /app/bin/readme-generator \
-		--readme Readme.md \
+		--readme README.md \
 		--values values.yaml \
 		--schema values.schema.json
 

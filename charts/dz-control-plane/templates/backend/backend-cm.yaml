@@ -60,6 +60,7 @@ data:
         enabled: {{ .Values.backend.grafana.enabled }}
         url: grafana:80
         datasource_id: {{ .Values.backend.grafana.datasourceId }}
+        arc_datasource_id: {{ .Values.backend.grafana.arcDatasourceId }}
         dora_datasource_id: {{ .Values.backend.grafana.doraDatasourceId }}
         oda_datasource_id: {{ .Values.backend.grafana.odaDatasourceId }}
         password: ""

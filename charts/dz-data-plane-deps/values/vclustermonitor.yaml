@@ -3,7 +3,6 @@ apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
   name: vclustermonitor
-  namespace: kube-prometheus-stack
 spec:
   namespaceSelector:
     any: true
