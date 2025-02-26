@@ -1,6 +1,6 @@
 apiVersion: v2
-name: dz-control-plane
-description: DevZero Self Hosted Control Plane
+name: dz-data-plane-deps
+description: DevZero Self Hosted Data Plane
 type: application
 version: 0.0.2
 appVersion: "v0.0.1"

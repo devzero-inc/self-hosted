@@ -11,8 +11,8 @@ install:
 	@$(MAKE) install-timescaledb
 	@$(MAKE) install-elasticmq
 	@$(MAKE) install-docker-registry
-	@$(MAKE) install-grafana
 	@$(MAKE) install-mimir
+	@$(MAKE) install-grafana
 	@$(MAKE) install-vault
 
 .PHONY: delete
@@ -26,8 +26,8 @@ delete:
 	@$(MAKE) delete-timescaledb
 	@$(MAKE) delete-elasticmq
 	@$(MAKE) delete-docker-registry
-	@$(MAKE) delete-grafana
 	@$(MAKE) delete-mimir
+	@$(MAKE) delete-grafana
 	@$(MAKE) delete-vault
 
 .PHONY: install-cert-manager

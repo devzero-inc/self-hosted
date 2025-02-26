@@ -1,3 +1,6 @@
+[![License: CC BY-NC 4.0](https://licensebuttons.net/l/by-nc/4.0/80x15.png)](https://creativecommons.org/licenses/by-nc/4.0/)
+
+
 # DevZero Self-Hosted
 
 Welcome to the **self-hosted** repository. This repository contains all the necessary components for setting up and managing a self-hosted environment, including infrastructure as code, deployment configurations, and custom tooling.
@@ -90,4 +93,10 @@ self-hosted/
 
 For detailed instructions, refer to the specific README files within each folder.
 
+## Code of conduct
+
 This project has a [Code of Conduct](/CODE_OF_CONDUCT.md).
+
+## License
+
+The contents of this repository are licensed under `CC BY-NC 4.0`. For more information, see [LICENSE](LICENSE).

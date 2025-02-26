@@ -35,13 +35,11 @@ variable "create_local_files" {
 
 variable "condition_resources" {
   description = "Condition resources to be added to IAM policies"
-  type = map(string)
   default = {}
 }
 
 variable "condition_requests" {
   description = "Condition requests to be added to IAM policies"
-  type = map(string)
   default = {}
 }
 
