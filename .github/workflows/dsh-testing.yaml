@@ -1,13 +1,13 @@
 name: devzero DSH deployment
 
 on:
-  push:
-    paths:
-      - 'self-hosted/terraform/examples/aws/**'
-    branches:
-      - main
-  schedule:
-    - cron: '0 3 * * *'
+  # push:
+  #   paths:
+  #     - 'self-hosted/terraform/examples/aws/**'
+  #   branches:
+  #     - main
+  # schedule:
+  #   - cron: '0 3 * * *'
   workflow_dispatch:
 
 jobs:
