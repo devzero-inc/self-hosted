@@ -1,4 +1,4 @@
-name: Build Kata AMI
+name: [Ubuntu] Build Kata AMI
 run-name: "Build Kata AMI for ${{ github.event.inputs.image_type || 'private' }} image"
 
 
