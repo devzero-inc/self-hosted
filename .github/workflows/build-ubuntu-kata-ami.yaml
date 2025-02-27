@@ -43,13 +43,13 @@ jobs:
           docker pull ghcr.io/devzero-inc/ubuntu-public-guest-pvm-linux:latest
 
           CONTAINER_ID=$(docker create ghcr.io/devzero-inc/ubuntu-public-host-pvm-linux:latest)
-          docker cp "$CONTAINER_ID:/linux-image-6.7.0-rc6-dz-pvm-host_6.7.0-rc6-g040ea4a66ec9-1_amd64.deb" ./kata/packer/kernel-image.deb
-          docker cp "$CONTAINER_ID:/linux-headers-6.7.0-rc6-dz-pvm-host_6.7.0-rc6-g040ea4a66ec9-1_amd64.deb" ./kata/packer/kernel-headers.deb
-          docker cp "$CONTAINER_ID:/linux-libc-dev_6.7.0-rc6-g040ea4a66ec9-1_amd64.deb" ./kata/packer/kernel-libc-dev.deb
+          docker cp "$CONTAINER_ID:/linux-image-6.7.0-rc6-dz-pvm-host_6.7.0-rc6-g040ea4a66ec9-1_amd64.deb" ./kata/packer/ubuntu/kernel-image.deb
+          docker cp "$CONTAINER_ID:/linux-headers-6.7.0-rc6-dz-pvm-host_6.7.0-rc6-g040ea4a66ec9-1_amd64.deb" ./kata/packer/ubuntu/kernel-headers.deb
+          docker cp "$CONTAINER_ID:/linux-libc-dev_6.7.0-rc6-g040ea4a66ec9-1_amd64.deb" ./kata/packer/ubuntu/kernel-libc-dev.deb
           docker rm "$CONTAINER_ID"
 
           CONTAINER_ID_GUEST=$(docker create ghcr.io/devzero-inc/ubuntu-public-guest-pvm-linux:latest)
-          docker cp "$CONTAINER_ID_GUEST:/guest-vmlinux" ./kata/packer/guest-vmlinux
+          docker cp "$CONTAINER_ID_GUEST:/guest-vmlinux" ./kata/packer/ubuntu/guest-vmlinux
           docker rm "$CONTAINER_ID_GUEST"
 
       - name: Configure AWS Credentials for Self Hosted
@@ -68,7 +68,7 @@ jobs:
 
       - name: Initialize and Build AMI
         run: |
-          cd ./kata/packer
+          cd ./kata/packer/ubuntu
           packer init .
           packer build --var-file=${{ github.event.inputs.image_type || 'private' }}.pkrvars.hcl eks-ubuntu.pkr.hcl
 
