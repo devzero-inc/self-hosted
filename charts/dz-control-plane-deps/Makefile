@@ -145,7 +145,7 @@ install-timescaledb:
 .PHONY: delete-timescaledb
 delete-timescaledb:
 	helm delete timescaledb -n devzero --ignore-not-found
-	kubectl delete -f timescaledb-secret.yaml
+	kubectl delete -f timescaledb-secret.yaml -n devzero
 	helm delete cnpg -n devzero --ignore-not-found
 	kubectl get crds -o name | grep 'postgresql.cnpg.io' | xargs kubectl delete
 
