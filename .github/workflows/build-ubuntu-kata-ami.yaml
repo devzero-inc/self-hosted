@@ -2,6 +2,9 @@ name: "[Ubuntu] Build Kata AMI"
 run-name: "Build Kata AMI for ${{ github.event.inputs.image_type || 'private' }} image"
 
 on:
+  push:
+    branches:
+      - garvit/dsh-kata-ubuntu
   workflow_dispatch:
     inputs:
       image_type:
