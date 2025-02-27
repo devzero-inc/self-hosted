@@ -143,7 +143,7 @@ The Helm chart installs the following components:
 | ------------------- | ----------------------------------------------- | ---------------------- |
 | `image.repository`  | Devzero container image repository              | `docker.io/devzeroinc` |
 | `image.repository`  | Devzero container image repository              | `docker.io/devzeroinc` |
-| `image.tag`         | Devzero container image tag                     | `v1.0.0`               |
+| `image.tag`         | Devzero container image tag                     | `v1.0.1`               |
 | `image.pullPolicy`  | Container pull policy                           | `IfNotPresent`         |
 | `image.pullSecrets` | Optionally specify an array of imagePullSecrets | `["pull-secret"]`      |
 
@@ -160,7 +160,7 @@ The Helm chart installs the following components:
 | --------------------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
 | `workspace.baseImages.sysboxBase` | Base image for sysbox deployment | `public.ecr.aws/v1i4e1r2/ubuntu-devbox-base:base-2024-12-17--06-31--c705618e0d55` |
 | `workspace.baseImages.kataBase`   | Base image for kata deployment   | `public.ecr.aws/v1i4e1r2/kata-devbox-base:base-2025-01-13--18-11--7bb0a987f303`   |
-| `workspace.baseImages.cliImage`   | Base image for cli deployment    | `public.ecr.aws/v1i4e1r2/dzcmd:b53fa1a`                                           |
+| `workspace.baseImages.cliImage`   | Base image for cli deployment    | `public.ecr.aws/v1i4e1r2/dzcmd:ffc8beb`                                           |
 
 ### Global Configuration
 
@@ -247,6 +247,7 @@ The Helm chart installs the following components:
 | `backend.sendgrid.apiKey`                               | SendGrid API Key                                      | `test-key`                                                                                 |
 | `backend.grafana.enabled`                               | Enable Grafana integration                            | `true`                                                                                     |
 | `backend.grafana.datasourceId`                          | Main datasource ID                                    | `mimir`                                                                                    |
+| `backend.grafana.arcDatasourceId`                       | ARC datasource ID                                     | `prometheus`                                                                               |
 | `backend.grafana.doraDatasourceId`                      | DORA metrics datasource ID                            | `pulse`                                                                                    |
 | `backend.grafana.odaDatasourceId`                       | ODA metrics datasource ID                             | `timescale`                                                                                |
 | `backend.grafana.password`                              | Grafana password                                      | `prom-operator`                                                                            |

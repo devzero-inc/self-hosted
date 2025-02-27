@@ -272,6 +272,8 @@ backend:
     enabled: true
     ## @param backend.grafana.datasourceId Main datasource ID
     datasourceId: "mimir"
+    ## @param backend.grafana.arcDatasourceId ARC datasource ID
+    arcDatasourceId: "prometheus"
     ## @param backend.grafana.doraDatasourceId DORA metrics datasource ID
     doraDatasourceId: "pulse"
     ## @param backend.grafana.odaDatasourceId ODA metrics datasource ID
