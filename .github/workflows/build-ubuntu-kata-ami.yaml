@@ -54,7 +54,7 @@ jobs:
           docker rm "$CONTAINER_ID_GUEST"
 
       - name: Configure AWS Credentials for Self Hosted
-        if: github.event.inputs.image_type == 'private'
+        if: if: github.event_name == 'push' || github.event.inputs.image_type == 'private'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::484907513542:role/github-actions-oidc-role
