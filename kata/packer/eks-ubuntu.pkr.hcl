@@ -7,16 +7,6 @@ packer {
   }
 }
 
-variable "ami_groups" {
-  type = list(string)
-  default = []
-}
-
-variable "ami_regions" {
-  type = list(string)
-  default = ["us-west-1"]
-}
-
 source "amazon-ebs" "ubuntu_1_29_eks" {
   ami_name        = "devzero-ubuntu-eks-node-24.04-x86_64-standard-1.29-{{timestamp}}"
   ami_description = "Devzero Ubuntu 24.04 EKS Node x86_64 Standard 1.29 with Kata runtime"
