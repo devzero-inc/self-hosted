@@ -2,6 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}-migrate
+  namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "devzero.labels" (dict "ctx" . "component" "polland") | nindent 4 }}
   annotations:

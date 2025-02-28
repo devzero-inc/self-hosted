@@ -2,14 +2,17 @@ include ../Makefile.common
 
 .PHONY: install
 install:
-	helm upgrade --install devzero . \
-	--namespace devzero \
-	--create-namespace \
-	--values values.yaml
+	@$(MAKE) _install-local-helm-chart-default \
+		APP_NAME=devzero \
+		NAMESPACE=devzero \
+		VALUES=values.yaml
 
 .PHONY: delete
 delete:
-	helm delete devzero -n devzero --ignore-not-found
+	@$(MAKE) _delete-local-chart \
+		APP_NAME=devzero \
+		NAMESPACE=devzero \
+		VALUES=values.yaml
 
 .PHONY: docs
 docs:

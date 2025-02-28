@@ -42,9 +42,15 @@ install-cert-manager:
 
 .PHONY: delete-cert-manager
 delete-cert-manager:
-	helm delete cert-manager -n cert-manager --ignore-not-found
-	kubectl delete namespace cert-manager --ignore-not-found=true
-	kubectl get crds -o name | grep 'cert-manager.io' | xargs kubectl delete
+	@$(MAKE) _delete-chart \
+		APP_NAME=cert-manager \
+		REPO_NAME=jetstack \
+		REPO_URL=https://charts.jetstack.io \
+		REPO_APP_NAME=cert-manager \
+		VERSION=v1.16.2 \
+		NAMESPACE=cert-manager
+	@$(MAKE) _delete-namespace NAMESPACE=cert-manager
+	@$(MAKE) _delete-crds CRD_NAME=cert-manager.io
 
 
 .PHONY: install-ingress-nginx
@@ -59,8 +65,14 @@ install-ingress-nginx:
 
 .PHONY: delete-ingress-nginx
 delete-ingress-nginx:
-	helm delete ingress-nginx -n ingress-nginx  --ignore-not-found
-	kubectl delete namespace ingress-nginx --ignore-not-found=true
+	@$(MAKE) _delete-chart \
+		APP_NAME=ingress-nginx \
+		REPO_NAME=ingress-nginx \
+		REPO_URL=https://kubernetes.github.io/ingress-nginx \
+		REPO_APP_NAME=ingress-nginx \
+		VERSION=4.11.3 \
+		NAMESPACE=ingress-nginx
+	@$(MAKE) _delete-namespace NAMESPACE=ingress-nginx
 
 .PHONY: install-mysql-pulse
 install-mysql-pulse:
@@ -74,7 +86,13 @@ install-mysql-pulse:
 
 .PHONY: delete-mysql-pulse
 delete-mysql-pulse:
-	helm delete mysql-pulse -n devzero --ignore-not-found
+	@$(MAKE) _delete-chart \
+		APP_NAME=mysql-pulse \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=mysql \
+		VERSION=11.1.19 \
+		NAMESPACE=devzero
 
 .PHONY: install-mongodb
 install-mongodb:
@@ -88,7 +106,13 @@ install-mongodb:
 
 .PHONY: delete-mongodb
 delete-mongodb:
-	helm delete mongodb -n devzero --ignore-not-found
+	@$(MAKE) _delete-chart \
+		APP_NAME=mongodb \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=mongodb \
+		VERSION=16.4.0 \
+		NAMESPACE=devzero
 
 .PHONY: install-redis
 install-redis:
@@ -102,7 +126,13 @@ install-redis:
 
 .PHONY: delete-redis
 delete-redis:
-	helm delete redis -n devzero --ignore-not-found
+	@$(MAKE) _delete-chart \
+		APP_NAME=redis \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=redis \
+		VERSION=20.6.2 \
+		NAMESPACE=devzero
 
 
 .PHONY: install-devzero-db
@@ -118,7 +148,13 @@ install-devzero-db:
 
 .PHONY: delete-devzero-db
 delete-devzero-db:
-	helm delete devzero-db -n devzero --ignore-not-found
+	@$(MAKE) _delete-chart \
+		APP_NAME=devzero-db \
+		REPO_NAME=bitnami \
+		REPO_URL=https://charts.bitnami.com/bitnami \
+		REPO_APP_NAME=postgresql \
+		VERSION=16.3.5 \
+		NAMESPACE=devzero
 
 
 .PHONY: install-timescaledb
@@ -131,7 +167,10 @@ install-timescaledb:
 		VERSION=0.23.0 \
 		NAMESPACE=devzero
 
-	kubectl apply -f timescaledb-secret.yaml -n devzero
+	@$(MAKE) _kubectl \
+		COMMAND=apply \
+		FILE_NAME=timescaledb-secret.yaml \
+		NAMESPACE=devzero
 
 	@$(MAKE) _install-helm-chart \
 		APP_NAME=timescaledb \
@@ -144,10 +183,25 @@ install-timescaledb:
 
 .PHONY: delete-timescaledb
 delete-timescaledb:
-	helm delete timescaledb -n devzero --ignore-not-found
-	kubectl delete -f timescaledb-secret.yaml
-	helm delete cnpg -n devzero --ignore-not-found
-	kubectl get crds -o name | grep 'postgresql.cnpg.io' | xargs kubectl delete
+	@$(MAKE) _delete-chart \
+		APP_NAME=timescaledb \
+		REPO_NAME=cnpg \
+		REPO_URL=https://cloudnative-pg.github.io/charts \
+		REPO_APP_NAME=cluster \
+		VERSION=0.2.1 \
+		NAMESPACE=devzero
+	@$(MAKE) _kubectl \
+		COMMAND=delete \
+		FILE_NAME=timescaledb-secret.yaml \
+		NAMESPACE=devzero
+	@$(MAKE) _delete-chart \
+		APP_NAME=cnpg \
+		REPO_NAME=cnpg \
+		REPO_URL=https://cloudnative-pg.github.io/charts \
+		REPO_APP_NAME=cloudnative-pg \
+		VERSION=0.23.0 \
+		NAMESPACE=devzero
+	@$(MAKE) _delete-crds CRD_NAME=postgresql.cnpg.io
 
 
 .PHONY: install-elasticmq
@@ -162,7 +216,13 @@ install-elasticmq:
 
 .PHONY: delete-elasticmq
 delete-elasticmq:
-	helm delete elasticmq -n devzero --ignore-not-found
+	@$(MAKE) _delete-chart \
+		APP_NAME=elasticmq \
+		REPO_NAME=elasticmq \
+		REPO_URL=https://chatwork.github.io/charts \
+		REPO_APP_NAME=elasticmq \
+		VERSION=0.2.0 \
+		NAMESPACE=devzero
 
 .PHONY: install-docker-registry
 install-docker-registry:
@@ -176,7 +236,13 @@ install-docker-registry:
 
 .PHONY: delete-docker-registry
 delete-docker-registry:
-	helm delete docker-registry -n devzero --ignore-not-found
+	@$(MAKE) _delete-chart \
+		APP_NAME=docker-registry \
+		REPO_NAME=docker-registry \
+		REPO_URL=https://helm.twun.io \
+		REPO_APP_NAME=docker-registry \
+		VERSION=2.2.3 \
+		NAMESPACE=devzero
 
 .PHONY: install-grafana
 install-grafana:
@@ -190,7 +256,13 @@ install-grafana:
 
 .PHONY: delete-grafana
 delete-grafana:
-	helm delete grafana -n devzero --ignore-not-found
+	@$(MAKE) _delete-chart \
+		APP_NAME=grafana \
+		REPO_NAME=grafana \
+		REPO_URL=https://grafana.github.io/helm-charts \
+		REPO_APP_NAME=grafana \
+		VERSION=8.8.2 \
+		NAMESPACE=devzero
 
 .PHONY: install-mimir
 install-mimir:
@@ -204,7 +276,13 @@ install-mimir:
 
 .PHONY: delete-mimir
 delete-mimir:
-	helm delete mimir -n devzero --ignore-not-found
+	@$(MAKE) _delete-chart \
+		APP_NAME=mimir \
+		REPO_NAME=grafana \
+		REPO_URL=https://grafana.github.io/helm-charts \
+		REPO_APP_NAME=mimir-distributed \
+		VERSION=5.6.0-weekly.321 \
+		NAMESPACE=devzero
 
 .PHONY: install-vault
 install-vault:
@@ -218,4 +296,10 @@ install-vault:
 
 .PHONY: delete-vault
 delete-vault:
-	helm delete vault -n devzero --ignore-not-found
+	@$(MAKE) _delete-chart \
+		APP_NAME=vault \
+		REPO_NAME=hashicorp \
+		REPO_URL=https://helm.releases.hashicorp.com \
+		REPO_APP_NAME=vault \
+		VERSION=0.28.1 \
+		NAMESPACE=devzero

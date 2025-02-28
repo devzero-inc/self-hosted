@@ -1,3 +1,10 @@
+.PHONY: _install-local-helm-chart
+_install-local-helm-chart-default:
+	helm upgrade --install $(APP_NAME) . \
+		--namespace $(NAMESPACE) \
+		--create-namespace \
+		--values $(VALUES)
+
 .PHONY: _install-helm-chart-default
 _install-helm-chart-default:
 	@helm repo add $(REPO_NAME) $(REPO_URL)
@@ -24,3 +31,97 @@ _install-oci-helm-chart:
 		--create-namespace \
 		--values values/$(APP_NAME).yaml \
 		--values values/$(APP_NAME)_overrides.yaml
+
+.PHONY: _delete-chart
+_delete-chart:
+	helm delete $(APP_NAME) -n $(NAMESPACE) --ignore-not-found
+
+.PHONY: _delete-local-chart
+_delete-local-chart:
+	helm delete $(APP_NAME) -n $(NAMESPACE) --ignore-not-found
+
+.PHONY: _delete-namespace
+_delete-namespace:
+	kubectl delete namespace $(NAMESPACE) --ignore-not-found=true
+
+.PHONY: _delete-crds
+_delete-crds:
+	kubectl get crds -o name | grep '$(CRD_NAME)' | xargs kubectl delete || true
+
+.PHONY: _kubectl
+_kubectl:
+	kubectl $(COMMAND) -f $(FILE_NAME) -n $(NAMESPACE)
+
+##################################################
+#
+# Uncomment this code, and comment the code above in a case when you,
+# can't apply helm directly and you need to apply all the templates
+# via kubectl apply
+#
+##################################################
+#.PHONY: _install-local-helm-chart
+#_install-local-helm-chart-default:
+#	helm template $(APP_NAME) . \
+#		--namespace $(NAMESPACE) \
+#		--create-namespace \
+#		--values $(VALUES) \
+#		| kubectl apply --force-conflicts -n $(NAMESPACE) -f -
+#
+#.PHONY: _install-helm-chart-default
+#_install-helm-chart-default:
+#	@helm repo add $(REPO_NAME) $(REPO_URL)
+#	@helm repo update $(REPO_NAME)
+#	helm template $(APP_NAME) $(REPO_NAME)/$(REPO_APP_NAME) --version $(VERSION) \
+#		--namespace $(NAMESPACE) \
+#		--create-namespace \
+#		--wait \
+#		| kubectl apply --force-conflicts -n $(NAMESPACE) -f -
+#
+#.PHONY: _install-helm-chart
+#_install-helm-chart:
+#	@helm repo add $(REPO_NAME) $(REPO_URL)
+#	@helm repo update $(REPO_NAME)
+#	helm template $(APP_NAME) $(REPO_NAME)/$(REPO_APP_NAME) --version $(VERSION) \
+#		--namespace $(NAMESPACE) \
+#		--create-namespace \
+#		--values values/$(APP_NAME).yaml \
+#		--values values/$(APP_NAME)_overrides.yaml \
+#		| kubectl apply --force-conflicts -n $(NAMESPACE) -f -
+#
+#.PHONY: _install-oci-helm-chart
+#_install-oci-helm-chart:
+#	HELM_EXPERIMENTAL_OCI=1 helm template $(APP_NAME) $(REPO_URL)/$(REPO_NAME) --version $(VERSION) \
+#		--namespace $(NAMESPACE) \
+#		--create-namespace \
+#		--values values/$(APP_NAME).yaml \
+#		--values values/$(APP_NAME)_overrides.yaml \
+#		| kubectl apply --force-conflicts -n $(NAMESPACE) -f -
+#
+#.PHONY: _delete-chart
+#_delete-chart:
+#	@helm repo add $(REPO_NAME) $(REPO_URL)
+#	@helm repo update $(REPO_NAME)
+#	helm template $(APP_NAME) $(REPO_NAME)/$(REPO_APP_NAME) --version $(VERSION) \
+#		--namespace $(NAMESPACE) \
+#		--values values/$(APP_NAME).yaml \
+#		--values values/$(APP_NAME)_overrides.yaml | kubectl delete -n $(NAMESPACE) -f -
+#
+#.PHONY: _delete-local-chart
+#_delete-local-chart:
+#	helm template $(APP_NAME) . \
+#		--namespace $(NAMESPACE) \
+#		--create-namespace \
+#		--values $(VALUES) \
+#		| kubectl delete -n $(NAMESPACE) -f -
+#
+#.PHONY: _delete-namespace
+#_delete-namespace:
+#	kubectl delete namespace $(NAMESPACE) --ignore-not-found=true
+#
+#.PHONY: _delete-crds
+#_delete-crds:
+#	kubectl get crds -o name | grep '$(CRD_NAME)' | xargs kubectl delete || true
+#
+#.PHONY: _kubectl
+#_kubectl:
+#	kubectl $(COMMAND) -f $(FILE_NAME) -n $(NAMESPACE)
