@@ -167,10 +167,7 @@ install-timescaledb:
 		VERSION=0.23.0 \
 		NAMESPACE=devzero
 
-	@$(MAKE) _kubectl \
-		COMMAND=apply \
-		FILE_NAME=timescaledb-secret.yaml \
-		NAMESPACE=devzero
+	@$(KUBECTL_BIN) apply -f timescaledb-secret.yaml -n devzero
 
 	@$(MAKE) _install-helm-chart \
 		APP_NAME=timescaledb \
@@ -190,10 +187,7 @@ delete-timescaledb:
 		REPO_APP_NAME=cluster \
 		VERSION=0.2.1 \
 		NAMESPACE=devzero
-	@$(MAKE) _kubectl \
-		COMMAND=delete \
-		FILE_NAME=timescaledb-secret.yaml \
-		NAMESPACE=devzero
+	@$(KUBECTL_BIN) delete --ignore-not-found=true -f timescaledb-secret.yaml -n devzero
 	@$(MAKE) _delete-chart \
 		APP_NAME=cnpg \
 		REPO_NAME=cnpg \
