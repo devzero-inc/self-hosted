@@ -64,6 +64,9 @@ HELM_BIN = $(shell which helm)
 ##################################################
 .PHONY: _install-local-helm-chart
 _install-local-helm-chart-default:
+	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
+	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
+
 	@$(KUBECTL_BIN) get namespace $(NAMESPACE) || $(KUBECTL_BIN) create namespace $(NAMESPACE)
 	$(HELM_BIN) template $(APP_NAME) . \
 		--namespace $(NAMESPACE) \
@@ -71,8 +74,13 @@ _install-local-helm-chart-default:
 		--values $(VALUES) \
 		| $(KUBECTL_BIN) apply --force-conflicts --server-side -f -
 
+	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
+
 .PHONY: _install-helm-chart-default
 _install-helm-chart-default:
+	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
+	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
+
 	@$(KUBECTL_BIN) get namespace $(NAMESPACE) || $(KUBECTL_BIN) create namespace $(NAMESPACE)
 	@$(HELM_BIN) repo add $(REPO_NAME) $(REPO_URL)
 	@$(HELM_BIN) repo update $(REPO_NAME)
@@ -82,8 +90,13 @@ _install-helm-chart-default:
 		--wait \
 		| $(KUBECTL_BIN) apply --force-conflicts --server-side -f -
 
+	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
+
 .PHONY: _install-helm-chart
 _install-helm-chart:
+	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
+	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
+
 	@$(KUBECTL_BIN) get namespace $(NAMESPACE) || $(KUBECTL_BIN) create namespace $(NAMESPACE)
 	@$(HELM_BIN) repo add $(REPO_NAME) $(REPO_URL)
 	@$(HELM_BIN) repo update $(REPO_NAME)
@@ -94,8 +107,13 @@ _install-helm-chart:
 		--values values/$(APP_NAME)_overrides.yaml \
 		| $(KUBECTL_BIN) apply --force-conflicts --server-side -f -
 
+	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
+
 .PHONY: _install-oci-helm-chart
 _install-oci-helm-chart:
+	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
+	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
+
 	@$(KUBECTL_BIN) get namespace $(NAMESPACE) || $(KUBECTL_BIN) create namespace $(NAMESPACE)
 	HELM_EXPERIMENTAL_OCI=1 $(HELM_BIN) template $(APP_NAME) $(REPO_URL)/$(REPO_NAME) --version $(VERSION) \
 		--namespace $(NAMESPACE) \
@@ -104,22 +122,34 @@ _install-oci-helm-chart:
 		--values values/$(APP_NAME)_overrides.yaml \
 		| $(KUBECTL_BIN) apply --force-conflicts --server-side -f -
 
+	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
+
 .PHONY: _delete-chart
 _delete-chart:
+	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
+	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
+
 	@$(HELM_BIN) repo add $(REPO_NAME) $(REPO_URL)
 	@$(HELM_BIN) repo update $(REPO_NAME)
 	$(HELM_BIN) template $(APP_NAME) $(REPO_NAME)/$(REPO_APP_NAME) --version $(VERSION) \
 		--namespace $(NAMESPACE) \
 		--values values/$(APP_NAME).yaml \
-		--values values/$(APP_NAME)_overrides.yaml | $(KUBECTL_BIN) delete -f -
+		--values values/$(APP_NAME)_overrides.yaml | $(KUBECTL_BIN) delete --ignore-not-found=true -f -
+
+	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
 
 .PHONY: _delete-local-chart
 _delete-local-chart:
+	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
+	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
+
 	$(HELM_BIN) template $(APP_NAME) . \
 		--namespace $(NAMESPACE) \
 		--create-namespace \
 		--values $(VALUES) \
-		| $(KUBECTL_BIN) delete -f -
+		| $(KUBECTL_BIN) delete --ignore-not-found=true -f -
+
+	$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
 
 .PHONY: _delete-namespace
 _delete-namespace:
@@ -127,8 +157,4 @@ _delete-namespace:
 
 .PHONY: _delete-crds
 _delete-crds:
-	$(KUBECTL_BIN) get crds -o name | grep '$(CRD_NAME)' | xargs $(KUBECTL_BIN) delete || true
-
-.PHONY: _kubectl
-_kubectl:
-	$(KUBECTL_BIN) $(COMMAND) -f $(FILE_NAME) -n $(NAMESPACE)
+	$(KUBECTL_BIN) get crds -o name | grep '$(CRD_NAME)' | xargs $(KUBECTL_BIN) delete --ignore-not-found=true || true
