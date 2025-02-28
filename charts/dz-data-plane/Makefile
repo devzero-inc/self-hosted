@@ -2,14 +2,17 @@ include ../Makefile.common
 
 .PHONY: install
 install:
-	helm upgrade --install devzero-data-plane . \
-	--namespace devzero-self-hosted \
-	--create-namespace \
-	--values values.yaml
+	@$(MAKE) _install-local-helm-chart-default \
+		APP_NAME=devzero-data-plane \
+		NAMESPACE=devzero-self-hosted \
+		VALUES=values.yaml
 
 .PHONY: delete
 delete:
-	helm delete devzero-data-plane -n devzero-self-hosted --ignore-not-found
+	@$(MAKE) _delete-local-chart \
+		APP_NAME=devzero-data-plane \
+		NAMESPACE=devzero-self-hosted \
+		VALUES=values.yaml
 
 .PHONY: docs
 docs:
