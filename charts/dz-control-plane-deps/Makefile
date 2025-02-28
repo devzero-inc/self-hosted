@@ -265,7 +265,7 @@ install-mimir:
 		REPO_NAME=grafana \
 		REPO_URL=https://grafana.github.io/helm-charts \
 		REPO_APP_NAME=mimir-distributed \
-		VERSION=5.6.0-weekly.321 \
+		VERSION=5.6.0 \
 		NAMESPACE=devzero
 
 .PHONY: delete-mimir
