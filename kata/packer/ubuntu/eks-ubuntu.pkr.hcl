@@ -16,8 +16,8 @@ variable "ami_regions" {
 }
 
 source "amazon-ebs" "ubuntu_1_29_eks" {
-  ami_name        = "devzero-ubuntu-eks-node-24.04-x86_64-standard-1.29-{{timestamp}}"
-  ami_description = "Devzero Ubuntu 24.04 EKS Node x86_64 Standard 1.29 with Kata runtime"
+  ami_name        = "devzero-ubuntu-eks-node-22.04-x86_64-standard-1.29-{{timestamp}}"
+  ami_description = "Devzero Ubuntu 22.04 EKS Node x86_64 Standard 1.29 with Kata runtime"
   ami_groups      = var.ami_groups
   instance_type   = "m5.4xlarge"
   region          = "us-west-1"
@@ -47,8 +47,8 @@ source "amazon-ebs" "ubuntu_1_29_eks" {
 }
 
 source "amazon-ebs" "ubuntu_1_30_eks" {
-  ami_name        = "devzero-ubuntu-eks-node-24.04-x86_64-standard-1.30-{{timestamp}}"
-  ami_description = "Devzero Ubuntu 24.04 EKS Node x86_64 Standard 1.30 with Kata runtime"
+  ami_name        = "devzero-ubuntu-eks-node-22.04-x86_64-standard-1.30-{{timestamp}}"
+  ami_description = "Devzero Ubuntu 22.04 EKS Node x86_64 Standard 1.30 with Kata runtime"
   ami_groups      = var.ami_groups
   instance_type   = "m5.4xlarge"
   region          = "us-west-1"
@@ -78,8 +78,8 @@ source "amazon-ebs" "ubuntu_1_30_eks" {
 }
 
 source "amazon-ebs" "ubuntu_1_31_eks" {
-  ami_name        = "devzero-ubuntu-eks-node-24.04-x86_64-standard-1.31-{{timestamp}}"
-  ami_description = "Devzero Ubuntu 24.04 EKS Node x86_64 Standard 1.31 with Kata runtime"
+  ami_name        = "devzero-ubuntu-eks-node-22.04-x86_64-standard-1.31-{{timestamp}}"
+  ami_description = "Devzero Ubuntu 22.04 EKS Node x86_64 Standard 1.31 with Kata runtime"
   ami_groups      = var.ami_groups
   instance_type   = "m5.4xlarge"
   region          = "us-west-1"

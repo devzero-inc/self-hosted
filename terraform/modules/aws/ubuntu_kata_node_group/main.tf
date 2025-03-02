@@ -29,7 +29,7 @@ module "node_cluster_role" {
 }
 
 
-module "kata_node_group" {
+module "ubuntu_kata_node_group" {
   source  = "terraform-aws-modules/eks/aws//modules/eks-managed-node-group"
   version = "20.31.6"
 
@@ -47,7 +47,7 @@ module "kata_node_group" {
   subnet_ids           = coalescelist(var.subnet_ids, tolist(data.aws_eks_cluster.this.vpc_config[0].subnet_ids))
 
   ami_id = var.ami_id
-  ami_type = "AL2023_x86_64_STANDARD"
+  ami_type = "CUSTOM"
 
   create_iam_role = false
   iam_role_arn    = module.node_cluster_role.iam_role_arn
@@ -58,63 +58,36 @@ module "kata_node_group" {
 
   enable_bootstrap_user_data = true
 
-  # Conditionally define cloudinit_pre_nodeadm only if custom_ca_cert is provided
-  cloudinit_pre_nodeadm = var.enable_custom_ca_cert ? [
-    {
-      content_type = "text/cloud-config"
-      content = <<-EOF
-        #cloud-config
-        ca_certs:
-          remove_default_ca: false
-          trusted:
-            - |
-              ${indent(12, var.custom_ca_cert)}
+  post_bootstrap_user_data = <<-EOT
+  #!/bin/bash
+  set -ex
 
-        runcmd:
-          - systemctl restart containerd
-      EOF
-    }, {
-      content_type = "application/node.eks.aws"
-      content = <<-EOF
-        #cloud-config
-        apiVersion: node.eks.aws/v1alpha1
-        kind: NodeConfig
-        spec:
-          containerd:
-            config: |
-              [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata]
-              runtime_type = "io.containerd.kata.v2"
-              privileged_without_host_devices = true
-              
-              [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-qemu]
-              runtime_type = "io.containerd.kata-qemu.v2"
-              privileged_without_host_devices = true
-      EOF
-    }
-  ] : [
-    {
-      content_type = "application/node.eks.aws"
-      content = <<-EOF
-        #cloud-config
-        apiVersion: node.eks.aws/v1alpha1
-        kind: NodeConfig
-        spec:
-          containerd:
-            config: |
-              [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata]
-              runtime_type = "io.containerd.kata.v2"
-              privileged_without_host_devices = true
-              
-              [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-qemu]
-              runtime_type = "io.containerd.kata-qemu.v2"
-              privileged_without_host_devices = true
-      EOF
-    }
-  ]
+  while ! systemctl is-active --quiet containerd; do
+      sleep 2
+  done
 
+  sudo mkdir -p /etc/containerd
+
+  if [ -f /etc/containerd/config.toml ]; then
+      sudo cp /etc/containerd/config.toml /etc/containerd/config.toml.backup
+  fi
+
+  cat <<EOF | sudo tee -a /etc/containerd/config.toml
+  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata]
+  runtime_type = "io.containerd.kata.v2"
+  privileged_without_host_devices = true
+
+  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-qemu]
+  runtime_type = "io.containerd.kata-qemu.v2"
+  privileged_without_host_devices = true
+  EOF
+
+  sudo systemctl restart containerd
+  EOT
+  
   block_device_mappings = {
-    xvda = {
-      device_name = "/dev/xvda"
+    sda = {
+      device_name = "/dev/sda1"
       ebs = {
         delete_on_termination = true
         encrypted             = true
