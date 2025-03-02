@@ -1,7 +1,7 @@
 KUBECTL_BIN = $(shell which kubectl)
 HELM_BIN = $(shell which helm)
 
-#.PHONY: _install-local-helm-chart
+#.PHONY: _install-local-helm-chart-default
 #_install-local-helm-chart-default:
 #	$(HELM_BIN) upgrade --install $(APP_NAME) . \
 #		--namespace $(NAMESPACE) \
@@ -54,7 +54,8 @@ HELM_BIN = $(shell which helm)
 #.PHONY: _delete-crds
 #_delete-crds:
 #	$(KUBECTL_BIN) get crds -o name | grep '$(CRD_NAME)' | xargs $(KUBECTL_BIN) delete || true
-#
+
+
 ##################################################
 #
 # Uncomment this code, and comment the code above in a case when you,
@@ -62,38 +63,37 @@ HELM_BIN = $(shell which helm)
 # via $(KUBECTL_BIN) apply
 #
 ##################################################
-.PHONY: _install-local-helm-chart
+.PHONY: _install-local-helm-chart-default
 _install-local-helm-chart-default:
 	@$(KUBECTL_BIN) get namespace $(NAMESPACE) || $(KUBECTL_BIN) create namespace $(NAMESPACE)
-
-	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
-
+	@CURR_NS=$$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
-
-	@echo "Current namespace: $(CURR_NS)"
+	@echo "Current namespace: $$CURR_NS"
 	@echo "Setting namespace to: $(NAMESPACE)"
-
 	@echo "Deploying local Helm chart to namespace: $(NAMESPACE)"
 	$(HELM_BIN) template $(APP_NAME) . \
 		--namespace $(NAMESPACE) \
 		--create-namespace \
 		--values $(VALUES) \
-		| $(KUBECTL_BIN) apply --force-conflicts --server-side -f -
-
-	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
-	@echo "Restored namespace to: $(CURR_NS)"
+		| $(KUBECTL_BIN) apply --force-conflicts --server-side -f - || \
+	{ \
+		echo "First kubectl apply attempt failed, retrying once..."; \
+		$(HELM_BIN) template $(APP_NAME) . \
+			--namespace $(NAMESPACE) \
+			--create-namespace \
+			--values $(VALUES) \
+			| $(KUBECTL_BIN) apply --force-conflicts --server-side -f -; \
+	}
+	@$(KUBECTL_BIN) config set-context --current --namespace=$$CURR_NS
+	@echo "Restored namespace to: $$CURR_NS"
 
 .PHONY: _install-helm-chart-default
 _install-helm-chart-default:
 	@$(KUBECTL_BIN) get namespace $(NAMESPACE) || $(KUBECTL_BIN) create namespace $(NAMESPACE)
-
-	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
-
+	@CURR_NS=$$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
-
-	@echo "Current namespace: $(CURR_NS)"
+	@echo "Current namespace: $$CURR_NS"
 	@echo "Setting namespace to: $(NAMESPACE)"
-
 	@echo "Deploying Helm chart from repository to namespace: $(NAMESPACE)"
 	@$(HELM_BIN) repo add $(REPO_NAME) $(REPO_URL)
 	@$(HELM_BIN) repo update $(REPO_NAME)
@@ -101,22 +101,25 @@ _install-helm-chart-default:
 		--namespace $(NAMESPACE) \
 		--create-namespace \
 		--wait \
-		| $(KUBECTL_BIN) apply --force-conflicts --server-side -f -
-
-	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
-	@echo "Restored namespace to: $(CURR_NS)"
+		| $(KUBECTL_BIN) apply --force-conflicts --server-side -f - || \
+	{ \
+		echo "First kubectl apply attempt failed, retrying once..."; \
+		$(HELM_BIN) template $(APP_NAME) $(REPO_NAME)/$(REPO_APP_NAME) --version $(VERSION) \
+			--namespace $(NAMESPACE) \
+			--create-namespace \
+			--wait \
+			| $(KUBECTL_BIN) apply --force-conflicts --server-side -f -; \
+	}
+	@$(KUBECTL_BIN) config set-context --current --namespace=$$CURR_NS
+	@echo "Restored namespace to: $$CURR_NS"
 
 .PHONY: _install-helm-chart
 _install-helm-chart:
 	@$(KUBECTL_BIN) get namespace $(NAMESPACE) || $(KUBECTL_BIN) create namespace $(NAMESPACE)
-
-	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
-
+	@CURR_NS=$$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
-	
-	@echo "Current namespace: $(CURR_NS)"
+	@echo "Current namespace: $$CURR_NS"
 	@echo "Setting namespace to: $(NAMESPACE)"
-
 	@$(HELM_BIN) repo add $(REPO_NAME) $(REPO_URL)
 	@$(HELM_BIN) repo update $(REPO_NAME)
 	$(HELM_BIN) template $(APP_NAME) $(REPO_NAME)/$(REPO_APP_NAME) --version $(VERSION) \
@@ -124,42 +127,52 @@ _install-helm-chart:
 		--create-namespace \
 		--values values/$(APP_NAME).yaml \
 		--values values/$(APP_NAME)_overrides.yaml \
-		| $(KUBECTL_BIN) apply --force-conflicts --server-side -f -
-
-	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
-	@echo "Restored namespace to: $(CURR_NS)"
+		| $(KUBECTL_BIN) apply --force-conflicts --server-side -f - || \
+	{ \
+		echo "First kubectl apply attempt failed, retrying once..."; \
+		$(HELM_BIN) template $(APP_NAME) $(REPO_NAME)/$(REPO_APP_NAME) --version $(VERSION) \
+			--namespace $(NAMESPACE) \
+			--create-namespace \
+			--values values/$(APP_NAME).yaml \
+			--values values/$(APP_NAME)_overrides.yaml \
+			| $(KUBECTL_BIN) apply --force-conflicts --server-side -f -; \
+	}
+	@$(KUBECTL_BIN) config set-context --current --namespace=$$CURR_NS
+	@echo "Restored namespace to: $$CURR_NS"
 
 .PHONY: _install-oci-helm-chart
 _install-oci-helm-chart:
 	@$(KUBECTL_BIN) get namespace $(NAMESPACE) || $(KUBECTL_BIN) create namespace $(NAMESPACE)
-
-	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
-
+	@CURR_NS=$$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
-
-	@echo "Current namespace: $(CURR_NS)"
+	@echo "Current namespace: $$CURR_NS"
 	@echo "Setting namespace to: $(NAMESPACE)"
-
 	@echo "Deploying OCI Helm chart to namespace: $(NAMESPACE)"
 	HELM_EXPERIMENTAL_OCI=1 $(HELM_BIN) template $(APP_NAME) $(REPO_URL)/$(REPO_NAME) --version $(VERSION) \
 		--namespace $(NAMESPACE) \
 		--create-namespace \
 		--values values/$(APP_NAME).yaml \
 		--values values/$(APP_NAME)_overrides.yaml \
-		| $(KUBECTL_BIN) apply --force-conflicts --server-side -f -
+		| $(KUBECTL_BIN) apply --force-conflicts --server-side -f - || \
+	{ \
+		echo "First kubectl apply attempt failed, retrying once..."; \
+		HELM_EXPERIMENTAL_OCI=1 $(HELM_BIN) template $(APP_NAME) $(REPO_URL)/$(REPO_NAME) --version $(VERSION) \
+			--namespace $(NAMESPACE) \
+			--create-namespace \
+			--values values/$(APP_NAME).yaml \
+			--values values/$(APP_NAME)_overrides.yaml \
+			| $(KUBECTL_BIN) apply --force-conflicts --server-side -f -; \
+	}
+	@$(KUBECTL_BIN) config set-context --current --namespace=$$CURR_NS
+	@echo "Restored namespace to: $$CURR_NS"
 
-	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
-	@echo "Restored namespace to: $(CURR_NS)"
 
 .PHONY: _delete-chart
 _delete-chart:
 	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
-
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
-
 	@echo "Current namespace: $(CURR_NS)"
 	@echo "Setting namespace to: $(NAMESPACE)"
-
 	@$(HELM_BIN) repo add $(REPO_NAME) $(REPO_URL)
 	@$(HELM_BIN) repo update $(REPO_NAME)
 	@echo "Deleting Helm chart from namespace: $(NAMESPACE)"
@@ -174,12 +187,9 @@ _delete-chart:
 .PHONY: _delete-local-chart
 _delete-local-chart:
 	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
-
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
-
 	@echo "Current namespace: $(CURR_NS)"
 	@echo "Setting namespace to: $(NAMESPACE)"
-
 	@echo "Deleting local Helm chart from namespace: $(NAMESPACE)"
 	$(HELM_BIN) template $(APP_NAME) . \
 		--namespace $(NAMESPACE) \
@@ -190,11 +200,9 @@ _delete-local-chart:
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
 	@echo "Restored namespace to: $(CURR_NS)"
 
-
 .PHONY: _create-namespace
 _create-namespace:
 	$(KUBECTL_BIN) get namespace $(NAMESPACE) || $(KUBECTL_BIN) create namespace $(NAMESPACE)
-
 
 .PHONY: _delete-namespace
 _delete-namespace:
