@@ -1,4 +1,4 @@
-name: devzero DSH deployment
+name: DevZero DSH Deployment
 
 on:
   # push:
@@ -9,6 +9,15 @@ on:
   # schedule:
   #   - cron: '0 3 * * *'
   workflow_dispatch:
+    inputs:
+      base_image:
+        description: "Select the base image"
+        required: true
+        default: "al2023"
+        type: choice
+        options:
+          - al2023
+          - ubuntu
 
 jobs:
   setup-and-test:
@@ -16,9 +25,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    strategy:
-      matrix:
-        base_image: [al2023, ubuntu]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -58,7 +64,7 @@ jobs:
         run: |
           cd self-hosted/terraform/examples/aws/base-cluster
           terraform init
-          if [ "${{ matrix.base_image }}" == "al2023" ]; then
+          if [ "${{ github.event.inputs.base_image }}" == "al2023" ]; then
             terraform apply -auto-approve -var="cluster_name=dz-dsh-testing-al2023"
           else
             terraform apply -auto-approve -var="cluster_name=dz-dsh-testing-ubuntu" -var="base_image=ubuntu"
