@@ -58,7 +58,7 @@ HELM_BIN = $(shell which helm)
 
 ##################################################
 #
-# Uncomment this code, and comment the code above in a case when you,
+# Uncomment this code, and comment the code above in a case when you
 # can't apply helm directly and you need to apply all the templates
 # via $(KUBECTL_BIN) apply
 #
