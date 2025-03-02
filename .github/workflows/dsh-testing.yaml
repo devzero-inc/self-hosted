@@ -263,3 +263,10 @@ jobs:
         run: |
           cd self-hosted/terraform/examples/aws/base-cluster
           terraform destroy -auto-approve
+
+          for volume_id in $(aws ec2 describe-volumes --filters "Name=status,Values=available" "Name=tag:Name,Values=${CLUSTER_NAME}*" --query "Volumes[].VolumeId" --output text); do
+            echo "Deleting volume: $volume_id"
+            aws ec2 delete-volume --volume-id $volume_id
+          done
+
+
