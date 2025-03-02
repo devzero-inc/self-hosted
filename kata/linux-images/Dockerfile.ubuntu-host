@@ -1,27 +1,53 @@
-#FROM amazonlinux@sha256:2023.6.20250115.0 AS build
-FROM amazonlinux@sha256:9b8a88839ab2c2abd6a8ded18e49255ab6cb89fcbb81eace8b330ee2afd598fd AS build
+FROM ubuntu:22.04 AS build
 
 ENV HOME=/home/root
 ENV SCCACHE_CACHE_SIZE="1G"
 ENV SCCACHE_DIR=$HOME/.cache/sccache
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN dnf groupinstall -y "Development Tools"
-RUN dnf install -y yum-utils rpmdevtools perl rpm-sign wget
-RUN dnf builddep -y kernel
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    fakeroot \
+    libncurses-dev \
+    flex \
+    bison \
+    libssl-dev \
+    libelf-dev \
+    git \
+    bc \
+    wget \
+    kmod \
+    cpio \
+    dwarves \
+    pkg-config \
+    debhelper \
+    devscripts \
+    python3 \
+    rsync \
+    gcc \
+    make \
+    ccache \
+    libudev-dev \
+    libpci-dev \
+    xz-utils \
+    zstd
 
+# Install sccache
 RUN wget https://github.com/mozilla/sccache/releases/download/v0.9.0/sccache-v0.9.0-x86_64-unknown-linux-musl.tar.gz && \
     tar xvf sccache-v0.9.0-x86_64-unknown-linux-musl.tar.gz && \
     mv sccache-v0.9.0-x86_64-unknown-linux-musl/sccache /usr/local/bin && \
     chmod +x /usr/local/bin/sccache && \
     rm -r sccache*
 
+# Copy kernel source and config
 COPY linux /linux
 COPY configs/host linux/arch/x86/configs/dz_pvm_host_defconfig
 
 WORKDIR /linux
 RUN mkdir -p "${HOME}"
-RUN echo "%_binary_payload    w2T16.xzdio" >> "${HOME}/.rpmmacros" && \
-    echo "%_source_payload    w2T16.xzdio" >> "${HOME}/.rpmmacros"
+
+# Configure kernel (keeping exact same configuration)
 RUN make defconfig KBUILD_DEFCONFIG=dz_pvm_host_defconfig
 RUN scripts/config -m KVM_PVM && \
     scripts/config -d ADDRESS_MASKING && \
@@ -33,10 +59,14 @@ RUN scripts/config -m KVM_PVM && \
     scripts/config --set-str SYSTEM_TRUSTED_KEYS "" && \
     scripts/config -m CONFIG_ENA_ETHERNET
 
-RUN --mount=type=cache,target=/home/root/.cache/sccache make -j$(nproc) rpm-pkg CC='sccache gcc' LOCALVERSION= EXTRAVERSION=-dz-pvm-host KBUILD_BUILD_TIMESTAMP=""
+# Build debian packages with sccache
+RUN --mount=type=cache,target=/home/root/.cache/sccache \
+    make -j$(nproc) deb-pkg \
+    CC='sccache gcc' \
+    LOCALVERSION=-dz-pvm-host \
+    KBUILD_BUILD_TIMESTAMP=""
 
 FROM alpine
-COPY --from=build linux/rpmbuild/RPMS/x86_64/*.rpm .
-COPY --from=build linux/rpmbuild/SRPMS/*.rpm .
+COPY --from=build /linux/../linux-*.deb .
 
 CMD ["sh", "-c", "sleep 300"]

@@ -15,87 +15,93 @@ variable "ami_regions" {
   type = list(string)
 }
 
-source "amazon-ebs" "al2023_1_29_eks" {
-  ami_name        = "devzero-amazon-eks-node-al2023-x86_64-standard-1.29-{{timestamp}}"
-  ami_description = "Devzero Amazon EKS Node AL2023 x86_64 Standard 1.29 with Kata runtime"
+source "amazon-ebs" "ubuntu_1_29_eks" {
+  ami_name        = "devzero-ubuntu-eks-node-22.04-x86_64-standard-1.29-{{timestamp}}"
+  ami_description = "Devzero Ubuntu 22.04 EKS Node x86_64 Standard 1.29 with Kata runtime"
   ami_groups      = var.ami_groups
   instance_type   = "m5.4xlarge"
   region          = "us-west-1"
-  ssh_username    = "ec2-user"
+  ssh_username    = "ubuntu"
 
   source_ami_filter {
     filters = {
       virtualization-type = "hvm"
-      name                = "amazon-eks-node-al2023-x86_64-standard-1.29-*"
+      name                = "ubuntu-eks/k8s_1.29/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
       root-device-type    = "ebs"
+      architecture        = "x86_64"
+      state              = "available"
     }
-    owners = ["602401143452"]
+    owners      = ["099720109477"]
     most_recent = true
   }
 
   launch_block_device_mappings {
-    device_name           = "/dev/xvda"
+    device_name           = "/dev/sda1"
     volume_size           = 200
-    throughput            = 750
-    volume_type           = "gp3"
+    throughput           = 750
+    volume_type          = "gp3"
     delete_on_termination = true
   }
 
   ami_regions = var.ami_regions
 }
 
-source "amazon-ebs" "al2023_1_30_eks" {
-  ami_name        = "devzero-amazon-eks-node-al2023-x86_64-standard-1.30-{{timestamp}}"
-  ami_description = "Devzero Amazon EKS Node AL2023 x86_64 Standard 1.30 with Kata runtime"
+source "amazon-ebs" "ubuntu_1_30_eks" {
+  ami_name        = "devzero-ubuntu-eks-node-22.04-x86_64-standard-1.30-{{timestamp}}"
+  ami_description = "Devzero Ubuntu 22.04 EKS Node x86_64 Standard 1.30 with Kata runtime"
   ami_groups      = var.ami_groups
   instance_type   = "m5.4xlarge"
   region          = "us-west-1"
-  ssh_username    = "ec2-user"
+  ssh_username    = "ubuntu"
 
   source_ami_filter {
     filters = {
       virtualization-type = "hvm"
-      name                = "amazon-eks-node-al2023-x86_64-standard-1.30-*"
+      name                = "ubuntu-eks/k8s_1.30/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
       root-device-type    = "ebs"
+      architecture        = "x86_64"
+      state              = "available"
     }
-    owners = ["602401143452"]
+    owners      = ["099720109477"]
     most_recent = true
   }
 
   launch_block_device_mappings {
-    device_name           = "/dev/xvda"
+    device_name           = "/dev/sda1"
     volume_size           = 200
-    throughput            = 750
-    volume_type           = "gp3"
+    throughput           = 750
+    volume_type          = "gp3"
     delete_on_termination = true
   }
 
   ami_regions = var.ami_regions
 }
 
-source "amazon-ebs" "al2023_1_31_eks" {
-  ami_name        = "devzero-amazon-eks-node-al2023-x86_64-standard-1.31-{{timestamp}}"
-  ami_description = "Devzero Amazon EKS Node AL2023 x86_64 Standard 1.31 with Kata runtime"
+source "amazon-ebs" "ubuntu_1_31_eks" {
+  ami_name        = "devzero-ubuntu-eks-node-22.04-x86_64-standard-1.31-{{timestamp}}"
+  ami_description = "Devzero Ubuntu 22.04 EKS Node x86_64 Standard 1.31 with Kata runtime"
   ami_groups      = var.ami_groups
   instance_type   = "m5.4xlarge"
   region          = "us-west-1"
-  ssh_username    = "ec2-user"
+  ssh_username    = "ubuntu"
 
   source_ami_filter {
     filters = {
       virtualization-type = "hvm"
-      name                = "amazon-eks-node-al2023-x86_64-standard-1.31-*"
+      name                = "ubuntu-eks/k8s_1.31/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
       root-device-type    = "ebs"
+      architecture        = "x86_64"
+      state              = "available"
     }
-    owners = ["602401143452"]
+    owners      = ["099720109477"]
     most_recent = true
   }
 
   launch_block_device_mappings {
-    device_name           = "/dev/xvda"
+    device_name           = "/dev/sda1"
     volume_size           = 200
-    throughput            = 750
-    volume_type           = "gp3"
+    throughput           = 750
+    volume_type          = "gp3"
     delete_on_termination = true
   }
 
@@ -103,18 +109,18 @@ source "amazon-ebs" "al2023_1_31_eks" {
 }
 
 build {
-  name = "build-al2023-with-pvm"
+  name = "build-ubuntu-with-pvm"
   sources = [
-    "source.amazon-ebs.al2023_1_29_eks",
-    "source.amazon-ebs.al2023_1_30_eks",
-    "source.amazon-ebs.al2023_1_31_eks",
+    "source.amazon-ebs.ubuntu_1_29_eks",
+    "source.amazon-ebs.ubuntu_1_30_eks",
+    "source.amazon-ebs.ubuntu_1_31_eks",
   ]
 
   provisioner "file" {
     sources = [
-      "./kernel.rpm",
-      "./kernel-devel.rpm",
-      "./kernel-headers.rpm",
+      "./kernel-headers.deb",
+      "./kernel-image.deb",
+      "./kernel-libc-dev.deb",
     ]
     destination = "/tmp/"
     max_retries = 3
@@ -122,8 +128,7 @@ build {
 
   provisioner "shell" {
     name              = "Upgrade kernel"
-    script            = "./upgrade_kernel.sh"
-    # Run it as root
+    script            = "./ubuntu_upgrade_kernel.sh"
     execute_command   = "sudo {{ .Path }}"
     expect_disconnect = true
   }
@@ -173,8 +178,9 @@ build {
 
   provisioner "shell" {
     name              = "Download docker images using ctr"
-    script            = "./pre_cache.sh"
-    execute_command   = "sudo {{ .Path }}"
+    script            = "./ubuntu_pre_cache.sh"
+    execute_command   = "sudo -E {{ .Path }}"
+    environment_vars  = ["DEBIAN_FRONTEND=noninteractive"]
     expect_disconnect = false
   }
 }

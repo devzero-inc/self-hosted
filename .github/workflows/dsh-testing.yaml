@@ -16,6 +16,9 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    strategy:
+      matrix:
+        base_image: [al2023, ubuntu]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -55,7 +58,11 @@ jobs:
         run: |
           cd self-hosted/terraform/examples/aws/base-cluster
           terraform init
-          terraform apply -auto-approve -var="cluster_name=devzero-dsh-testing"
+          if [ "${{ matrix.base_image }}" == "al2023" ]; then
+            terraform apply -auto-approve -var="cluster_name=dz-dsh-testing-al2023"
+          else
+            terraform apply -auto-approve -var="cluster_name=dz-dsh-testing-ubuntu" -var="base_image=ubuntu"
+          fi
           echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_ENV
           echo "VPC_ID=$(terraform output -raw vpc_id)" >> $GITHUB_ENV
           echo "PUBLIC_SUBNET_IDS=$(terraform output -json public_subnet_ids | jq -c .)" >> $GITHUB_ENV

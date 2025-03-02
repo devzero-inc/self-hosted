@@ -251,6 +251,8 @@ module "eks" {
 }
 
 data "aws_ami" "devzero_amazon_eks_node_al2023" {
+  count = var.base_image == "al2023" ? 1 : 0
+
   filter {
     name   = "name"
     values = ["devzero-amazon-eks-node-al2023-x86_64-standard-${var.cluster_version}-*"]
@@ -259,16 +261,51 @@ data "aws_ami" "devzero_amazon_eks_node_al2023" {
   most_recent = true
 }
 
+data "aws_ami" "devzero_ubuntu_eks_node_22_04" {
+  count = var.base_image == "ubuntu" ? 1 : 0
+  
+  filter {
+    name   = "name"
+    values = ["devzero-ubuntu-eks-node-22.04-x86_64-standard-${var.cluster_version}-*"]
+  }
+  owners      = ["484907513542"]
+  most_recent = true
+}
+
 module "kata_node_group" {
   source = "../../../modules/aws/kata_node_group"
 
-  count = var.enable_kata_node_group ? 1 : 0
+  count = var.enable_kata_node_group && var.base_image == "al2023" ? 1 : 0
 
   cluster_name = module.eks.cluster_name
 
   instance_type = var.instance_type
 
   ami_id = data.aws_ami.devzero_amazon_eks_node_al2023.image_id
+
+  # Optinally pass in CA certificate
+  enable_custom_ca_cert = var.create_vpn
+  custom_ca_cert = var.create_vpn ? module.vpn[0].vpn_ca_certificate : ""
+
+  desired_size = var.desired_size
+  min_size     = var.min_size
+  max_size     = var.max_size
+
+  depends_on = [
+    module.eks
+  ]
+}
+
+module "ubuntu_kata_node_group" {
+  source = "../../../modules/aws/ubuntu_kata_node_group"
+
+  count = var.enable_kata_node_group && var.base_image == "ubuntu" ? 1 : 0
+
+  cluster_name = module.eks.cluster_name
+
+  instance_type = var.instance_type
+
+  ami_id = data.aws_ami.devzero_ubuntu_eks_node_22_04.image_id
 
   # Optinally pass in CA certificate
   enable_custom_ca_cert = var.create_vpn
@@ -349,7 +386,11 @@ module "alb" {
   node_group_asg_names = merge({
     # Other ASG names to be added to this ALB
     },
-    # If ubuntu node group is enabled, add it to the ALB
+    # If base_image is "ubuntu", use ubuntu_kata_node_group
+    var.base_image == "ubuntu" ? {
+      "kata_node_group" = module.ubuntu_kata_node_group[0].node_group.node_group_autoscaling_group_names[0]
+    } : {},
+    # Otherwise, use the default kata_node_group if enabled
     var.enable_kata_node_group ? {
       "kata_node_group" = module.kata_node_group[0].node_group.node_group_autoscaling_group_names[0]
     } : {}

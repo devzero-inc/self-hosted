@@ -1,0 +1,73 @@
+name: "[Ubuntu] Build Kata AMI"
+run-name: "Build Kata AMI for ${{ github.event.inputs.image_type || 'private' }} image"
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_type:
+        type: choice
+        required: true
+        description: 'The type of image to build. Use "private" for development and testing images and "public" for public images available to customers.'
+        options:
+          - private
+          - public
+        default: private
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  build-ami:
+    name: Build AMI with Packer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Login to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: devzero-inc
+          password: ${{ secrets.GH_TOKEN }}
+
+      - name: Pull and Create Temporary Container
+        run: |
+          docker pull ghcr.io/devzero-inc/ubuntu-public-host-pvm-linux:latest
+          docker pull ghcr.io/devzero-inc/ubuntu-public-guest-pvm-linux:latest
+
+          CONTAINER_ID=$(docker create ghcr.io/devzero-inc/ubuntu-public-host-pvm-linux:latest)
+          docker cp "$CONTAINER_ID:/linux-image-6.7.0-rc6-dz-pvm-host_6.7.0-rc6-g040ea4a66ec9-1_amd64.deb" ./kata/packer/ubuntu/kernel-image.deb
+          docker cp "$CONTAINER_ID:/linux-headers-6.7.0-rc6-dz-pvm-host_6.7.0-rc6-g040ea4a66ec9-1_amd64.deb" ./kata/packer/ubuntu/kernel-headers.deb
+          docker cp "$CONTAINER_ID:/linux-libc-dev_6.7.0-rc6-g040ea4a66ec9-1_amd64.deb" ./kata/packer/ubuntu/kernel-libc-dev.deb
+          docker rm "$CONTAINER_ID"
+
+          CONTAINER_ID_GUEST=$(docker create ghcr.io/devzero-inc/ubuntu-public-guest-pvm-linux:latest)
+          docker cp "$CONTAINER_ID_GUEST:/guest-vmlinux" ./kata/packer/ubuntu/guest-vmlinux
+          docker rm "$CONTAINER_ID_GUEST"
+
+      - name: Configure AWS Credentials for Self Hosted
+        if: github.event_name == 'push' || github.event.inputs.image_type == 'private'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::484907513542:role/github-actions-oidc-role
+          aws-region: us-west-1
+
+      - name: Configure AWS Credentials for Public AMIs
+        if: github.event.inputs.image_type == 'public'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::710271940431:role/github-actions-oidc-role
+          aws-region: us-west-1
+
+      - name: Initialize and Build AMI
+        run: |
+          cd ./kata/packer/ubuntu
+          packer init .
+          packer build --var-file=${{ github.event.inputs.image_type || 'private' }}.pkrvars.hcl eks-ubuntu.pkr.hcl
+
+  
