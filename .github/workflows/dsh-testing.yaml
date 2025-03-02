@@ -48,13 +48,15 @@ jobs:
           terraform_version: 1.5.7
 
       - name: Add Backend Override (Base Cluster)
+        env:
+          BASE_IMAGE: ${{ github.event.inputs.base_image }}
         run: |
           cd self-hosted/terraform/examples/aws/base-cluster
           cat <<EOF > backend_override.tf
           terraform {
             backend "s3" {
                 bucket         	   = "dsh-tf-state"
-                key              	 = "base-cluster/terraform.tfstate"
+                key              	 = "${BASE_IMAGE}/base-cluster/terraform.tfstate"
                 region         	   = "us-west-1"
             }
           }
@@ -86,13 +88,15 @@ jobs:
           EOT
 
       - name: Add Backend Override (Cluster Extensions)
+        env:
+          BASE_IMAGE: ${{ github.event.inputs.base_image }}
         run: |
           cd self-hosted/terraform/examples/aws/cluster-extensions
           cat <<EOF > backend_override.tf
           terraform {
             backend "s3" {
                 bucket         	   = "dsh-tf-state"
-                key              	 = "cluster-extensions/terraform.tfstate"
+                key              	 = "${BASE_IMAGE}/cluster-extensions/terraform.tfstate"
                 region         	   = "us-west-1"
             }
           }
