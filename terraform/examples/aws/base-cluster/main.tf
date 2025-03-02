@@ -281,7 +281,7 @@ module "kata_node_group" {
 
   instance_type = var.instance_type
 
-  ami_id = data.aws_ami.devzero_amazon_eks_node_al2023.image_id
+  ami_id = data.aws_ami.devzero_amazon_eks_node_al2023[0].image_id
 
   # Optinally pass in CA certificate
   enable_custom_ca_cert = var.create_vpn
@@ -305,7 +305,7 @@ module "ubuntu_kata_node_group" {
 
   instance_type = var.instance_type
 
-  ami_id = data.aws_ami.devzero_ubuntu_eks_node_22_04.image_id
+  ami_id = data.aws_ami.devzero_ubuntu_eks_node_22_04[0].image_id
 
   # Optinally pass in CA certificate
   enable_custom_ca_cert = var.create_vpn
