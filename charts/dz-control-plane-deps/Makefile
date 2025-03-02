@@ -2,6 +2,7 @@ include ../Makefile.common
 
 .PHONY: install
 install:
+	@$(MAKE) _create-namespace NAMESPACE=devzero
 	@$(MAKE) install-cert-manager
 	@$(MAKE) install-ingress-nginx
 	@$(MAKE) install-mysql-pulse
@@ -29,6 +30,7 @@ delete:
 	@$(MAKE) delete-mimir
 	@$(MAKE) delete-grafana
 	@$(MAKE) delete-vault
+	@$(MAKE) _delete-namespace NAMESPACE=devzero
 
 .PHONY: install-cert-manager
 install-cert-manager:
