@@ -2,14 +2,18 @@ include ../Makefile.common
 
 .PHONY: install
 install:
-	helm upgrade --install devzero . \
-	--namespace devzero \
-	--create-namespace \
-	--values values.yaml
+	@$(MAKE) _create-namespace NAMESPACE=devzero
+	@$(MAKE) _install-local-helm-chart-default \
+		APP_NAME=devzero \
+		NAMESPACE=devzero \
+		VALUES=values.yaml
 
 .PHONY: delete
 delete:
-	helm delete devzero -n devzero --ignore-not-found
+	@$(MAKE) _delete-local-chart \
+		APP_NAME=devzero \
+		NAMESPACE=devzero \
+		VALUES=values.yaml
 
 .PHONY: docs
 docs:
@@ -23,12 +27,12 @@ docs:
 
 .PHONY: add-docker-creds
 add-docker-creds:
-	kubectl create secret docker-registry regcred \
+	$(KUBECTL_BIN) create secret docker-registry regcred \
 	--docker-username=$(DOCKERHUB_USERNAME) \
 	--docker-password=$(DOCKERHUB_TOKEN) \
 	-n devzero --dry-run=client -o yaml | kubectl apply -f -
 
-	kubectl patch serviceaccount default \
+	$(KUBECTL_BIN) patch serviceaccount default \
 	-p '{"imagePullSecrets": [{"name": "regcred"}]}' \
 	--namespace=devzero
 
