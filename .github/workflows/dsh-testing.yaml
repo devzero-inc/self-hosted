@@ -1,4 +1,5 @@
-name: DevZero DSH Deployment
+name: DevZero self-hosted deployment
+run-name: '(base_image: ${{ github.event.inputs.base_image }}) self-hosted test run'
 
 on:
   # push:
