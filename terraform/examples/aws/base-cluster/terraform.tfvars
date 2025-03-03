@@ -11,7 +11,6 @@ desired_size  = 1
 cluster_endpoint_public_access       = true
 cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
 
-
 # VPN
 create_vpn            = false
 client_vpn_cidr_block = "10.9.0.0/22"
@@ -33,3 +32,6 @@ single_nat_gateway     = true
 # public_subnet_ids = ["MY_SUBNET_ID_1", "MY_SUBNET_ID_2"]
 # private_subnet_ids = ["MY_SUBNET_ID_3", "MY_SUBNET_ID_3"]
 # security_group_ids = ["MY_SECURITY_GROUP_ID"]
+
+# Create a DERP server
+create_derp = false
