@@ -15,7 +15,7 @@
         "domain": {
             "type": "string",
             "description": "Domain name for the installation",
-            "default": "devzero.internal"
+            "default": "example.com"
         },
         "credentials": {
             "type": "object",
@@ -1610,7 +1610,7 @@
                         "DOCKER_REGISTRY": {
                             "type": "string",
                             "description": "Use custom docker registry",
-                            "default": "docker-registry.devzero.svc.cluster.local:5000"
+                            "default": "docker-registry.example.com"
                         },
                         "DEVBOX_INGRESS_CLASS_NAME": {
                             "type": "string",
