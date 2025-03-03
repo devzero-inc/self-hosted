@@ -168,9 +168,7 @@ install-timescaledb:
 		REPO_APP_NAME=cloudnative-pg \
 		VERSION=0.23.0 \
 		NAMESPACE=devzero
-
 	@$(KUBECTL_BIN) apply -f timescaledb-secret.yaml -n devzero
-
 	@$(MAKE) _install-helm-chart \
 		APP_NAME=timescaledb \
 		REPO_NAME=cnpg \

@@ -53,7 +53,7 @@ _delete-namespace:
 
 .PHONY: _delete-crds
 _delete-crds:
-	$(KUBECTL_BIN) get crds -o name | grep '$(CRD_NAME)' | xargs $(KUBECTL_BIN) delete || true
+	$(KUBECTL_BIN) get crds -o name | grep '$(CRD_NAME)' | xargs $(KUBECTL_BIN) delete
 
 
 ##################################################
@@ -210,4 +210,4 @@ _delete-crds:
 #
 #.PHONY: _delete-crds
 #_delete-crds:
-#	$(KUBECTL_BIN) get crds -o name | grep '$(CRD_NAME)' | xargs $(KUBECTL_BIN) delete --ignore-not-found=true || true
+#	$(KUBECTL_BIN) get crds -o name | grep '$(CRD_NAME)' | xargs $(KUBECTL_BIN) delete --ignore-not-found=true
