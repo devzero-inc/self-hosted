@@ -50,13 +50,13 @@ class ControlPlane:
             control_plane_cfg.license_key = click.prompt("Please provide your DevZero license key")
             control_plane_cfg.save()
 
-        if not control_plane_cfg.docker_hub or force:
-            control_plane_cfg.docker_hub.access = click.confirm("Does your cluster have configured credentials for Docker Hub?", default=False)
-            if not control_plane_cfg.docker_hub.access:
-                control_plane_cfg.docker_hub.username = click.prompt("Please provide your Docker Hub username")
-                control_plane_cfg.docker_hub.password = click.prompt("Please provide your Docker Hub password", hide_input=True)
-                control_plane_cfg.docker_hub.email = click.prompt("Please provide your Docker Hub email")
-            control_plane_cfg.save()
+        if not globals_cfg.docker_hub or force:
+            globals_cfg.docker_hub.access = click.confirm("Does your cluster have configured credentials for Docker Hub?", default=False)
+            if not globals_cfg.docker_hub.access:
+                globals_cfg.docker_hub.username = click.prompt("Please provide your Docker Hub username")
+                globals_cfg.docker_hub.password = click.prompt("Please provide your Docker Hub password", hide_input=True)
+                globals_cfg.docker_hub.email = click.prompt("Please provide your Docker Hub email")
+            globals_cfg.save()
 
         # ask for provisioning databases in cluster
         if not control_plane_cfg.provision_dbs_in_cluster or force:
@@ -117,9 +117,9 @@ class ControlPlane:
                 values['credentials']['enable'] = False
             else:
                 values['credentials']['enable'] = True
-                values['credentials']['username'] = control_plane_cfg.docker_hub.username
-                values['credentials']['password'] = control_plane_cfg.docker_hub.password
-                values['credentials']['email'] = control_plane_cfg.docker_hub.email
+                values['credentials']['username'] = globals_cfg.docker_hub.username
+                values['credentials']['password'] = globals_cfg.docker_hub.password
+                values['credentials']['email'] = globals_cfg.docker_hub.email
 
         values['tls']['enabled'] = not control_plane_cfg.cert_manager.external
 
@@ -187,7 +187,7 @@ class ControlPlane:
             annotations = values['controller']['service']['annotations']
 
             if globals_cfg.provider == "aws":
-                aws_cfg = DZConfig().data.aws
+                aws_cfg = DZConfig().data.control_plane.aws.cluster
                 subnets = aws_cfg.vpc.subnets.keys()
 
                 if not control_plane_cfg.ingress.public:
@@ -301,11 +301,8 @@ class ControlPlane:
                 sh.make("install-mysql-pulse", _cwd=control_plane_deps_dir)
                 sh.make("install-mongodb", _cwd=control_plane_deps_dir)
                 sh.make("install-redis", _cwd=control_plane_deps_dir)
-                sh.make("install-postgres-logsrv", _cwd=control_plane_deps_dir)
-                sh.make("install-postgres-hydra", _cwd=control_plane_deps_dir)
-                sh.make("install-postgres-polland", _cwd=control_plane_deps_dir)
-                sh.make("install-postgres-vault", _cwd=control_plane_deps_dir)
-                sh.make("install-timescaledb-single", _cwd=control_plane_deps_dir)
+                sh.make("install-devzero-db", _cwd=control_plane_deps_dir)
+                sh.make("install-timescaledb", _cwd=control_plane_deps_dir)
                 sh.make("install-elasticmq", _cwd=control_plane_deps_dir)
             except sh.ErrorReturnCode as err:
                 click.echo(f"Error installing databases: {err.stderr.decode('utf-8')}", err=True)

@@ -26,6 +26,7 @@ class DZConfig:
         "globals",
         "control_plane",
         "networking",
+        "data_planes",
     ]
     _instance = None
 

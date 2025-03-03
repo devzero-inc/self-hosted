@@ -22,20 +22,17 @@ class OrderedGroup(click.Group):
     def list_commands(self, ctx):
         return self.commands
 
-
 @click.group()
 @click.version_option(VERSION)
 def cli():
     """DevZero Kubernetes Cluster Installation Tool"""
     pass
 
-
 # Global configuration commands
 @cli.group()
 def global_config():
     """Defines global configuration for various commands"""
     pass
-
 
 @global_config.command("cloud-provider")
 @click.argument(
@@ -47,7 +44,6 @@ def set_cloud_provider(provider):
     cfg = DZConfig().data
     cfg.globals.provider = provider
     cfg.save()
-
 
 # Check commands
 @cli.group(name="check")
@@ -71,7 +67,6 @@ def check_control_plane():
     """Runs control plane checks for the current cloud provider"""
     pass
 
-
 @check_control_plane.command("all")
 @click.option(
     "--force", is_flag=True, help="Force run checks even if already checked before"
@@ -87,7 +82,6 @@ def check_control_plane_all(force):
     cp.check_control_plane_cert_manager(force)
     cp.check_control_plane_chart(force)
 
-
 @check_control_plane.command("permissions")
 @click.option(
     "--force", is_flag=True, help="Force run checks even if already checked before"
@@ -96,7 +90,6 @@ def check_control_plane_permissions(force):
     """Runs permission checks for the current cloud provider"""
     provider: AWSProvider = get_provider()
     provider.control_plane_permissions(force)
-
 
 @check_control_plane.command("cluster")
 @click.option(
@@ -108,7 +101,6 @@ def check_control_plane_cluster(force):
     provider: AWSProvider = get_provider()
     provider.control_plane_cluster(force)
 
-
 @check_control_plane.command("network")
 @click.option(
     "--force", is_flag=True, help="Force run checks even if already checked before"
@@ -117,7 +109,6 @@ def check_control_plane_network(force):
     """Runs network checks for the current cloud provider"""
     provider: AWSProvider = get_provider()
     provider.control_plane_network(force)
-
 
 @check_control_plane.command("ingress")
 @click.option(
@@ -150,36 +141,55 @@ def check_data_plane():
     """Runs data plane checks for the current cloud provider"""
     pass
 
-
 @check_data_plane.command("all")
-def check_data_plane_all():
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
+def check_data_plane_all(force):
     """Runs all data-plane checks"""
-    click.echo("Running all data plane checks...")
-
+    info("Running all data plane checks...")
+    provider: AWSProvider = get_provider()
+    provider.data_plane_cluster(force)
+    provider.data_plane_network(force)
+    dp = DataPlane()
 
 @check_data_plane.command("permissions")
-def check_data_plane_permissions():
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
+def check_data_plane_permissions(force):
     """Runs permission checks for the current cloud provider"""
-    click.echo("Checking data plane permissions...")
-
+    info("Checking data plane permissions...")
+    provider: AWSProvider = get_provider()
+    provider.data_plane_permissions(force)
 
 @check_data_plane.command("network")
-def check_data_plane_network():
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
+def check_data_plane_network(force):
     """Runs network checks for the current cloud provider"""
-    click.echo("Checking data plane network...")
-
+    info("Checking data plane network...")
+    provider: AWSProvider = get_provider()
+    provider.data_plane_network(force)
 
 @check_data_plane.command("cluster")
-def check_data_plane_cluster():
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
+def check_data_plane_cluster(force):
     """Runs cluster existence checks for the current cloud provider"""
-    click.echo("Checking data plane cluster...")
-
+    info("Checking data plane cluster...")
+    provider: AWSProvider = get_provider()
+    provider.data_plane_cluster(force)
 
 @check_data_plane.command("ingress")
+@click.option(
+    "--force", is_flag=True, help="Force run checks even if already checked before"
+)
 def check_data_plane_ingress():
     """Runs cluster existence checks kubernetes ingresses"""
-    click.echo("Checking data plane ingress...")
-
+    info("Checking data plane ingress...")
 
 # Data plane Helm chart checks
 @check_data_plane.command("rook-ceph")
@@ -190,36 +200,25 @@ def check_data_plane_rook_ceph(force):
     """Helm chart: rook-ceph"""
     DataPlane().check_data_plane_rook_ceph(force)
 
-
 @check_data_plane.command("rook-ceph-cluster")
 def check_data_plane_rook_ceph_cluster():
     """Helm chart: rook-ceph-cluster"""
     click.echo("Checking helm chart: rook-ceph-cluster")
-
 
 @check_data_plane.command("ingress-nginx")
 def check_data_plane_ingress_nginx():
     """Helm chart: ingress-nginx"""
     click.echo("Checking helm chart: ingress-nginx")
 
-
 @check_data_plane.command("cert-manager")
 def check_data_plane_cert_manager():
     """Helm chart: cert-manager"""
     click.echo("Checking helm chart: cert-manager")
 
-
-@check_data_plane.command("cedana")
-def check_data_plane_cedana():
-    """Helm chart: cedana"""
-    click.echo("Checking helm chart: cedana")
-
-
 @check_data_plane.command("metacontroller")
 def check_data_plane_metacontroller():
     """Helm chart: metacontroller"""
     click.echo("Checking helm chart: metacontroller")
-
 
 @check_data_plane.command("prometheus")
 @click.option(
@@ -237,11 +236,11 @@ def install(force):
     """Installs various required resources"""
     pass
 
-
 @install.command("all")
 def install_all():
     """Runs all checks"""
-    click.echo("Running all checks...")
+    info("Running all checks...")
+    install_control_plane_all()
 
 # Control plane commands
 @install.group("control-plane", cls=OrderedGroup)
@@ -252,7 +251,7 @@ def install_control_plane():
 @install_control_plane.command("all")
 def install_control_plane_all():
     """Runs all control-plane checks"""
-    click.echo("Installing control plane...")
+    info("Installing control plane...")
     cp = ControlPlane()
     cp.install_control_plane_ingress()
     cp.install_control_plane_cert_manager()
@@ -267,12 +266,12 @@ def install_control_plane_ingress():
 @install_control_plane.command("certificate")
 def install_control_plane_certificate():
     """Runs cluster existence checks kubernetes ingresses"""
-    # ControlPlane().install_control_plane_cert_manager()
+    ControlPlane().install_control_plane_cert_manager()
 
 @install_control_plane.command("deps")
-def install_control_plane_chart_deps():
+def install_control_plane_deps():
     """Helm chart: control-plane"""
-    # ControlPlane().install_control_plane_chart_deps()
+    ControlPlane().install_control_plane_deps()
 
 @install_control_plane.command("chart")
 def install_control_plane_chart():

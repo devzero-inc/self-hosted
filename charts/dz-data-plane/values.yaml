@@ -1,6 +1,6 @@
 ## @section Devzero
 devzero:
-  ## @param devzero.teamId Team identifier
+  ## @param devzero.teamId Team identifier. Only needed for SaaS self-hosted data plane
   teamId: ""
   ## @param devzero.region Base Region
   region: ""
