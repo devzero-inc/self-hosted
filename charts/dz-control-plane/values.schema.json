@@ -1572,6 +1572,11 @@
                             "description": "Self-hosted mode",
                             "default": "True"
                         },
+                        "KATA_NODE_SELECTOR": {
+                            "type": "string",
+                            "description": "Node selector for pods that use Kata runtime",
+                            "default": "kata-devpod-node"
+                        },
                         "USE_INSECURE_REGISTRY": {
                             "type": "string",
                             "description": "Use insecure registry",
