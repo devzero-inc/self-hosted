@@ -1,4 +1,4 @@
-echo "Checking pods in namespace:  devzero"
+echo "Checking pods in namespace: devzero"
 PODS=$(kubectl get pods -n devzero --no-headers)
 
 if [[ -z "$PODS" ]]; then
