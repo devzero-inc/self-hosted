@@ -1,5 +1,5 @@
 apiVersion: v2
-name: dz-data-plane-deps
+name: data-plane-deps
 description: DevZero Self Hosted Data Plane
 type: application
 version: 0.0.2
