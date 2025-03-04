@@ -93,6 +93,14 @@ jobs:
           echo "" >> self-hosted/terraform/examples/aws/base-cluster/terraform.tfvars
           echo "# Setting eks cluster version" >> self-hosted/terraform/examples/aws/base-cluster/terraform.tfvars
           echo "cluster_version = \"${{ matrix.eks_version }}\"" >> self-hosted/terraform/examples/aws/base-cluster/terraform.tfvars
+
+          # DevZero currently doesnt publish a base AMI for Kubernetes 1.25, but local testing has indicated that we can use the 1.30 version
+          # AMIs available https://us-west-1.console.aws.amazon.com/ec2/home?region=us-west-1#Images:visibility=public-images;imageName=:devzero;v=3
+          # TODO (debo): this is currently kind of a hack to make sure that the 1.25 test uses the 1.30 node
+          if [ "${{ matrix.eks_version }}" = "1.25" ]; then
+            echo "# Using ami_version 1.30 for EKS 1.25 as a workaround" >> self-hosted/terraform/examples/aws/base-cluster/terraform.tfvars
+            echo "ami_version = \"1.30\"" >> self-hosted/terraform/examples/aws/base-cluster/terraform.tfvars
+          fi
   
       - name: Initialize and Apply Terraform (Base Cluster)
         run: |
