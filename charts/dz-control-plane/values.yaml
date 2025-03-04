@@ -42,7 +42,7 @@ image:
   ## @param image.repository Devzero container image repository
   repository: docker.io/devzeroinc
   ## @param image.tag Devzero container image tag
-  tag: "v1.0.1"
+  tag: "v1.0.3"
   ## @param image.pullPolicy Container pull policy
   pullPolicy: IfNotPresent
   # -- Optionally specify an array of imagePullSecrets
