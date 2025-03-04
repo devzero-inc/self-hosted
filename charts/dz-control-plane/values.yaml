@@ -818,6 +818,9 @@ polland:
     ## @param polland.env.SELF_HOSTED Self-hosted mode
     SELF_HOSTED: "True"
 
+    ## @param polland.env.KATA_NODE_SELECTOR Node selector for pods that use Kata runtime
+    KATA_NODE_SELECTOR: "kata-devpod-node"
+
     ## @param polland.env.USE_INSECURE_REGISTRY Use insecure registry
     USE_INSECURE_REGISTRY: "True"
     ## @param polland.env.USE_ECR_REGISTRY Use ECR registry
