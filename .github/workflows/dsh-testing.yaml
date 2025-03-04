@@ -102,8 +102,9 @@ jobs:
           if [ "${{ matrix.eks_version }}" == "1.25" ]; then
             echo "# Using ami_version 1.30 for EKS 1.25 as a workaround" >> self-hosted/terraform/examples/aws/base-cluster/terraform.tfvars
             echo "ami_version = \"1.30\"" >> self-hosted/terraform/examples/aws/base-cluster/terraform.tfvars
+            echo "" >> self-hosted/terraform/examples/aws/base-cluster/terraform.tfvars
           fi
-  
+
       - name: Initialize and Apply Terraform (Base Cluster)
         run: |
           cd self-hosted/terraform/examples/aws/base-cluster
