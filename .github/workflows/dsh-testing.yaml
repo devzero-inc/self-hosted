@@ -121,7 +121,7 @@ jobs:
       - name: Deploy Control Plane Dependencies (and modify domains)
         run: |
           cd self-hosted/charts/dz-control-plane-deps
-          find values -type f -exec sed -i'.bak' 's/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g' {} \; && find values -name "*.bak" -delete
+          find values -type f -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find values -name "*.bak" -delete
           make install
 
       - name: Update values.yaml for dz-control-plane
@@ -141,7 +141,7 @@ jobs:
         run: |
           cd self-hosted/charts/dz-control-plane
           make add-docker-creds
-          find . -name "values.yaml" -exec sed -i'.bak' 's/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g' {} \; && find . -name "values.yaml.bak" -delete
+          find . -name "values.yaml" -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find . -name "values.yaml.bak" -delete
           make install
 
       - name: Validate Control Plane
@@ -156,13 +156,13 @@ jobs:
       - name: Deploy Data Plane Dependencies
         run: |
           cd self-hosted/charts/dz-data-plane-deps
-          find values -type f -exec sed -i'.bak' 's/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g' {} \; && find values -name "*.bak" -delete
+          find values -type f -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find values -name "*.bak" -delete
           make install
 
       - name: Deploy DevZero Data Plane
         run: |
           cd self-hosted/charts/dz-data-plane
-          find . -name "values.yaml" -exec sed -i'.bak' 's/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g' {} \; && find . -name "values.yaml.bak" -delete
+          find . -name "values.yaml" -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find . -name "values.yaml.bak" -delete
           make install
 
       - name: Validate Data Plane
@@ -197,13 +197,13 @@ jobs:
       - name: '[terraform] Destroy cluster-extensions'
         if: always()
         run: |
-          cd self-hosted/terraform/examples/aws/cluster-extenions
+          cd self-hosted/terraform/examples/aws/cluster-extensions
           terraform destroy -auto-approve
     
       - name: '[terraform] Destroy base-cluster'
         if: always()
         run: |
-          cd self-hosted/terraform/examples/aws/cluster-extenions
+          cd self-hosted/terraform/examples/aws/base-cluster
           terraform destroy -auto-approve
       
       - name: '[aws-cli] clean up volumes explicitly'
