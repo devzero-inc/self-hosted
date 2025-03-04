@@ -31,16 +31,12 @@ class ControlPlane:
                 if not force:
                     return
             else:
-                click.echo("Control plane is not installed")
+                info("Control plane is not installed")
         except RuntimeError as e:
             self.error(str(e))
 
         globals_cfg = DZConfig().data.globals
         control_plane_cfg = DZConfig().data.control_plane
-
-        if force:
-            del globals_cfg.control_plane
-            globals_cfg.save()
 
         if not globals_cfg.domain_name or force:
             globals_cfg.domain_name = click.prompt("Please provide a domain name for the control plane.\n Examples: example.com or subdomain.example.com", prompt_suffix="\n")

@@ -250,6 +250,8 @@ class AWSProvider:
             self.config.save()
 
         config = self.config.data_planes[region]
+        self.config.data_planes.current_region = region
+        self.config.save()
 
         if hasattr(config, "cluster_complete") and config.aws.cluster_complete and not force:
             click.echo("Cluster configuration already exists, skipping...")

@@ -16,6 +16,7 @@ nodeLabeler:
 
 ## @section Credentials Configuration
 credentials:
+  enable: true
   ## @param credentials.registry Container registry URL
   registry: ""
   ## @param credentials.username Registry username

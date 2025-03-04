@@ -25,7 +25,6 @@ class DZConfig:
     NAMESPACES = [
         "globals",
         "control_plane",
-        "networking",
         "data_planes",
     ]
     _instance = None

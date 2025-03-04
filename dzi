@@ -57,7 +57,7 @@ def check(force):
 @check.command("all")
 def check_all():
     """Runs all checks"""
-    click.echo("Running all checks...")
+    info("Running all checks...")
     check_control_plane_all()
     check_data_plane_all()
 
@@ -152,6 +152,9 @@ def check_data_plane_all(force):
     provider.data_plane_cluster(force)
     provider.data_plane_network(force)
     dp = DataPlane()
+    dp.check_data_plane_ingress(force)
+    dp.check_data_plane_rook_ceph(force)
+    dp.check_data_plane_chart(force)
 
 @check_data_plane.command("permissions")
 @click.option(
@@ -187,9 +190,10 @@ def check_data_plane_cluster(force):
 @click.option(
     "--force", is_flag=True, help="Force run checks even if already checked before"
 )
-def check_data_plane_ingress():
+def check_data_plane_ingress(force):
     """Runs cluster existence checks kubernetes ingresses"""
     info("Checking data plane ingress...")
+    DataPlane().check_data_plane_ingress(force)
 
 # Data plane Helm chart checks
 @check_data_plane.command("rook-ceph")
@@ -200,33 +204,13 @@ def check_data_plane_rook_ceph(force):
     """Helm chart: rook-ceph"""
     DataPlane().check_data_plane_rook_ceph(force)
 
-@check_data_plane.command("rook-ceph-cluster")
-def check_data_plane_rook_ceph_cluster():
-    """Helm chart: rook-ceph-cluster"""
-    click.echo("Checking helm chart: rook-ceph-cluster")
-
 @check_data_plane.command("ingress-nginx")
-def check_data_plane_ingress_nginx():
-    """Helm chart: ingress-nginx"""
-    click.echo("Checking helm chart: ingress-nginx")
-
-@check_data_plane.command("cert-manager")
-def check_data_plane_cert_manager():
-    """Helm chart: cert-manager"""
-    click.echo("Checking helm chart: cert-manager")
-
-@check_data_plane.command("metacontroller")
-def check_data_plane_metacontroller():
-    """Helm chart: metacontroller"""
-    click.echo("Checking helm chart: metacontroller")
-
-@check_data_plane.command("prometheus")
 @click.option(
     "--force", is_flag=True, help="Force run checks even if already checked before"
 )
-def check_data_plane_prometheus(force):
-    """Helm chart: prometheus"""
-    DataPlane().check_data_plane_prometheus(force)
+def check_data_plane_ingress_nginx(force):
+    """Helm chart: ingress-nginx"""
+    DataPlane().check_data_plane_ingress(force)
 
 @cli.group(name="install")
 @click.option(
@@ -241,6 +225,7 @@ def install_all():
     """Runs all checks"""
     info("Running all checks...")
     install_control_plane_all()
+    install_data_plane_all()
 
 # Control plane commands
 @install.group("control-plane", cls=OrderedGroup)
@@ -277,6 +262,41 @@ def install_control_plane_deps():
 def install_control_plane_chart():
     """Helm chart: control-plane"""
     ControlPlane().install_control_plane_chart()
+
+@install.group("data-plane", cls=OrderedGroup)
+def install_data_plane():
+    """Runs data plane checks for the current cloud provider"""
+    pass
+
+@install_data_plane.command("all")
+def install_data_plane_all():
+    """Runs all data-plane checks"""
+    info("Installing data plane...")
+    dp = DataPlane()
+    dp.install_data_plane_ingress()
+    dp.install_data_plane_rook_ceph()
+    dp.install_data_plane_deps()
+    dp.install_data_plane_chart()
+
+@install_data_plane.command("ingress")
+def install_data_plane_ingress():
+    """Runs cluster existence checks kubernetes ingresses"""
+    DataPlane().install_data_plane_ingress()
+
+@install_data_plane.command("rook-ceph")
+def install_data_plane_rook_ceph():
+    """Helm chart: rook-ceph"""
+    DataPlane().install_data_plane_rook_ceph()
+
+@install_data_plane.command("deps")
+def install_data_plane_deps():
+    """Helm chart: rook-ceph"""
+    DataPlane().install_data_plane_deps()
+
+@install_data_plane.command("chart")
+def install_data_plane_chart():
+    """Helm chart: rook-ceph"""
+    DataPlane().install_data_plane_chart()
 
 if __name__ == "__main__":
     cli()
