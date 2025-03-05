@@ -68,7 +68,7 @@
                 "tag": {
                     "type": "string",
                     "description": "Devzero container image tag",
-                    "default": "v1.0.1"
+                    "default": "v1.0.3"
                 },
                 "pullPolicy": {
                     "type": "string",
