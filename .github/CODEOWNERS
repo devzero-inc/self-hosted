@@ -1,0 +1,27 @@
+# CODEOWNERS for DevZero Self-Hosted Repository
+# Each line is a file pattern followed by one or more owners.
+# For more details, see: https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
+
+# Default rule for any file not explicitly matched below:
+* @devzero/core
+
+# Top-level files
+/README.md               @devzero/core
+/CODE_OF_CONDUCT.md      @devzero/core
+/LICENSE                 @devzero/core
+
+# CI: Ci workflows for self hosted
+/.github/**              @devzero-inc/ci
+
+# Charts: Responsible team for Helm charts and related configuration.
+# (dz-control-plane, dz-control-plane-deps, dz-data-plane, dz-data-plane-deps)
+ /charts/                @devzero-inc/infra
+
+# DZ Installer: CLI tool for installation and validation.
+ /dz_installer/           @devzero-inc/cli
+
+# Kata: AMI building and Kata Container configuration.
+ /kata/                  @devzero-inc/infra
+
+# Terraform: Infrastructure as Code for self-hosted deployment.
+ /terraform/             @devzero-inc/infra
