@@ -95,7 +95,7 @@ For detailed instructions, refer to the specific README files within each folder
 
 ## Code of conduct
 
-This project has a [Code of Conduct](/CODE_OF_CONDUCT.md).
+This project has a [Code of Conduct](.github/CODE_OF_CONDUCT.md).
 
 ## License
 
