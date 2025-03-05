@@ -41,6 +41,7 @@ install-cert-manager:
 		REPO_APP_NAME=cert-manager \
 		VERSION=v1.16.2 \
 		NAMESPACE=cert-manager
+	@$(KUBECTL_BIN) apply -f cluster_issuer.yaml
 
 .PHONY: delete-cert-manager
 delete-cert-manager:
@@ -53,7 +54,7 @@ delete-cert-manager:
 		NAMESPACE=cert-manager
 	@$(MAKE) _delete-namespace NAMESPACE=cert-manager
 	@$(MAKE) _delete-crds CRD_NAME=cert-manager.io
-
+	@$(KUBECTL_BIN) delete -f cluster_issuer.yaml
 
 .PHONY: install-ingress-nginx
 install-ingress-nginx:
