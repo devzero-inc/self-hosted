@@ -1,0 +1,41 @@
+changelog:
+  # Exclude commits with these labels or authors from the changelog.
+  exclude:
+    labels:
+      - ignore-for-release
+  # Categories for grouping commits based on labels.
+  categories:
+    - title: "Breaking Changes 🛠"
+      labels:
+        - Semver-Major
+        - breaking-change
+    - title: "Exciting New Features 🎉"
+      labels:
+        - Semver-Minor
+        - enhancement
+        - new-feature
+        - feat
+        - feature
+    - title: "Bug Fixes 🐛"
+      labels:
+        - fix
+        - bugfix
+        - bug
+    - title: "Performance Improvements ⚡"
+      labels:
+        - performance
+    - title: "Terraform Changes 🛠"
+      labels:
+        - terraform
+    - title: "Kata Changes 🛠"
+      labels:
+        - kata
+    - title: "Helm Chart Changes 🛠"
+      labels:
+        - helm
+    - title: "DZ Installer Changes 🛠"
+      labels:
+        - dz-installer
+    - title: "Other Changes"
+      labels:
+        - "*"  # Catch-all for any labels not defined above
