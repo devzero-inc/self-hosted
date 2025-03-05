@@ -102,21 +102,7 @@ For detailed Terraform setup instructions, refer to the [Terraform README](../te
 
 ## Control Plane and CRD Setup
 
-To deploy the DevZero Control Plane and Data Plane:
-
-1. **Set up CRDs:**
-   ```bash
-   helm pull oci://registry-1.docker.io/devzeroinc/dz-data-plane-crds
-   helm install dz-control-plane-crds oci://registry-1.docker.io/devzeroinc/dz-control-plane-crds -n devzero --create-namespace
-   ```
-
-2. **Install the Control Plane:**
-   ```bash
-   helm pull oci://registry-1.docker.io/devzeroinc/dz-control-plane
-   helm install dz-control-plane oci://registry-1.docker.io/devzeroinc/dz-control-plane -n devzero --set domain=<domain_name> --set issuer.email=support@devzero.io --set credentials.registry=docker.io/devzeroinc --set credentials.username=<username> --set credentials.password=<password> --set credentials.email=<email> --set backend.licenseKey=<license_key>
-   ```
-
-For additional deployment details, refer to the [Charts README](../charts/README.md).
+To deploy the DevZero Control Plane and Data Plane refer to the [Charts README](../charts/README.md).
 
 ## Troubleshooting
 
