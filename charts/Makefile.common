@@ -1,69 +1,123 @@
 KUBECTL_BIN = $(shell which kubectl)
 HELM_BIN = $(shell which helm)
 
-#.PHONY: _install-local-helm-chart
-#_install-local-helm-chart-default:
-#	$(HELM_BIN) upgrade --install $(APP_NAME) . \
-#		--namespace $(NAMESPACE) \
-#		--create-namespace \
-#		--values $(VALUES)
-#
-#.PHONY: _install-helm-chart-default
-#_install-helm-chart-default:
-#	@$(HELM_BIN) repo add $(REPO_NAME) $(REPO_URL)
-#	@$(HELM_BIN) repo update $(REPO_NAME)
-#	$(HELM_BIN) upgrade --install $(APP_NAME) $(REPO_NAME)/$(REPO_APP_NAME) --version $(VERSION) \
-#		--namespace $(NAMESPACE) \
-#		--create-namespace \
-#		--wait
-#
-#.PHONY: _install-helm-chart
-#_install-helm-chart:
-#	@$(HELM_BIN) repo add $(REPO_NAME) $(REPO_URL)
-#	@$(HELM_BIN) repo update $(REPO_NAME)
-#	$(HELM_BIN) upgrade --install $(APP_NAME) $(REPO_NAME)/$(REPO_APP_NAME) --version $(VERSION) \
-#		--namespace $(NAMESPACE) \
-#		--create-namespace \
-#		--values values/$(APP_NAME).yaml \
-#		--values values/$(APP_NAME)_overrides.yaml
-#
-#.PHONY: _install-oci-helm-chart
-#_install-oci-helm-chart:
-#	HELM_EXPERIMENTAL_OCI=1 $(HELM_BIN) upgrade --install $(APP_NAME) $(REPO_URL)/$(REPO_NAME) --version $(VERSION) \
-#		--namespace $(NAMESPACE) \
-#		--create-namespace \
-#		--values values/$(APP_NAME).yaml \
-#		--values values/$(APP_NAME)_overrides.yaml
-#
-#.PHONY: _delete-chart
-#_delete-chart:
-#	$(HELM_BIN) delete $(APP_NAME) -n $(NAMESPACE) --ignore-not-found
-#
-#.PHONY: _delete-local-chart
-#_delete-local-chart:
-#	$(HELM_BIN) delete $(APP_NAME) -n $(NAMESPACE) --ignore-not-found
-#
-#.PHONY: _delete-namespace
-#_delete-namespace:
-#	$(KUBECTL_BIN) delete namespace $(NAMESPACE) --ignore-not-found=true
-#
-#.PHONY: _delete-crds
-#_delete-crds:
-#	$(KUBECTL_BIN) get crds -o name | grep '$(CRD_NAME)' | xargs $(KUBECTL_BIN) delete || true
-#
-#.PHONY: _kubectl
-#_kubectl:
-#	$(KUBECTL_BIN) $(COMMAND) -f $(FILE_NAME) -n $(NAMESPACE)
-#
-##################################################
-#
-# Uncomment this code, and comment the code above in a case when you,
-# can't apply helm directly and you need to apply all the templates
-# via $(KUBECTL_BIN) apply
-#
-##################################################
+# Install strategy: helm or kubectl
+INSTALL_STRATEGY = helm
+
+################################################################################
+# Generic targets for strategies and independent targets
+################################################################################
 .PHONY: _install-local-helm-chart
 _install-local-helm-chart-default:
+	@if [ "$(INSTALL_STRATEGY)" = "helm" ]; then \
+		$(MAKE) _install-local-helm-chart-default-helm; \
+	elif [ "$(INSTALL_STRATEGY)" = "kubectl" ]; then \
+		$(MAKE) _install-local-helm-chart-default-kubectl; \
+	fi
+
+.PHONY: _install-helm-chart-default
+_install-helm-chart-default:
+	@if [ "$(INSTALL_STRATEGY)" = "helm" ]; then \
+		$(MAKE) _install-helm-chart-default-helm; \
+	elif [ "$(INSTALL_STRATEGY)" = "kubectl" ]; then \
+		$(MAKE) _install-helm-chart-default-kubectl; \
+	fi
+
+	
+
+.PHONY: _install-helm-chart
+_install-helm-chart:
+	@if [ "$(INSTALL_STRATEGY)" = "helm" ]; then \
+		$(MAKE) _install-helm-chart-helm; \
+	elif [ "$(INSTALL_STRATEGY)" = "kubectl" ]; then \
+		$(MAKE) _install-helm-chart-kubectl; \
+	fi
+
+.PHONY: _install-oci-helm-chart
+_install-oci-helm-chart:
+	@if [ "$(INSTALL_STRATEGY)" = "helm" ]; then \
+		$(MAKE) _install-oci-helm-chart-helm; \
+	elif [ "$(INSTALL_STRATEGY)" = "kubectl" ]; then \
+		$(MAKE) _install-oci-helm-chart-kubectl; \
+	fi
+
+.PHONY: _delete-chart
+_delete-chart:
+	@if [ "$(INSTALL_STRATEGY)" = "helm" ]; then \
+		$(MAKE) _delete-chart-helm; \
+	elif [ "$(INSTALL_STRATEGY)" = "kubectl" ]; then \
+		$(MAKE) _delete-chart-kubectl; \
+	fi
+
+.PHONY: _delete-local-chart
+_delete-local-chart:
+	@if [ "$(INSTALL_STRATEGY)" = "helm" ]; then \
+		$(MAKE) _delete-local-chart-helm; \
+	elif [ "$(INSTALL_STRATEGY)" = "kubectl" ]; then \
+		$(MAKE) _delete-local-chart-kubectl; \
+	fi
+
+.PHONY: _delete-namespace
+_delete-namespace:
+	$(KUBECTL_BIN) delete namespace $(NAMESPACE) --ignore-not-found=true
+
+.PHONY: _delete-crds
+_delete-crds:
+	$(KUBECTL_BIN) get crds -o name | grep '$(CRD_NAME)' | xargs $(KUBECTL_BIN) delete --ignore-not-found=true || true
+
+
+################################################################################
+# Helm Strategy
+################################################################################
+.PHONY: _install-local-helm-chart-helm
+_install-local-helm-chart-default-helm:
+	$(HELM_BIN) upgrade --install $(APP_NAME) . \
+		--namespace $(NAMESPACE) \
+		--create-namespace \
+		--values $(VALUES)
+
+.PHONY: _install-helm-chart-default-helm
+_install-helm-chart-default-helm:
+	@$(HELM_BIN) repo add $(REPO_NAME) $(REPO_URL)
+	@$(HELM_BIN) repo update $(REPO_NAME)
+	$(HELM_BIN) upgrade --install $(APP_NAME) $(REPO_NAME)/$(REPO_APP_NAME) --version $(VERSION) \
+		--namespace $(NAMESPACE) \
+		--create-namespace \
+		--wait
+
+.PHONY: _install-helm-chart-helm
+_install-helm-chart-helm:
+	@$(HELM_BIN) repo add $(REPO_NAME) $(REPO_URL)
+	@$(HELM_BIN) repo update $(REPO_NAME)
+	$(HELM_BIN) upgrade --install $(APP_NAME) $(REPO_NAME)/$(REPO_APP_NAME) --version $(VERSION) \
+		--namespace $(NAMESPACE) \
+		--create-namespace \
+		--values values/$(APP_NAME).yaml \
+		--values values/$(APP_NAME)_overrides.yaml
+
+.PHONY: _install-oci-helm-chart-helm
+_install-oci-helm-chart-helm:
+	HELM_EXPERIMENTAL_OCI=1 $(HELM_BIN) upgrade --install $(APP_NAME) $(REPO_URL)/$(REPO_NAME) --version $(VERSION) \
+		--namespace $(NAMESPACE) \
+		--create-namespace \
+		--values values/$(APP_NAME).yaml \
+		--values values/$(APP_NAME)_overrides.yaml
+
+.PHONY: _delete-chart-helm
+_delete-chart-helm:
+	$(HELM_BIN) delete $(APP_NAME) -n $(NAMESPACE) --ignore-not-found
+
+.PHONY: _delete-local-chart-helm
+_delete-local-chart-helm:
+	$(HELM_BIN) delete $(APP_NAME) -n $(NAMESPACE) --ignore-not-found
+
+
+
+################################################################################
+# Kubectl Strategy
+################################################################################
+.PHONY: _install-local-helm-chart-kubectl
+_install-local-helm-chart-default-kubectl:
 	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
 
@@ -76,8 +130,8 @@ _install-local-helm-chart-default:
 
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
 
-.PHONY: _install-helm-chart-default
-_install-helm-chart-default:
+.PHONY: _install-helm-chart-default-kubectl
+_install-helm-chart-default-kubectl:
 	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
 
@@ -92,8 +146,8 @@ _install-helm-chart-default:
 
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
 
-.PHONY: _install-helm-chart
-_install-helm-chart:
+.PHONY: _install-helm-chart-kubectl
+_install-helm-chart-kubectl:
 	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
 
@@ -109,8 +163,8 @@ _install-helm-chart:
 
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
 
-.PHONY: _install-oci-helm-chart
-_install-oci-helm-chart:
+.PHONY: _install-oci-helm-chart-kubectl
+_install-oci-helm-chart-kubectl:
 	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
 
@@ -124,8 +178,8 @@ _install-oci-helm-chart:
 
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
 
-.PHONY: _delete-chart
-_delete-chart:
+.PHONY: _delete-chart-kubectl
+_delete-chart-kubectl:
 	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
 
@@ -138,8 +192,8 @@ _delete-chart:
 
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
 
-.PHONY: _delete-local-chart
-_delete-local-chart:
+.PHONY: _delete-local-chart-kubectl
+_delete-local-chart-kubectl:
 	@CURR_NS=$($(KUBECTL_BIN) config view --minify --output 'jsonpath={.contexts[0].context.namespace}')
 	@$(KUBECTL_BIN) config set-context --current --namespace=$(NAMESPACE)
 
@@ -151,10 +205,3 @@ _delete-local-chart:
 
 	$(KUBECTL_BIN) config set-context --current --namespace=$(CURR_NS)
 
-.PHONY: _delete-namespace
-_delete-namespace:
-	$(KUBECTL_BIN) delete namespace $(NAMESPACE) --ignore-not-found=true
-
-.PHONY: _delete-crds
-_delete-crds:
-	$(KUBECTL_BIN) get crds -o name | grep '$(CRD_NAME)' | xargs $(KUBECTL_BIN) delete --ignore-not-found=true || true
