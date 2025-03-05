@@ -3,12 +3,12 @@
 # For more details, see: https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
 
 # Default rule for any file not explicitly matched below:
-* @devzero/core
+* @devzero-inc/core
 
 # Top-level files
-/README.md               @devzero/core
-/CODE_OF_CONDUCT.md      @devzero/core
-/LICENSE                 @devzero/core
+/README.md               @devzero-inc/core
+/CODE_OF_CONDUCT.md      @devzero-inc/core
+/LICENSE                 @devzero-inc/core
 
 # CI: Ci workflows for self hosted
 /.github/**              @devzero-inc/ci
@@ -18,7 +18,7 @@
  /charts/                @devzero-inc/infra
 
 # DZ Installer: CLI tool for installation and validation.
- /dz_installer/           @devzero-inc/cli
+ /dz_installer/          @devzero-inc/cli
 
 # Kata: AMI building and Kata Container configuration.
  /kata/                  @devzero-inc/infra
