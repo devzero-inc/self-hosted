@@ -13,8 +13,9 @@ The **Kata AMI** is a pre-configured Amazon Machine Image designed to efficientl
 - [AWS CLI](https://aws.amazon.com/cli/) - Manages AWS resources.
 - **AWS Access Credentials** - IAM user/role with sufficient permissions.
 
-### Base AMI Requirements
-- **Amazon Linux 2023** (used as the base image for AMI creation)
+### Base AMI Options
+- **Amazon Linux 2023** 
+- **Ubuntu 22.04**
 
 For infrastructure setup, refer to the [Terraform README](../terraform/README.md).
 
@@ -34,31 +35,87 @@ cd self-hosted/kata/linux-images
   git clone https://github.com/virt-pvm/linux.git
   ```
 - Build and run the Docker container:
-  ```bash
-  docker build -t linux-image-host -f Dockerfile.host .
-  docker run -d --name linux-image-host linux-image-host
-  ```
+
+  <details open>
+  <summary>For AL2023</summary>
+   
+   ```bash
+   docker build -t linux-image-host -f Dockerfile.host .
+   docker run -d --name linux-image-host linux-image-host
+   ```
+   </details>
+   <details>
+   <summary>For Ubuntu</summary>
+   
+   ```bash
+   docker build -t linux-image-host -f Dockerfile.ubuntu-host .
+   docker run -d --name linux-image-host linux-image-host
+   ```
+   </details> 
+   <br>
 - Copy package files to the Packer directory:
-  ```bash
-  docker cp linux-image-host:/kernel-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel.rpm
-  docker cp linux-image-host:/kernel-headers-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel-headers.rpm
-  docker cp linux-image-host:/kernel-devel-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel-devel.rpm
-  ```
+
+  <details open>
+  <summary>For AL2023</summary>
+   
+   ```bash
+   docker cp linux-image-host:/kernel-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel.rpm
+   docker cp linux-image-host:/kernel-headers-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel-headers.rpm
+   docker cp linux-image-host:/kernel-devel-6.7.0_dz_pvm_host-1.x86_64.rpm /packer/kernel-devel.rpm
+   ```
+   </details>
+   <details>
+   <summary>For Ubuntu</summary>
+   
+   ```bash
+   docker cp linux-image-host:/linux-image-6.7.0-rc6-dz-pvm-host_6.7.0-rc6-g040ea4a66ec9-1_amd64.deb /packer/ubuntu/kernel-image.deb
+   docker cp linux-image-host:/linux-headers-6.7.0-rc6-dz-pvm-host_6.7.0-rc6-g040ea4a66ec9-1_amd64.deb /packer/ubuntu/kernel-headers.deb
+   docker cp linux-image-host:/linux-libc-dev_6.7.0-rc6-g040ea4a66ec9-1_amd64.deb /packer/ubuntu/kernel-libc-dev.deb
+   ```
+   </details> 
 
 ### 3. Build the Guest Environment
+
+<details open>
+<summary>For AL2023</summary>
 
 ```bash
 docker build -t linux-image-guest -f Dockerfile.guest .
 docker run -d --name linux-image-guest linux-image-guest
-docker cp linux-image-guest:/guest-vmlinux /packer
+docker cp linux-image-guest:/guest-vmlinux /packer 
 ```
+</details>
+<details>
+<summary>For Ubuntu</summary>
+
+```bash
+docker build -t linux-image-guest -f Dockerfile.ubuntu-guest .
+docker run -d --name linux-image-guest linux-image-guest
+docker cp linux-image-guest:/guest-vmlinux /packer/ubuntu 
+```
+</details> 
 
 ### 4. Build the AMI with Packer
 
+<details open>
+<summary>For AL2023</summary>
+
 ```bash
+cd ../packer 
 packer init .
-packer build .
+packer build --var-file=private.pkrvars.hcl eks-al2023.pkr.hcl 
 ```
+</details>
+<details>
+<summary>For Ubuntu</summary>
+
+```bash
+cd ../packer/ubuntu 
+packer init .
+packer build --var-file=private.pkrvars.hcl eks-ubuntu.pkr.hcl
+```
+</details>
+<br>
 
 Upon successful build, Packer will output AMI IDs for multiple AWS regions:
 
@@ -70,32 +127,65 @@ us-west-1: ami-yyyyyyyyyyyyyyyyy
 ## Integrating the AMI with Terraform
 
 1. **Navigate to the Terraform Deployment Directory:**
+
    ```bash
    cd ../../terraform/examples/aws/base-cluster
    ```
 
 2. **Update the AMI ID:**
-   In `main.tf`, replace the existing `ami_id` under `module "kata_node_group"` with the new AMI ID:
-   ```bash
-   ami_id = "ami-xxxxxxxxxxxxxxxxx"
-   ```
+
+   <details open>
+   <summary>For AL2023</summary>
+
+      In `main.tf`, replace the existing `ami_id` under `module "kata_node_group"` with the new AMI ID:
+
+      ```bash
+      ami_id = "ami-xxxxxxxxxxxxxxxxx"
+      ```
+   </details>
+   <details>
+   <summary>For Ubuntu</summary>
+
+      In `main.tf`, replace the existing `ami_id` under `module "ubuntu_kata_node_group"` with the new AMI ID:
+      
+      ```bash
+      ami_id = "ami-xxxxxxxxxxxxxxxxx"
+      ```
+   </details> 
+   <br>
 
 3. **Deploy the Infrastructure:**
-   ```bash
-   terraform init
-   terraform apply
-   ```
+
+   <details open>
+   <summary>For AL2023</summary>
+
+      ```bash
+      terraform init
+      terraform apply
+      ```
+   </details>
+   <details>
+   <summary>For Ubuntu</summary>
+
+      ```bash
+      terraform init
+      terraform apply -var="base_image=ubuntu"
+      ```
+   </details> 
+   <br>
 
 For detailed Terraform setup instructions, refer to the [Terraform README](../terraform/README.md).
 
 ## Kubernetes Configuration
 
 1. **Update the kubeconfig:**
+
    ```bash
    aws eks update-kubeconfig --region <region> --name <cluster-name>
    ```
 
 2. **Apply the Kata RuntimeClass:**
+
    ```bash
    kubectl apply -f runtimeclass.yaml
    ```
@@ -105,12 +195,14 @@ For detailed Terraform setup instructions, refer to the [Terraform README](../te
 To deploy the DevZero Control Plane and Data Plane:
 
 1. **Set up CRDs:**
+
    ```bash
    helm pull oci://registry-1.docker.io/devzeroinc/dz-data-plane-crds
    helm install dz-control-plane-crds oci://registry-1.docker.io/devzeroinc/dz-control-plane-crds -n devzero --create-namespace
    ```
 
 2. **Install the Control Plane:**
+
    ```bash
    helm pull oci://registry-1.docker.io/devzeroinc/dz-control-plane
    helm install dz-control-plane oci://registry-1.docker.io/devzeroinc/dz-control-plane -n devzero --set domain=<domain_name> --set issuer.email=support@devzero.io --set credentials.registry=docker.io/devzeroinc --set credentials.username=<username> --set credentials.password=<password> --set credentials.email=<email> --set backend.licenseKey=<license_key>
