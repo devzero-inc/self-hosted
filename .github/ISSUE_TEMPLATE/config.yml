@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: DevZero Self-Hosted Support
+    url: https://www.devzero.io/support
+    about: For questions or issues regarding DevZero Self-Hosted, please email [support@devzero.io](mailto:support@devzero.io) or visit our website.
+  - name: Feature Requests and Enhancements
+    url: https://www.devzero.io
+    about: To suggest new features or enhancements for DevZero Self-Hosted, please submit a feature request using the appropriate template.
+  - name: Documentation Feedback
+    url: https://www.devzero.io/docs
+    about: To report issues or suggest improvements to our documentation, please submit a documentation issue.

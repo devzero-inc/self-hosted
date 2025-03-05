@@ -1,0 +1,84 @@
+name: Bug Report
+description: Let us know about an unexpected error, crash, or incorrect behavior in DevZero Self-Hosted.
+labels: ["bug", "new"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Thank you for opening a bug report.
+
+        This issue tracker is reserved for reporting bugs that affect the core functionality of DevZero Self-Hosted, including issues with infrastructure provisioning (Terraform), deployment (Helm charts), CLI tools (DZ Installer), or AMI builds (Kata).
+
+        For general questions or usage support, please visit [devzero.io](https://www.devzero.io) or email [support@devzero.io](mailto:support@devzero.io).
+
+        ## If your issue relates to a specific component:
+        - **Terraform (infrastructure provisioning):** Please mention "Terraform" in the report.
+        - **Helm Charts (deployment):** Please mention "Helm" or "charts".
+        - **DZ Installer (CLI tool):** Please mention "dz_installer".
+        - **Kata (AMI builds):** Please mention "Kata".
+        - **Other or general issues:** Please provide as much context as possible.
+  - type: textarea
+    id: devzero-version
+    attributes:
+      label: DevZero Self-Hosted Version
+      description: |
+        Please provide the version information. Run the relevant command (e.g. `devzero --version`) or check your deployment details.
+      render: shell
+      placeholder: ...output of `devzero --version`...
+      value: ""
+    validations:
+      required: true
+  - type: textarea
+    id: affected-component
+    attributes:
+      label: Affected Component
+      description: Specify which component is affected (e.g., Terraform, Helm, dz_installer, Kata).
+      placeholder: e.g. "Terraform", "dz_installer", "charts", "Kata"
+      value: ""
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to Reproduce
+      description: |
+        List the steps required to reproduce the issue. For example:
+          1. Provision the environment using Terraform.
+          2. Run the DZ Installer command to initialize.
+      placeholder: |
+        1. ...
+        2. ...
+      value: ""
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What should have happened?
+      placeholder: What should have happened?
+      value: ""
+    validations:
+      required: true
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: What happened instead?
+      value: ""
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any extra context (e.g. environment details, special configuration) that might help us investigate the issue.
+      placeholder: Additional context...
+      value: ""
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        **Note:** Ensure you have provided a **Title** for the issue. If the submit button is disabled after filling out the required fields, double-check your title.
