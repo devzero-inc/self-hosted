@@ -2,6 +2,7 @@ include ../Makefile.common
 
 .PHONY: install
 install:
+	@$(MAKE) _create-namespace NAMESPACE=devzero-self-hosted
 	@$(MAKE) _install-local-helm-chart-default \
 		APP_NAME=devzero-data-plane \
 		NAMESPACE=devzero-self-hosted \
@@ -13,6 +14,7 @@ delete:
 		APP_NAME=devzero-data-plane \
 		NAMESPACE=devzero-self-hosted \
 		VALUES=values.yaml
+	@$(MAKE) _delete-namespace NAMESPACE=devzero-self-hosted
 
 .PHONY: docs
 docs:

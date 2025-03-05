@@ -15,7 +15,7 @@
         "domain": {
             "type": "string",
             "description": "Domain name for the installation",
-            "default": "devzero.internal"
+            "default": "example.com"
         },
         "credentials": {
             "type": "object",
@@ -68,7 +68,7 @@
                 "tag": {
                     "type": "string",
                     "description": "Devzero container image tag",
-                    "default": "v1.0.1"
+                    "default": "v1.0.3"
                 },
                 "pullPolicy": {
                     "type": "string",
@@ -1572,6 +1572,11 @@
                             "description": "Self-hosted mode",
                             "default": "True"
                         },
+                        "KATA_NODE_SELECTOR": {
+                            "type": "string",
+                            "description": "Node selector for pods that use Kata runtime",
+                            "default": "kata-devpod-node"
+                        },
                         "USE_INSECURE_REGISTRY": {
                             "type": "string",
                             "description": "Use insecure registry",
@@ -1610,7 +1615,7 @@
                         "DOCKER_REGISTRY": {
                             "type": "string",
                             "description": "Use custom docker registry",
-                            "default": "docker-registry.devzero.svc.cluster.local:5000"
+                            "default": "docker-registry.example.com"
                         },
                         "DEVBOX_INGRESS_CLASS_NAME": {
                             "type": "string",

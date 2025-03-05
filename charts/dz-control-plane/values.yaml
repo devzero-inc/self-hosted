@@ -14,7 +14,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 ## @param domain Domain name for the installation
-domain: "devzero.internal"
+domain: "example.com"
 
 ## @section Credentials Configuration
 credentials:
@@ -42,7 +42,7 @@ image:
   ## @param image.repository Devzero container image repository
   repository: docker.io/devzeroinc
   ## @param image.tag Devzero container image tag
-  tag: "v1.0.1"
+  tag: "v1.0.3"
   ## @param image.pullPolicy Container pull policy
   pullPolicy: IfNotPresent
   # -- Optionally specify an array of imagePullSecrets
@@ -452,9 +452,9 @@ hydra:
     #             {
     #               "Name": "901a", 
     #               "RegionID": 901,
-    #               "HostName": "your.hostname.com", // for private IP deployments, use the server IP
-    #               "IPv4": "1.1.1.1", // IP address of the machine
-    #               "IPv6": "1608:f740:f::ab", // IPv6 address of the machine
+    #               "HostName": "your.hostname.com", // for private IP deployments, use the private IP of the VPS
+    #               "IPv4": "1.1.1.1", // IP address of the VPS
+    #               "IPv6": "1608:f740:f::ab", // IPv6 address of the VPS
     #               "InsecureForTests": true // set this true for private IP deploys, false otherwise
     #             }
     #           ]
@@ -818,6 +818,9 @@ polland:
     ## @param polland.env.SELF_HOSTED Self-hosted mode
     SELF_HOSTED: "True"
 
+    ## @param polland.env.KATA_NODE_SELECTOR Node selector for pods that use Kata runtime
+    KATA_NODE_SELECTOR: "kata-devpod-node"
+
     ## @param polland.env.USE_INSECURE_REGISTRY Use insecure registry
     USE_INSECURE_REGISTRY: "True"
     ## @param polland.env.USE_ECR_REGISTRY Use ECR registry
@@ -835,7 +838,7 @@ polland:
     LOGSRV_DEFAULT_REGION: "elasticmq"
 
     ## @param polland.env.DOCKER_REGISTRY Use custom docker registry
-    DOCKER_REGISTRY: "docker-registry.devzero.svc.cluster.local:5000"
+    DOCKER_REGISTRY: "docker-registry.example.com"
 
     ## @param polland.env.DEVBOX_INGRESS_CLASS_NAME Use custom nginx ingress controller
     DEVBOX_INGRESS_CLASS_NAME: "devzero-data-ingress"

@@ -1,13 +1,13 @@
 ## @section Devzero
 devzero:
-  ## @param devzero.teamId Team identifier
+  ## @param devzero.teamId Team identifier. Only needed for SaaS self-hosted data plane
   teamId: ""
   ## @param devzero.region Base Region
   region: ""
   ## @section Vault
   vault:
     ## @param devzero.vault.server Vault server
-    server: "https://csi.devzero.io"
+    server: "https://csi.example.com"
 
 ## @section Node Labeler
 nodeLabeler:
@@ -16,6 +16,7 @@ nodeLabeler:
 
 ## @section Credentials Configuration
 credentials:
+  enable: true
   ## @param credentials.registry Container registry URL
   registry: ""
   ## @param credentials.username Registry username

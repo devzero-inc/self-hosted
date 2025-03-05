@@ -57,6 +57,10 @@ _delete-local-chart:
 		$(MAKE) _delete-local-chart-kubectl; \
 	fi
 
+.PHONY: _create-namespace
+_create-namespace:
+	$(KUBECTL_BIN) get namespace $(NAMESPACE) || $(KUBECTL_BIN) create namespace $(NAMESPACE)
+
 .PHONY: _delete-namespace
 _delete-namespace:
 	$(KUBECTL_BIN) delete namespace $(NAMESPACE) --ignore-not-found=true

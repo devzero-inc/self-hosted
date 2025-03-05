@@ -2,6 +2,7 @@ include ../Makefile.common
 
 .PHONY: install
 install:
+	@$(MAKE) _create-namespace NAMESPACE=devzero
 	@$(MAKE) _install-local-helm-chart-default \
 		APP_NAME=devzero \
 		NAMESPACE=devzero \

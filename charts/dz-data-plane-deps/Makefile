@@ -129,10 +129,8 @@ install-prometheus:
 		REPO_APP_NAME=prometheus \
 		VERSION=26.0.1 \
 		NAMESPACE=devzero
-	@$(MAKE) _kubectl \
-		COMMAND=apply \
-		FILE_NAME=./values/vclustermonitor.yaml \
-		NAMESPACE=devzero
+
+	@$(KUBECTL_BIN) apply -f ./values/vclustermonitor.yaml -n devzero
 
 .PHONY: delete-prometheus
 delete-prometheus:
