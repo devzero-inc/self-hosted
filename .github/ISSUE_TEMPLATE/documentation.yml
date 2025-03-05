@@ -7,26 +7,24 @@ body:
       value: |
         # Thank you for submitting a documentation issue.
 
-        Please report any problems or suggest improvements for our DevZero Self-Hosted documentation. Our docs are available at [devzero.io/docs](https://www.devzero.io/docs).
+        Please report any problems or suggest improvements for our DevZero Self-Hosted documentation. Our docs are available at [devzero.io/docs](https://www.devzero.io/docs) and each component has README.md file available.
 
         For product bugs or feature requests, please use the appropriate template or contact [support@devzero.io](mailto:support@devzero.io).
   - type: textarea
     id: devzero-version
     attributes:
       label: DevZero Self-Hosted Version
-      description: Provide the version details (e.g., output of `devzero --version` or your deployment version).
+      description: Provide the version details (e.g. `v0.1.0`) of DevZero Self-Hosted.
       render: shell
-      placeholder: ...output of `devzero --version`...
-      value: ""
+      placeholder: e.g. `v0.1.0`
     validations:
       required: true
   - type: textarea
     id: affected-pages
     attributes:
       label: Affected Pages
-      description: Provide links or names of the documentation pages relevant to your issue.
+      description: Provide links or names of the documentation pages relevant to your issue, or README.md files.
       placeholder: e.g. "https://www.devzero.io/docs/..."
-      value: ""
     validations:
       required: false
   - type: textarea
@@ -35,7 +33,6 @@ body:
       label: Documentation Issue Description
       description: Describe the issue or suggestion for improvement in the documentation.
       placeholder: Describe the issue...
-      value: ""
     validations:
       required: true
   - type: textarea
@@ -45,7 +42,6 @@ body:
       description: |
           Describe what changes would fix the issue or improve the documentation. Examples, rewording, or additional content suggestions are welcome.
       placeholder: Describe your proposal...
-      value: ""
     validations:
       required: false
   - type: textarea
@@ -58,7 +54,6 @@ body:
           - #123
         ```
       placeholder: e.g. "- #123"
-      value: ""
     validations:
       required: false
   - type: markdown

@@ -9,32 +9,26 @@ body:
 
         This issue tracker is reserved for reporting bugs that affect the core functionality of DevZero Self-Hosted, including issues with infrastructure provisioning (Terraform), deployment (Helm charts), CLI tools (DZ Installer), or AMI builds (Kata).
 
-        For general questions or usage support, please visit [devzero.io](https://www.devzero.io) or email [support@devzero.io](mailto:support@devzero.io).
-
-        ## If your issue relates to a specific component:
-        - **Terraform (infrastructure provisioning):** Please mention "Terraform" in the report.
-        - **Helm Charts (deployment):** Please mention "Helm" or "charts".
-        - **DZ Installer (CLI tool):** Please mention "dz_installer".
-        - **Kata (AMI builds):** Please mention "Kata".
-        - **Other or general issues:** Please provide as much context as possible.
+        For general questions or usage support, please visit [devzero.io/docs](https://www.devzero.io/docs/admin/install) or email [support@devzero.io](mailto:support@devzero.io).
+  - type: dropdown
+    attributes:
+      label: With what part of DevZero Self-Hosted are you experiencing issues?
+      description: |
+        Select the component of DevZero Self-Hosted that is causing the issue.
+      options:
+        - terrraform 
+        - charts
+        - kata
+        - dz installer
+        - other (please specify)
   - type: textarea
     id: devzero-version
     attributes:
       label: DevZero Self-Hosted Version
       description: |
-        Please provide the version information. Run the relevant command (e.g. `devzero --version`) or check your deployment details.
+        Please provide the version information.
       render: shell
-      placeholder: ...output of `devzero --version`...
-      value: ""
-    validations:
-      required: true
-  - type: textarea
-    id: affected-component
-    attributes:
-      label: Affected Component
-      description: Specify which component is affected (e.g., Terraform, Helm, dz_installer, Kata).
-      placeholder: e.g. "Terraform", "dz_installer", "charts", "Kata"
-      value: ""
+      placeholder: e.g. `v0.1.0`
     validations:
       required: true
   - type: textarea
@@ -45,10 +39,10 @@ body:
         List the steps required to reproduce the issue. For example:
           1. Provision the environment using Terraform.
           2. Run the DZ Installer command to initialize.
+          3. Run make install
       placeholder: |
         1. ...
         2. ...
-      value: ""
     validations:
       required: true
   - type: textarea

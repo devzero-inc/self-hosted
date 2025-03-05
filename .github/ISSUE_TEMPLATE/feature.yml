@@ -10,14 +10,24 @@ body:
         Please describe the new feature or improvement you are proposing for DevZero Self-Hosted. This can be related to any component—whether it’s the Terraform modules, Helm charts, DZ Installer, Kata builds, or another aspect of the product.
 
         For questions or usage inquiries, please visit [devzero.io](https://www.devzero.io) or email [support@devzero.io](mailto:support@devzero.io).
+  - type: dropdown
+    attributes:
+      label: For what part of DevZero Self-Hosted you want to suggest a feature?
+      description: |
+        Select the component of DevZero Self-Hosted that you want to suggest a feature for.
+      options:
+        - terrraform 
+        - charts
+        - kata
+        - dz installer
+        - other (please specify)
   - type: textarea
     id: devzero-version
     attributes:
       label: DevZero Self-Hosted Version
-      description: Provide the version details (e.g., output of `devzero --version` or deployment version).
+      description: Provide the version details (e.g., `v0.1.0`) of DevZero Self-Hosted.
       render: shell
-      placeholder: ...output of `devzero --version`...
-      value: ""
+      placeholder: e.g., `v0.1.0`
     validations:
       required: true
   - type: textarea
@@ -27,7 +37,6 @@ body:
       description: |
         Describe the end goal or problem you are trying to solve. What scenario is driving this feature request?
       placeholder: Describe your use case here...
-      value: ""
     validations:
       required: true
   - type: textarea
@@ -37,7 +46,6 @@ body:
       description: |
           If you have already tried to address the problem using the existing features, describe what you tried and why it did not meet your needs.
       placeholder: What did you try?
-      value: ""
     validations:
       required: true
   - type: textarea
@@ -47,7 +55,6 @@ body:
       description: |
           Provide your proposed solution or enhancement. Include configuration examples or command line examples if possible.
       placeholder: Describe your proposal...
-      value: ""
     validations:
       required: false
   - type: textarea
@@ -56,7 +63,6 @@ body:
       label: Additional Context
       description: Any further information or context that would help us understand the request.
       placeholder: Additional context...
-      value: ""
     validations:
       required: false
   - type: markdown
