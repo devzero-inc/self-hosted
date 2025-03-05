@@ -93,6 +93,10 @@ self-hosted/
 
 For detailed instructions, refer to the specific README files within each folder.
 
+## How to Contribute
+
+We welcome contributions! Please review our [CONTRIBUTING.md](.github/CONTRIBUTING.md) for guidelines on how to get started.
+
 ## Code of conduct
 
 This project has a [Code of Conduct](/CODE_OF_CONDUCT.md).
