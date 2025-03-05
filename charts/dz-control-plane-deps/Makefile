@@ -54,7 +54,7 @@ delete-cert-manager:
 		NAMESPACE=cert-manager
 	@$(MAKE) _delete-namespace NAMESPACE=cert-manager
 	@$(MAKE) _delete-crds CRD_NAME=cert-manager.io
-	@$(KUBECTL_BIN) delete -f cluster_issuer.yaml
+	@$(KUBECTL_BIN) delete -f cluster_issuer.yaml --ignore-not-found=true
 
 .PHONY: install-ingress-nginx
 install-ingress-nginx:
