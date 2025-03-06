@@ -114,7 +114,3 @@ condition_requests = {
 | condition_resources | List of resource conditions to restrict API calls.                                                        | map(string) | {}      |    no    |
 | condition_requests  | List of request conditions to restrict API calls.                                                         | map(string) | {}      |    no    |
 | tags                | A map of tags to add to all resources.                                                                    | map(string) | {}      |    no    |
-
-
-## TODO: 
-- Allow creation of local files without creating the IAM policies.
