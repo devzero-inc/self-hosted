@@ -143,7 +143,7 @@ The Helm chart installs the following components:
 | ------------------- | ----------------------------------------------- | ---------------------- |
 | `image.repository`  | Devzero container image repository              | `docker.io/devzeroinc` |
 | `image.repository`  | Devzero container image repository              | `docker.io/devzeroinc` |
-| `image.tag`         | Devzero container image tag                     | `v1.0.1`               |
+| `image.tag`         | Devzero container image tag                     | `v1.0.3`               |
 | `image.pullPolicy`  | Container pull policy                           | `IfNotPresent`         |
 | `image.pullSecrets` | Optionally specify an array of imagePullSecrets | `["pull-secret"]`      |
 
@@ -439,6 +439,7 @@ The Helm chart installs the following components:
 | `polland.env.CELERY_FLOWER_USER`                        | Celery Flower user                               | `devzero`                                 |
 | `polland.env.CELERY_FLOWER_PASSWORD`                    | Celery Flower password                           | `devzero`                                 |
 | `polland.env.SELF_HOSTED`                               | Self-hosted mode                                 | `True`                                    |
+| `polland.env.KATA_NODE_SELECTOR`                        | Node selector for pods that use Kata runtime     | `kata-devpod-node`                        |
 | `polland.env.USE_INSECURE_REGISTRY`                     | Use insecure registry                            | `True`                                    |
 | `polland.env.USE_ECR_REGISTRY`                          | Use ECR registry                                 | `False`                                   |
 | `polland.env.USE_LOCAL_LOGSRV`                          | Use local LogSrv                                 | `True`                                    |

@@ -1,0 +1,76 @@
+name: Release To Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Type of version increment'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+
+jobs:
+  manual-tag-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ensure all tags are fetched
+
+      - name: Calculate next version
+        id: next_version
+        run: |
+          # Get the latest tag from the repo
+          latest_tag=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          echo "Latest tag: $latest_tag"
+
+          # Extract the current version
+          latest_version="${latest_tag#v}"
+          major=$(echo "$latest_version" | cut -d. -f1)
+          minor=$(echo "$latest_version" | cut -d. -f2)
+          patch=$(echo "$latest_version" | cut -d. -f3)
+
+          # Increment version based on input
+          case "${{ github.event.inputs.version_type }}" in
+            major)
+              next_major=$((major + 1))
+              next_version="$next_major.0.0"
+              ;;
+            minor)
+              next_minor=$((minor + 1))
+              next_version="$major.$next_minor.0"
+              ;;
+            patch)
+              next_patch=$((patch + 1))
+              next_version="$major.$minor.$next_patch"
+              ;;
+          esac
+
+          echo "next_version=v$next_version" >> $GITHUB_ENV
+          # Set the next version as an output
+          echo "version=v$next_version" >> $GITHUB_OUTPUT
+
+      - name: Create and push new tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure Git to use the token
+          git config --global url."https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+
+          # Create and push the tag
+          git tag "${next_version}"
+          git push origin "${next_version}"
+
+      - name: Create GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${next_version}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "Release ${next_version}" \
+              --generate-notes

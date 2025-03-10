@@ -1,0 +1,62 @@
+name: Documentation Issue
+description: Report an issue or suggest improvements to the DevZero Self-Hosted documentation.
+labels: ["documentation", "new"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Thank you for submitting a documentation issue.
+
+        Please report any problems or suggest improvements for our DevZero Self-Hosted documentation. Our docs are available at [devzero.io/docs](https://www.devzero.io/docs) and each component has README.md file available.
+
+        For product bugs or feature requests, please use the appropriate template or contact [support@devzero.io](mailto:support@devzero.io).
+  - type: textarea
+    id: devzero-version
+    attributes:
+      label: DevZero Self-Hosted Version
+      description: Provide the version details (e.g. `v0.1.0`) of DevZero Self-Hosted.
+      render: shell
+      placeholder: e.g. `v0.1.0`
+    validations:
+      required: true
+  - type: textarea
+    id: affected-pages
+    attributes:
+      label: Affected Pages
+      description: Provide links or names of the documentation pages relevant to your issue, or README.md files.
+      placeholder: e.g. "https://www.devzero.io/docs/..."
+    validations:
+      required: false
+  - type: textarea
+    id: documentation-problem
+    attributes:
+      label: Documentation Issue Description
+      description: Describe the issue or suggestion for improvement in the documentation.
+      placeholder: Describe the issue...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Changes
+      description: |
+          Describe what changes would fix the issue or improve the documentation. Examples, rewording, or additional content suggestions are welcome.
+      placeholder: Describe your proposal...
+    validations:
+      required: false
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: |
+        List any related GitHub issues (open or closed) that might be relevant to this documentation issue. For example:
+        ```
+          - #123
+        ```
+      placeholder: e.g. "- #123"
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        **Note:** Ensure you have provided a **Title** for the issue. If the submit button is disabled after filling out the required fields, double-check your title.

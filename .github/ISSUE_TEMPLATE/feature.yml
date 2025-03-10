@@ -1,0 +1,71 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for DevZero Self-Hosted.
+labels: ["enhancement", "new"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Thank you for submitting a feature request.
+
+        Please describe the new feature or improvement you are proposing for DevZero Self-Hosted. This can be related to any component—whether it’s the Terraform modules, Helm charts, DZ Installer, Kata builds, or another aspect of the product.
+
+        For questions or usage inquiries, please visit [devzero.io](https://www.devzero.io) or email [support@devzero.io](mailto:support@devzero.io).
+  - type: dropdown
+    attributes:
+      label: For what part of DevZero Self-Hosted you want to suggest a feature?
+      description: |
+        Select the component of DevZero Self-Hosted that you want to suggest a feature for.
+      options:
+        - terrraform 
+        - charts
+        - kata
+        - dz installer
+        - other (please specify)
+  - type: textarea
+    id: devzero-version
+    attributes:
+      label: DevZero Self-Hosted Version
+      description: Provide the version details (e.g., `v0.1.0`) of DevZero Self-Hosted.
+      render: shell
+      placeholder: e.g., `v0.1.0`
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: |
+        Describe the end goal or problem you are trying to solve. What scenario is driving this feature request?
+      placeholder: Describe your use case here...
+    validations:
+      required: true
+  - type: textarea
+    id: attempted-solution
+    attributes:
+      label: Attempted Solutions
+      description: |
+          If you have already tried to address the problem using the existing features, describe what you tried and why it did not meet your needs.
+      placeholder: What did you try?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: |
+          Provide your proposed solution or enhancement. Include configuration examples or command line examples if possible.
+      placeholder: Describe your proposal...
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any further information or context that would help us understand the request.
+      placeholder: Additional context...
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        **Note:** Ensure you have provided a **Title** for the issue. If the submit button is disabled after filling out the required fields, double-check your title.

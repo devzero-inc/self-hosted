@@ -41,6 +41,7 @@ install-cert-manager:
 		REPO_APP_NAME=cert-manager \
 		VERSION=v1.16.2 \
 		NAMESPACE=cert-manager
+	@$(KUBECTL_BIN) apply -f cluster_issuer.yaml
 
 .PHONY: delete-cert-manager
 delete-cert-manager:
@@ -53,7 +54,7 @@ delete-cert-manager:
 		NAMESPACE=cert-manager
 	@$(MAKE) _delete-namespace NAMESPACE=cert-manager
 	@$(MAKE) _delete-crds CRD_NAME=cert-manager.io
-
+	@$(KUBECTL_BIN) delete -f cluster_issuer.yaml --ignore-not-found=true
 
 .PHONY: install-ingress-nginx
 install-ingress-nginx:
@@ -168,7 +169,9 @@ install-timescaledb:
 		REPO_APP_NAME=cloudnative-pg \
 		VERSION=0.23.0 \
 		NAMESPACE=devzero
+
 	@$(KUBECTL_BIN) apply -f timescaledb-secret.yaml -n devzero
+
 	@$(MAKE) _install-helm-chart \
 		APP_NAME=timescaledb \
 		REPO_NAME=cnpg \
@@ -265,7 +268,7 @@ install-mimir:
 		REPO_NAME=grafana \
 		REPO_URL=https://grafana.github.io/helm-charts \
 		REPO_APP_NAME=mimir-distributed \
-		VERSION=5.6.0-weekly.321 \
+		VERSION=5.6.0 \
 		NAMESPACE=devzero
 
 .PHONY: delete-mimir

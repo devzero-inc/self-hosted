@@ -67,7 +67,7 @@ install-rook-ceph-cluster:
 		REPO_URL=https://charts.rook.io/release \
 		REPO_APP_NAME=rook-ceph-cluster \
 		VERSION=v1.14.9 \
-		NAMESPACE=dezvero-rook
+		NAMESPACE=devzero-rook
 
 .PHONY: delete-rook-ceph-cluster
 delete-rook-ceph-cluster:
@@ -77,7 +77,7 @@ delete-rook-ceph-cluster:
 		REPO_URL=https://charts.rook.io/release \
 		REPO_APP_NAME=rook-ceph-cluster \
 		VERSION=v1.14.9 \
-		NAMESPACE=dezvero-rook
+		NAMESPACE=devzero-rook
 
 .PHONY: install-metacontroller
 install-metacontroller:

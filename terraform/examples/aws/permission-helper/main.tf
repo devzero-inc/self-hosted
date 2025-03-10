@@ -84,6 +84,7 @@ locals {
 module "permission_sets" {
   source   = "terraform-aws-modules/iam/aws//modules/iam-policy"
   for_each = {for set in local.permission_sets : "${set[0]}-${set[1]}" => [set[0], set[1]]}
+  create_policy = var.create_aws_user
 
   name        = "${local.tpl_vars.CLUSTER_NAME}-${each.key}"
   path        = "/"
@@ -94,10 +95,10 @@ module "permission_sets" {
 
 
 resource "local_file" "permission_sets" {
-  for_each = var.create_local_files ? toset([for set in local.permission_sets : "${set[0]}-${set[1]}"]) : toset([])
+  for_each = var.create_local_files ? {for set in local.permission_sets : "${set[0]}-${set[1]}" => [set[0], set[1]]}  : {}
 
-  content  = module.permission_sets[each.value].policy
-  filename = "${path.module}/permissions/${each.value}.json"
+  content  = jsonencode(local.permissions_data[each.value[0]][each.value[1]])
+  filename = "${path.module}/permissions/${each.key}.json"
 }
 
 # output "yaml_debug" {
