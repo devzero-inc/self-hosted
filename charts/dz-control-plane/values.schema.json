@@ -1579,7 +1579,7 @@
                         },
                         "DEVPOD_NODE_SELECTOR": {
                             "type": "string",
-                            "description": "Node selector for workspaces",
+                            "description": "Node selector for containers that support workspaces ",
                             "default": "devpod-node"
                         },
                         "USE_INSECURE_REGISTRY": {
