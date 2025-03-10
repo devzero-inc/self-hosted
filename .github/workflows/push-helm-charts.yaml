@@ -84,10 +84,11 @@ jobs:
 
           NEW_VERSION="$MAJOR.$MINOR.$PATCH"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-          sed -i "s/^version:.*/version: $NEW_VERSION/" charts/${{ matrix.chart }}/Chart.yaml
-          sed -i "s/^appVersion:.*/appVersion: \"v$NEW_VERSION\"/" charts/${{ matrix.chart }}/Chart.yaml
 
-          cat charts/${{ matrix.chart }}/Chart.yaml
+          sed -i "s/^version:.*/version: $NEW_VERSION/" charts/${{ matrix.dir }}/Chart.yaml
+          sed -i "s/^appVersion:.*/appVersion: \"v$NEW_VERSION\"/" charts/${{ matrix.dir }}/Chart.yaml
+
+          cat charts/${{ matrix.dir }}/Chart.yaml
 
       - name: Package Helm Chart
         run: |
