@@ -23,7 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        chart: [dz-control-plane, dz-control-plane-deps, dz-data-plane, dz-data-plane-deps]
+        include:
+          - dir: dz-control-plane
+            name: control-plane
+          - dir: dz-data-plane
+            name: data-plane
+
       fail-fast: false
 
     steps:
@@ -47,7 +52,7 @@ jobs:
       - name: Get Current Chart Version
         id: get_version
         run: |
-          VERSION_FILE="charts/${{ matrix.chart }}/Chart.yaml"
+          VERSION_FILE="charts/${{ matrix.dir }}/Chart.yaml"
           CURRENT_VERSION=$(grep 'version:' $VERSION_FILE | awk '{print $2}')
           echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
 
@@ -86,17 +91,18 @@ jobs:
 
       - name: Package Helm Chart
         run: |
-          helm package charts/${{ matrix.chart }}
+          helm package charts/${{ matrix.dir }} --destination .
 
       - name: Push Helm Chart to Docker Hub (OCI)
         run: |
-          helm push ${{ matrix.chart }}-*.tgz oci://docker.io/devzeroinc
+          helm push ${{ matrix.name }}-*.tgz oci://docker.io/devzeroinc
 
       - name: Upload Updated Chart.yaml as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: chart-${{ matrix.chart }}
-          path: charts/${{ matrix.chart }}/Chart.yaml
+          name: chart-${{ matrix.dir }}
+          path: charts/${{ matrix.dir }}/Chart.yaml
+
 
   create-pr:
     name: Create Pull Request for Chart Updates
@@ -115,11 +121,11 @@ jobs:
 
       - name: Move Updated Chart.yaml to Correct Locations
         run: |
-          for chart in dz-control-plane dz-control-plane-deps dz-data-plane dz-data-plane-deps; do
-            if [ -f "downloaded_charts/chart-$chart/Chart.yaml" ]; then
-              mv "downloaded_charts/chart-$chart/Chart.yaml" "charts/$chart/Chart.yaml"
+          for chart_dir in dz-control-plane dz-data-plane; do
+            if [ -f "downloaded_charts/chart-$chart_dir/Chart.yaml" ]; then
+              mv "downloaded_charts/chart-$chart_dir/Chart.yaml" "charts/$chart_dir/Chart.yaml"
             else
-              echo "Error: Chart.yaml for $chart not found in artifact!"
+              echo "Error: Chart.yaml for $chart_dir not found in artifact!"
               exit 1
             fi
           done
