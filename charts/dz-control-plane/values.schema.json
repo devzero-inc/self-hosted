@@ -1577,6 +1577,11 @@
                             "description": "Node selector for pods that use Kata runtime",
                             "default": "kata-devpod-node"
                         },
+                        "DEVPOD_NODE_SELECTOR": {
+                            "type": "string",
+                            "description": "Node selector for containers that support workspaces",
+                            "default": "devpod-node"
+                        },
                         "USE_INSECURE_REGISTRY": {
                             "type": "string",
                             "description": "Use insecure registry",
