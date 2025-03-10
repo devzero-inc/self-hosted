@@ -440,6 +440,7 @@ The Helm chart installs the following components:
 | `polland.env.CELERY_FLOWER_PASSWORD`                    | Celery Flower password                           | `devzero`                                 |
 | `polland.env.SELF_HOSTED`                               | Self-hosted mode                                 | `True`                                    |
 | `polland.env.KATA_NODE_SELECTOR`                        | Node selector for pods that use Kata runtime     | `kata-devpod-node`                        |
+| `polland.env.DEVPOD_NODE_SELECTOR`                      | Node selector for workspaces                     | `devpod-node`                             |
 | `polland.env.USE_INSECURE_REGISTRY`                     | Use insecure registry                            | `True`                                    |
 | `polland.env.USE_ECR_REGISTRY`                          | Use ECR registry                                 | `False`                                   |
 | `polland.env.USE_LOCAL_LOGSRV`                          | Use local LogSrv                                 | `True`                                    |
