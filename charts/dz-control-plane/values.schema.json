@@ -1575,12 +1575,12 @@
                         "KATA_NODE_SELECTOR": {
                             "type": "string",
                             "description": "Node selector for pods that use Kata runtime",
-                            "default": "kata-devpod-node"
+                            "default": "node-role.kubernetes.io/kata-devpod-node"
                         },
                         "DEVPOD_NODE_SELECTOR": {
                             "type": "string",
                             "description": "Node selector for containers that support workspaces",
-                            "default": "devpod-node"
+                            "default": "node-role.kubernetes.io/devpod-node"
                         },
                         "USE_INSECURE_REGISTRY": {
                             "type": "string",
