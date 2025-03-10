@@ -821,7 +821,7 @@ polland:
     ## @param polland.env.KATA_NODE_SELECTOR Node selector for pods that use Kata runtime
     KATA_NODE_SELECTOR: "kata-devpod-node"
 
-    ## @param polland.env.DEVPOD_NODE_SELECTOR Node selector for containers that support workspaces 
+    ## @param polland.env.DEVPOD_NODE_SELECTOR Node selector for containers that support workspaces
     DEVPOD_NODE_SELECTOR: "devpod-node"
 
     ## @param polland.env.USE_INSECURE_REGISTRY Use insecure registry
