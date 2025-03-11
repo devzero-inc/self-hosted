@@ -100,3 +100,4 @@ data:
     github_webhook_secret: ""
     nats_endpoint: ""
     nats_token: ""
+    require_invite: false
