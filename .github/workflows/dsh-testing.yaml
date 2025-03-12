@@ -23,9 +23,20 @@ on:
 jobs:
   setup-and-test:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # TODO (debo/zvonimir)
+        # eks_version: ["1.25", "1.30", "1.31"]
+        eks_version: ["1.30", "1.31"]
+      fail-fast: false
+
+    name: '(base_image: ${{ github.event.inputs.base_image }}) (eks_version: ${{ matrix.eks_version }})'
+
     permissions:
       id-token: write
       contents: read
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -36,12 +47,6 @@ jobs:
           role-to-assume: arn:aws:iam::484907513542:role/github-actions-oidc-role
           aws-region: us-west-1
           role-duration-seconds: 7200
-
-      - name: Clone DevZero Self-Hosted Repository
-        env:
-          GH_PAT: ${{ secrets.GH_TOKEN }}
-        run: |
-          git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
@@ -56,16 +61,21 @@ jobs:
       - name : Add SHORT_SHA Environment Variable
         id   : short-sha
         shell: bash      
-        run  : echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+        run  : |
+          # creating a 4-char long SHA
+          echo "SHORT_SHA=`git rev-parse --short=3 HEAD`" >> $GITHUB_ENV
       
       - name : Generate unique job identifier
         id   : job-identifier
         shell: bash      
-        run  : echo "JOB_IDENTIFIER=gh-ci-${{ github.event.inputs.base_image }}-${SHORT_SHA}" >> $GITHUB_ENV
+        run  : |
+          # replace `.` in k8s version with `-` so that the same job identifier can be used in various places
+          K8S_VERSION=$(echo ${{ matrix.eks_version }} | sed 's/\./-/')
+          echo "JOB_IDENTIFIER=gh-${K8S_VERSION}-${{ github.event.inputs.base_image }}-${SHORT_SHA}" >> $GITHUB_ENV
 
       - name: Add Backend Override (Base Cluster)
         run: |
-          cd self-hosted/terraform/examples/aws/base-cluster
+          cd terraform/examples/aws/base-cluster
           cat <<EOF > backend_override.tf
           terraform {
             backend "s3" {
@@ -76,9 +86,23 @@ jobs:
           }
           EOF
 
+      - name: Set EKS version v${{ matrix.eks_version }} (Base Cluster)
+        run: |
+          echo "" >> terraform/examples/aws/base-cluster/terraform.tfvars
+          echo "# Setting eks cluster version" >> terraform/examples/aws/base-cluster/terraform.tfvars
+          echo "cluster_version = \"${{ matrix.eks_version }}\"" >> terraform/examples/aws/base-cluster/terraform.tfvars
+
+          # DevZero currently doesnt publish a base AMI for Kubernetes 1.25, but local testing has indicated that we can use the 1.30 version
+          # AMIs available https://us-west-1.console.aws.amazon.com/ec2/home?region=us-west-1#Images:visibility=public-images;imageName=:devzero;v=3
+          # TODO (debo): this is currently kind of a hack to make sure that the 1.25 test uses the 1.30 node
+          if [ "${{ matrix.eks_version }}" == "1.25" ]; then
+            echo "# Using ami_version 1.30 for EKS 1.25 as a workaround" >> terraform/examples/aws/base-cluster/terraform.tfvars
+            echo "ami_version = \"1.30\"" >> terraform/examples/aws/base-cluster/terraform.tfvars
+          fi
+  
       - name: Initialize and Apply Terraform (Base Cluster)
         run: |
-          cd self-hosted/terraform/examples/aws/base-cluster
+          cd terraform/examples/aws/base-cluster
           terraform init
           if [ "${{ github.event.inputs.base_image }}" == "al2023" ]; then
             terraform apply -auto-approve -var="cluster_name=$JOB_IDENTIFIER"
@@ -88,7 +112,7 @@ jobs:
 
       - name: Update Cluster-Extensions tfvars
         run: |
-          cat <<EOT > self-hosted/terraform/examples/aws/cluster-extensions/terraform.tfvars
+          cat <<EOT > terraform/examples/aws/cluster-extensions/terraform.tfvars
           region = "us-west-1"
           enable_cluster_autoscaler = false
           cluster_name = "$JOB_IDENTIFIER"
@@ -97,7 +121,7 @@ jobs:
 
       - name: Add Backend Override (Cluster Extensions)
         run: |
-          cd self-hosted/terraform/examples/aws/cluster-extensions
+          cd terraform/examples/aws/cluster-extensions
           cat <<EOF > backend_override.tf
           terraform {
             backend "s3" {
@@ -110,7 +134,7 @@ jobs:
 
       - name: Initialize and Apply Cluster-Extensions
         run: |
-          cd self-hosted/terraform/examples/aws/cluster-extensions
+          cd terraform/examples/aws/cluster-extensions
           terraform init
           terraform apply -auto-approve
 
@@ -120,7 +144,7 @@ jobs:
 
       - name: Deploy Control Plane Dependencies (and modify domains)
         run: |
-          cd self-hosted/charts/dz-control-plane-deps
+          cd charts/dz-control-plane-deps
           find values -type f -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find values -name "*.bak" -delete
           make install
 
@@ -132,14 +156,14 @@ jobs:
           # also setting image.pullsecrets to empty to make sure that each of the deployments dont try to pull their relevant OCI images from this registry
           # backend license key is ... needed
 
-          yq e '.credentials.enable = false | .backend.licenseKey = strenv(BACKEND_LICENSE_KEY) | .image.pullSecrets = []' -i self-hosted/charts/dz-control-plane/values.yaml
+          yq e '.credentials.enable = false | .backend.licenseKey = strenv(BACKEND_LICENSE_KEY) | .image.pullSecrets = []' -i charts/dz-control-plane/values.yaml
 
       - name: Deploy DevZero Control Plane (after configuring kubernetes to use dockerhub creds, and patching all the deployments to point to the right domain)
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          cd self-hosted/charts/dz-control-plane
+          cd charts/dz-control-plane
           make add-docker-creds
           find . -name "values.yaml" -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find . -name "values.yaml.bak" -delete
           make install
@@ -148,20 +172,20 @@ jobs:
         run: |
           echo -e "\nPods in namespace  devzero:"
           kubectl get pods -n devzero
-          chmod +x self-hosted/.github/scripts/dsh-pod-test.sh
-          self-hosted/.github/scripts/dsh-pod-test.sh
+          chmod +x .github/scripts/dsh-pod-test.sh
+          .github/scripts/dsh-pod-test.sh
           echo -e "\nIngress in namespace  devzero:"
           kubectl get ingress -n devzero
       
       - name: Deploy Data Plane Dependencies
         run: |
-          cd self-hosted/charts/dz-data-plane-deps
+          cd charts/dz-data-plane-deps
           find values -type f -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find values -name "*.bak" -delete
           make install
 
       - name: Deploy DevZero Data Plane
         run: |
-          cd self-hosted/charts/dz-data-plane
+          cd charts/dz-data-plane
           find . -name "values.yaml" -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find . -name "values.yaml.bak" -delete
           make install
 
@@ -173,37 +197,37 @@ jobs:
       - name: '[helm] Destroy data-plane'
         if: always()
         run: |
-          cd self-hosted/charts/dz-data-plane
+          cd charts/dz-data-plane
           make delete
       
       - name: '[helm] Destroy data-plane-deps'
         if: always()
         run: |
-          cd self-hosted/charts/dz-data-plane-deps
+          cd charts/dz-data-plane-deps
           make delete
 
       - name: '[helm] Destroy control-plane'
         if: always()
         run: |
-          cd self-hosted/charts/dz-control-plane
+          cd charts/dz-control-plane
           make delete
       
       - name: '[helm] Destroy control-plane-deps'
         if: always()
         run: |
-          cd self-hosted/charts/dz-control-plane-deps
+          cd charts/dz-control-plane-deps
           make delete
       
       - name: '[terraform] Destroy cluster-extensions'
         if: always()
         run: |
-          cd self-hosted/terraform/examples/aws/cluster-extensions
+          cd terraform/examples/aws/cluster-extensions
           terraform destroy -auto-approve
     
       - name: '[terraform] Destroy base-cluster'
         if: always()
         run: |
-          cd self-hosted/terraform/examples/aws/base-cluster
+          cd terraform/examples/aws/base-cluster
           terraform destroy -auto-approve
       
       - name: '[aws-cli] clean up volumes explicitly'
