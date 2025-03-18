@@ -1,0 +1,239 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: containerd-config-updater
+  namespace: kube-system
+  labels:
+    katacontainers.io/kata-runtime: "true"
+spec:
+  selector:
+    matchLabels:
+      name: containerd-config-updater
+  template:
+    metadata:
+      labels:
+        name: containerd-config-updater
+        katacontainers.io/kata-runtime: "true"
+    spec:
+      serviceAccountName: kata-deploy-sa
+      hostNetwork: true
+      hostPID: true
+      initContainers:
+      - name: install-kata
+        image: bitnami/kubectl
+        securityContext:
+          privileged: true
+        command:
+          - "sh"
+          - "-c"
+          - |
+            kubectl apply -f https://raw.githubusercontent.com/kata-containers/kata-containers/main/tools/packaging/kata-deploy/kata-deploy/base/kata-deploy.yaml
+            kubectl -n kube-system wait --timeout=10m --for=condition=Ready -l name=kata-deploy pod
+            kubectl apply -f https://raw.githubusercontent.com/kata-containers/kata-containers/main/tools/packaging/kata-deploy/runtimeclasses/kata-runtimeClasses.yaml
+
+      - name: configure-containerd
+        image: ubuntu:latest
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        command:
+          - "sh"
+          - "-c"
+          - |
+            echo "Updating containerd config..."
+            chown -R root:root /etc/containerd && chmod -R 777 /etc/containerd
+            chown -R root:root /etc/cni/net.d && chmod -R 777 /etc/cni/net.d
+            chown -R root:root /opt/kata/share/defaults/kata-containers && chmod -R 777 /opt/kata/share/defaults/kata-containers
+            cp /tmp/config.toml /etc/containerd/config.toml && 
+            cp /tmp/10-gke-ptp.conflist /etc/cni/net.d/10-gke-ptp.conflist && 
+            cp /tmp/configuration-qemu.toml /opt/kata/share/defaults/kata-containers/configuration-qemu.toml
+        volumeMounts:
+        - name: kata-bin
+          mountPath: /opt/kata/bin/
+        - name: containerd-config
+          mountPath: /etc/containerd
+          mountPropagation: Bidirectional
+        - name: cni-config
+          mountPath: /etc/cni/net.d
+          mountPropagation: Bidirectional
+        - name: config-files
+          mountPath: /tmp
+        - name: kata-config
+          mountPath: /opt/kata/share/defaults/kata-containers/
+          mountPropagation: Bidirectional
+      containers:
+      - name: pause
+        image: k8s.gcr.io/pause:3.8
+      volumes:
+      - name: kata-bin
+        hostPath:
+          path: /opt/kata/bin/
+      - name: containerd-config
+        hostPath:
+          path: /etc/containerd
+          type: DirectoryOrCreate
+      - name: cni-config
+        hostPath:
+          path: /etc/cni/net.d
+          type: DirectoryOrCreate
+      - name: kata-config
+        hostPath:
+          path: /opt/kata/share/defaults/kata-containers/
+          type: DirectoryOrCreate
+      - name: config-files
+        configMap:
+          name: containerd-config-files
+      tolerations:
+      - operator: "Exists"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: containerd-config-files
+  namespace: kube-system
+data:
+  config.toml: |
+    version = 2
+    required_plugins = ["io.containerd.grpc.v1.cri"]
+    disabled_plugins = ["io.containerd.internal.v1.restart"]
+    oom_score = -999
+
+    [debug]
+    level = "info"
+
+    [grpc]
+    gid = 119
+
+    [plugins."io.containerd.grpc.v1.cri"]
+    stream_server_address = "127.0.0.1"
+    max_container_log_line_size = 262144
+    sandbox_image = "us-central1-artifactregistry.gcr.io/gke-release/gke-release/pause:3.8@sha256:880e63f94b145e46f1b1082bb71b85e21f16b99b180b9996407d61240ceb9830"
+    image_pull_progress_timeout = "5m"
+
+    [plugins."io.containerd.grpc.v1.cri".cni]
+    bin_dir = "/home/kubernetes/bin"
+    conf_dir = "/etc/cni/net.d"
+    conf_template = ""
+
+    [plugins."io.containerd.grpc.v1.cri".containerd]
+    default_runtime_name = "runc"
+    discard_unpacked_layers = true
+
+    [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+    runtime_type = "io.containerd.runc.v2"
+
+    [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+    SystemdCgroup = true
+
+    [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-clh]
+    runtime_type = "io.containerd.kata-clh.v2"
+    runtime_path = "/opt/kata/bin/containerd-shim-kata-v2"
+    privileged_without_host_devices = true
+    pod_annotations = ["io.katacontainers.*"]
+
+    [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-clh.options]
+    ConfigPath = "/opt/kata/share/defaults/kata-containers//configuration-clh.toml"
+
+    [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-qemu]
+    runtime_type = "io.containerd.kata-qemu.v2"
+    runtime_path = "/opt/kata/bin/containerd-shim-kata-v2"
+    privileged_without_host_devices = true
+    pod_annotations = ["io.katacontainers.*"]
+
+    [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-qemu.options]
+    ConfigPath = "/opt/kata/share/defaults/kata-containers//configuration-qemu.toml"
+    SystemdCgroup = true
+
+    [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-cloud-hypervisor]
+    runtime_type = "io.containerd.kata-cloud-hypervisor.v2"
+    runtime_path = "/opt/kata/runtime-rs/bin/containerd-shim-kata-v2"
+  
+  10-gke-ptp.conflist: |
+    {
+      "cniVersion": "0.3.1",
+      "name": "kata-pod-network",
+      "plugins": [
+        {
+          "type": "bridge",
+          "bridge": "kata0",
+          "isGateway": true,
+          "ipMasq": true,
+          "mtu": 1500,
+          "ipam": {
+            "type": "host-local",
+            "subnet": "10.20.1.0/24",
+            "routes": [
+              { "dst": "0.0.0.0/0" }
+            ]
+          }
+        },
+        {
+          "type": "portmap",
+          "capabilities": {
+            "portMappings": true
+          }
+        }
+      ]
+    }
+
+  configuration-qemu.toml: |
+    [hypervisor.qemu]
+    path = "/opt/kata/bin/qemu-system-x86_64"
+    kernel = "/opt/kata/share/kata-containers/vmlinux.container"
+    image = "/opt/kata/share/kata-containers/kata-containers.img"
+    machine_type = "q35"
+
+    rootfs_type="ext4"
+    enable_annotations = ["enable_iommu", "virtio_fs_extra_args", "kernel_params"]
+    valid_hypervisor_paths = ["/opt/kata/bin/qemu-system-x86_64"]
+    kernel_params = "cgroup_no_v1=all systemd.unified_cgroup_hierarchy=1"
+    firmware = ""
+    firmware_volume = ""
+    machine_accelerators=""
+    cpu_features="pmu=off"
+    default_vcpus = 1
+    default_maxvcpus = 0
+    default_bridges = 1
+    default_memory = 2048
+    default_maxmemory = 0
+    disable_block_device_use = false
+    shared_fs = "virtio-fs"
+    virtio_fs_daemon = "/opt/kata/libexec/virtiofsd"
+    valid_virtio_fs_daemon_paths = ["/opt/kata/libexec/virtiofsd"]
+    virtio_fs_cache_size = 0
+    virtio_fs_queue_size = 1024
+    virtio_fs_extra_args = ["--thread-pool-size=1", "--announce-submounts"]
+    virtio_fs_cache = "auto"
+    block_device_driver = "virtio-scsi"
+    block_device_aio = "io_uring"
+    enable_iothreads = false
+    enable_vhost_user_store = false
+    vhost_user_store_path = "/var/run/kata-containers/vhost-user"
+    valid_vhost_user_store_paths = ["/var/run/kata-containers/vhost-user"]
+    vhost_user_reconnect_timeout_sec = 0
+    valid_file_mem_backends = [""]
+    pflashes = []
+    valid_entropy_sources = ["/dev/urandom","/dev/random",""]
+    disable_selinux=false
+    disable_guest_selinux=true
+
+    [factory]
+
+    [agent.kata]
+
+    kernel_modules=[]
+    dial_timeout = 45
+
+    [runtime]
+    internetworking_model="tcfilter"
+
+    disable_guest_seccomp=true
+    sandbox_cgroup_only=false
+    static_sandbox_resource_mgmt=false
+    sandbox_bind_mounts=[]
+    vfio_mode="guest-kernel"
+    disable_guest_empty_dir=false
+    experimental=[]
+    create_container_timeout = 60
+    dan_conf = "/run/kata-containers/dans"

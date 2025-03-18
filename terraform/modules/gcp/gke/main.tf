@@ -14,13 +14,13 @@ resource "google_compute_subnetwork" "default_subnet" {
 
 resource "google_container_cluster" "gke_cluster" {
   name     = "garvit-kata"
-  location = "us-central1"
+  location = "us-central1-a"
 
   networking_mode = "VPC_NATIVE"
   ip_allocation_policy {
     cluster_ipv4_cidr_block  = "10.8.0.0/16"  # IPv4 range for the pods
     services_ipv4_cidr_block = "10.4.0.0/20"  # IPv4 range for the services
-    stack_type               = "IPV4_IPV6"   # Enable IPv6 support for the cluster
+    stack_type               = "IPV4_IPV6"    # Enable IPv6 support for the cluster
   }
 
   deletion_protection = false
@@ -31,13 +31,15 @@ resource "google_container_cluster" "gke_cluster" {
   datapath_provider = "ADVANCED_DATAPATH"
 
   private_cluster_config {
-    enable_private_nodes    = true
+    enable_private_nodes    = false
     enable_private_endpoint = false
-    master_ipv4_cidr_block  = "172.16.0.0/28"
+    # master_ipv4_cidr_block  = "172.16.0.0/28"
   }
 
   network    = "default"  # Use the default network
   subnetwork = google_compute_subnetwork.default_subnet.name  # Reference the subnet
+
+  min_master_version = "1.31.6-gke.1020000" 
 }
 
 resource "google_container_node_pool" "default_pool" {
@@ -45,13 +47,14 @@ resource "google_container_node_pool" "default_pool" {
   location  = google_container_cluster.gke_cluster.location
   name      = "kata-node-pool"
 
+  node_count = 1
+
   node_config {
     machine_type = "n2-standard-4"
+    image_type   = "UBUNTU_CONTAINERD"
     advanced_machine_features {
       threads_per_core = 1
       enable_nested_virtualization = true
     }
   }
-
-  initial_node_count = 1
 }
