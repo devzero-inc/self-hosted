@@ -50,7 +50,7 @@ resource "google_container_node_pool" "default_pool" {
   node_count = 1
 
   node_config {
-    machine_type = "n2-standard-4"
+    machine_type = "n2-highcpu-32"
     image_type   = "UBUNTU_CONTAINERD"
     advanced_machine_features {
       threads_per_core = 1
