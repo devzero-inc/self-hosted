@@ -68,7 +68,7 @@
                 "tag": {
                     "type": "string",
                     "description": "Devzero container image tag",
-                    "default": "v1.0.4"
+                    "default": "v1.0.6"
                 },
                 "pullPolicy": {
                     "type": "string",
@@ -117,12 +117,12 @@
                         "kataBase": {
                             "type": "string",
                             "description": "Base image for kata deployment",
-                            "default": "public.ecr.aws/v1i4e1r2/kata-devbox-base:base-2025-01-13--18-11--7bb0a987f303"
+                            "default": "public.ecr.aws/v1i4e1r2/kata-devbox-base:base-2025-03-19--18-01--29221879bc90"
                         },
                         "cliImage": {
                             "type": "string",
                             "description": "Base image for cli deployment",
-                            "default": "public.ecr.aws/v1i4e1r2/dzcmd:ffc8beb"
+                            "default": "public.ecr.aws/v1i4e1r2/dzcmd:2922187-amd64"
                         }
                     }
                 }
