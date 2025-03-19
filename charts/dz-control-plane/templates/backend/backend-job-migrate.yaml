@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "backend") }}-migrate
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "backend") | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "devzero.podLabels" (dict "ctx" . "component" "backend") | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      containers:
+      - name: {{ include "devzero.resourceName" (dict "ctx" . "component" "backend") }}-migrate-job
+        image: "{{ .Values.image.repository }}/{{ .Values.backend.imageName}}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+         - "/migrate"
+         - "-database"
+         - "$(MONGODB_URL)"
+         - "-path"
+         - "migrations"
+         - "up"
+        env:
+            - name: MONGODB_URL
+              value: "{{ .Values.backend.mongo.url }}"
