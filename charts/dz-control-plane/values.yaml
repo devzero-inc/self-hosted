@@ -59,6 +59,11 @@ workspace:
   image: public.ecr.aws/v1i4e1r2/devzero-devbox-base
   ## @param workspace.localTag Tag for local workspace image
   localTag: base-latest
+  ## @param workspace.readOnlyHostPathVolumes Read-only host path volumes to mount inside of each workspace.
+  ## @extra workspace.readOnlyHostPathVolumes[0].name The name for this read-only host path volume.
+  ## @extra workspace.readOnlyHostPathVolumes[0].source The path on the host from which you'd like to create this volume.
+  ## @extra workspace.readOnlyHostPathVolumes[0].mountPath The path on the workspace into which you'd like to mount this volume.
+  readOnlyHostPathVolumes: []
   ## @section Base Image Configuration
   baseImages:
     ## @param workspace.baseImages.sysboxBase Base image for sysbox deployment
@@ -67,6 +72,7 @@ workspace:
     kataBase: public.ecr.aws/v1i4e1r2/kata-devbox-base:base-2025-01-13--18-11--7bb0a987f303
     ## @param workspace.baseImages.cliImage Base image for cli deployment
     cliImage: public.ecr.aws/v1i4e1r2/dzcmd:ffc8beb 
+
 
 ## @section Global Configuration
 ## @param global.podAnnotations Global pod annotations

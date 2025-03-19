@@ -149,10 +149,14 @@ The Helm chart installs the following components:
 
 ### Workspace Configuration
 
-| Name                 | Description                   | Value                                         |
-| -------------------- | ----------------------------- | --------------------------------------------- |
-| `workspace.image`    | Base image for workspaces     | `public.ecr.aws/v1i4e1r2/devzero-devbox-base` |
-| `workspace.localTag` | Tag for local workspace image | `base-latest`                                 |
+| Name                                             | Description                                                           | Value                                         |
+| ------------------------------------------------ | --------------------------------------------------------------------- | --------------------------------------------- |
+| `workspace.image`                                | Base image for workspaces                                             | `public.ecr.aws/v1i4e1r2/devzero-devbox-base` |
+| `workspace.localTag`                             | Tag for local workspace image                                         | `base-latest`                                 |
+| `workspace.readOnlyHostPathVolumes`              | Read-only host path volumes to mount inside of each workspace.        | `[]`                                          |
+| `workspace.readOnlyHostPathVolumes[0].name`      | The name for this read-only host path volume.                         |                                               |
+| `workspace.readOnlyHostPathVolumes[0].source`    | The path on the host from which you'd like to create this volume.     |                                               |
+| `workspace.readOnlyHostPathVolumes[0].mountPath` | The path on the workspace into which you'd like to mount this volume. |                                               |
 
 ### Base Image Configuration
 

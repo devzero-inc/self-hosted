@@ -98,5 +98,6 @@ data:
     github_enterprise_url: {{ .Values.backend.github.enterpriseUrl }}
     github_app_private_key: {{- .Values.backend.github.appPrivateKey | toYaml | indent 3}}
     github_webhook_secret: ""
+    read_only_host_path_volumes: {{- .Values.workspace.readOnlyHostPathVolumes | toYaml | nindent 6 }}
     nats_endpoint: ""
     nats_token: ""

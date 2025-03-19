@@ -100,6 +100,12 @@
                     "description": "Tag for local workspace image",
                     "default": "base-latest"
                 },
+                "readOnlyHostPathVolumes": {
+                    "type": "array",
+                    "description": "Read-only host path volumes to mount inside of each workspace.",
+                    "default": [],
+                    "items": {}
+                },
                 "baseImages": {
                     "type": "object",
                     "properties": {
