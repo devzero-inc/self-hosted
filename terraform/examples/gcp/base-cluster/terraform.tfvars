@@ -1,40 +1,47 @@
-# General Settings
-region       = "us-west1"
-project_id   = "my-gcp-project"
-cluster_name = "devzero-dsh"
-domain       = "devzero.internal"
-
-# GKE
-machine_type  = "e2-standard-4"
-max_size      = 4
-min_size      = 1
-desired_size  = 1
-
-cluster_endpoint_public_access       = true
-cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
-
-# VPN
-create_vpn            = false
-client_vpn_cidr_block = "10.9.0.0/22"
-vpn_client_list       = ["root"]
+# General
+prefix = "garvit"
+project_id = "devzero-kubernetes-sandbox"
+region = "us-central1"
 
 # VPC
-create_vpc          = true
-network_name        = "devzero-vpc"
-cidr               = "10.8.0.0/16"
-subnet_cidr_blocks = ["10.8.1.0/24", "10.8.2.0/24", "10.8.3.0/24"]
+gke_subnet_cidr = "10.1.0.0/20"
+mtu = 1460
+create_vpc = false
 
-# NAT & Internet Access
-create_nat_gateway      = true
-single_nat_gateway      = true
-one_nat_gateway_per_subnet = false
-create_cloud_router     = true
+# NAT Gateway (Enable only if using private nodes)
+enable_private_nodes = false
+enable_private_endpoint = false
 
-# Existing VPC (if not creating a new one)
-# create_vpc = false
-# vpc_id = "MY_VPC_ID"
-# public_subnet_ids = ["MY_SUBNET_ID_1", "MY_SUBNET_ID_2"]
-# private_subnet_ids = ["MY_SUBNET_ID_3", "MY_SUBNET_ID_4"]
+# GKE Cluster (Single-Zone)
+gke_cluster_location = "us-central1-a"  
+gke_zones = ["us-central1-a"]  # ✅ Single-zone explicitly set
+gke_cluster_ipv4_cidr = "10.8.0.0/16"
+gke_services_ipv4_cidr = "10.4.0.0/20"
+gke_master_version = "1.31.6-gke.1020000"
 
-# Optional Services
-create_derp = false
+gke_enable_nested_virtualization = true
+gke_machine_type = "n2-highcpu-32"
+gke_node_count = 1
+gke_node_pool_name = "default-pool"
+gke_threads_per_core = 1
+
+# GKE Node Pool (Single Node)
+gke_node_pools = [
+  {
+    name               = "default-node-pool"
+    machine_type       = "n2-highcpu-32"
+    min_count          = 1
+    max_count          = 1
+    local_ssd_count    = 0
+    disk_size_gb       = 100
+    disk_type          = "pd-standard"
+    image_type         = "UBUNTU_CONTAINERD"
+    enable_gcfs        = false
+    enable_gvnic       = false
+    logging_variant    = "DEFAULT"
+    auto_repair        = true
+    auto_upgrade       = true
+    preemptible        = false
+    initial_node_count = 1
+  }
+]
