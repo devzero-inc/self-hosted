@@ -1632,6 +1632,16 @@
                             "type": "string",
                             "description": "Use custom nginx ingress controller",
                             "default": "devzero-data-ingress"
+                        },
+                        "ALLOW_POD_EVICTION_ANNOTATION": {
+                            "type": "string",
+                            "description": "JSON style annotations to allow pod eviction",
+                            "default": "{\"cluster-autoscaler.kubernetes.io/safe-to-evict\": \"true\"}"
+                        },
+                        "DISALLOW_POD_EVICTION_ANNOTATION": {
+                            "type": "string",
+                            "description": "JSON style annotations to disallow pod eviction",
+                            "default": "{\"cluster-autoscaler.kubernetes.io/safe-to-evict\": \"false\"}"
                         }
                     }
                 },

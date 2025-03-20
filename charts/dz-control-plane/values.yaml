@@ -852,6 +852,23 @@ polland:
     ## @param polland.env.DEVBOX_INGRESS_CLASS_NAME Use custom nginx ingress controller
     DEVBOX_INGRESS_CLASS_NAME: "devzero-data-ingress"
 
+    ## @param polland.env.ALLOW_POD_EVICTION_ANNOTATION JSON style annotations to allow pod eviction
+    # ClusterAutoscaler https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#what-types-of-pods-can-prevent-ca-from-removing-a-node
+    ALLOW_POD_EVICTION_ANNOTATION: '{"cluster-autoscaler.kubernetes.io/safe-to-evict": "true"}'
+    # karpenter < 1.0 https://karpenter.sh/v1.0/upgrading/v1-migration/
+    # ALLOW_POD_EVICTION_ANNOTATION: '{"karpenter.sh/do-not-evict": "false"}'
+    # karpenter > 1.0 https://karpenter.sh/v1.0/upgrading/v1-migration/
+    # ALLOW_POD_EVICTION_ANNOTATION: '{"karpenter.sh/do-not-disrupt": "true"}'
+
+
+    ## @param polland.env.DISALLOW_POD_EVICTION_ANNOTATION JSON style annotations to disallow pod eviction
+    # ClusterAutoscaler https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#what-types-of-pods-can-prevent-ca-from-removing-a-node
+    DISALLOW_POD_EVICTION_ANNOTATION: '{"cluster-autoscaler.kubernetes.io/safe-to-evict": "false"}'
+    # karpenter < 1.0 https://karpenter.sh/v1.0/upgrading/v1-migration/
+    # DISALLOW_POD_EVICTION_ANNOTATION: '{"karpenter.sh/do-not-disrupt": "true"}'
+    # karpenter > 1.0 https://karpenter.sh/v1.0/upgrading/v1-migration/
+    # DISALLOW_POD_EVICTION_ANNOTATION: '{"karpenter.sh/do-not-disrupt": "false"}'
+
   ## @subsection Polland Autoscaling Configuration
   autoscaling:
     ## @param polland.autoscaling.enabled Enable autoscaling for Polland
