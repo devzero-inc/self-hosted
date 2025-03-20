@@ -28,7 +28,7 @@ variable "tags" {
 variable "enable_cluster_autoscaler" {
   description = "Enable cluster autoscaler"
   type = bool
-  default = false
+  default = true
 }
 
 
