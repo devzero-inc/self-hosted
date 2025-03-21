@@ -16,6 +16,7 @@ resource "google_compute_subnetwork" "private_subnets" {
   for_each = {for subnets in var.subnets : subnets.name => subnets}
 
   name          = each.key
+  project       = var.project_id
   ip_cidr_range = each.value.ip_cidr_range
   network       = google_compute_network.vpc.id
   region        = var.region
@@ -33,6 +34,7 @@ resource "google_compute_subnetwork" "private_subnets" {
 resource "google_compute_firewall" "allow_internal" {
   name    = "fw-${local.prefix}-allow-internal"
   network = google_compute_network.vpc.id
+  project = var.project_id
 
   allow {
     protocol = "all"
