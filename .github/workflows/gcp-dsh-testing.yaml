@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        
+
       - name: Set up GCP Service Account Key
         env:
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
@@ -71,7 +71,7 @@ jobs:
         run: |
           cd self-hosted/terraform/examples/gcp/base-cluster
           terraform init
-          terraform apply -auto-approve -var="cluster_name=$JOB_IDENTIFIER"
+          terraform apply -auto-approve -var="prefix=$JOB_IDENTIFIER"
 
       - name: Configure Kubernetes Access
         run: |
