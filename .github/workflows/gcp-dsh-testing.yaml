@@ -30,10 +30,6 @@ jobs:
       - name: Set GCP Credentials for Terraform
         run: echo "GOOGLE_APPLICATION_CREDENTIALS=${{ steps.auth.outputs.credentials_file_path }}" >> $GITHUB_ENV
 
-      - id: 'gcloud'
-        name: 'gcloud'
-        run: gcloud auth activate-service-account --key-file="${{ steps.auth.outputs.credentials_file_path }}"
-
       - name: Clone DevZero Self-Hosted Repository
         env:
           GH_PAT: ${{ secrets.GH_TOKEN }}
