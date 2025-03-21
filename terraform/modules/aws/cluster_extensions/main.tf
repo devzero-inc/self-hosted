@@ -89,6 +89,8 @@ module "eks_blueprints_addons" {
     }
   }
 
+  enable_external_secrets = var.enable_external_secrets
+
   enable_cluster_autoscaler = var.enable_cluster_autoscaler
   cluster_autoscaler = {
     chart_version = "9.43.2"

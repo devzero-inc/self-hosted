@@ -29,6 +29,11 @@ variable "enable_cluster_autoscaler" {
   description = "Enable cluster autoscaler"
   type = bool
   default = false
+
+variable "enable_external_secrets" {
+  description = "Enable External Secrets operator add-on"
+  type        = bool
+  default     = false
 }
 
 
