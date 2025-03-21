@@ -26,7 +26,6 @@ jobs:
           workload_identity_provider: "projects/354385559261/locations/global/workloadIdentityPools/dz-ga-dsh-pool/providers/dz-ga-dsh-provider"
           service_account: "dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com"
           create_credentials_file: true
-          audience: "projects/354385559261/locations/global/workloadIdentityPools/dz-ga-dsh-pool/providers/dz-ga-dsh-provider"
 
       - name: Set GCP Credentials for Terraform
         run: echo "GOOGLE_APPLICATION_CREDENTIALS=${{ steps.auth.outputs.credentials_file_path }}" >> $GITHUB_ENV
