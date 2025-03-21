@@ -1,4 +1,4 @@
-name: [GCP] DevZero self-hosted deployment
+name: "[GCP] DevZero self-hosted deployment"
 run-name: '(base_image: Ubuntu) self-hosted test run'
 
 on:
