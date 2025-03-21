@@ -1,5 +1,8 @@
 locals {
   prefix = var.prefix
+  subnet_name = "${local.prefix}-gke-subnet"
+  pods_range_name = "pods-range"
+  services_range_name = "services-range"
 }
 
 ################################################################################
@@ -20,35 +23,40 @@ provider "kubernetes" {
 }
 
 ################################################################################
-# VPC
+# VPC - DIRECT RESOURCES INSTEAD OF MODULE
 ################################################################################
-module "vpc" {
-  source  = "terraform-google-modules/network/google"
-  
-  project_id   = var.project_id
-  network_name = "${local.prefix}-vpc"
+resource "google_compute_network" "vpc_network" {
+  name                    = "${local.prefix}-vpc"
+  auto_create_subnetworks = false
+  mtu                     = var.mtu
+  project                 = var.project_id
+}
 
-  subnets = [
-    {
-      subnet_name             = "${local.prefix}-gke-subnet"
-      subnet_ip               = var.gke_subnet_cidr
-      subnet_region           = var.region
-      private_ip_google_access = false
-    }
-  ]
+resource "google_compute_subnetwork" "gke_subnet" {
+  name          = local.subnet_name
+  ip_cidr_range = var.gke_subnet_cidr  # "10.1.0.0/20"
+  region        = var.region
+  network       = google_compute_network.vpc_network.id
+  project       = var.project_id
 
-  mtu = var.mtu  # Default MTU from tfvars
+  secondary_ip_range {
+    range_name    = local.pods_range_name
+    ip_cidr_range = "10.12.0.0/16"  # Changed from 10.8.0.0/16
+  }
 
-  routes = [
-    {
-      name              = "default-route"
-      description       = "Route all traffic to internet gateway"
-      destination_range = "0.0.0.0/0"
-      next_hop_internet = true
-    }
-  ]
+  secondary_ip_range {
+    range_name    = local.services_range_name
+    ip_cidr_range = "10.14.0.0/20"  # Changed from 10.4.0.0/20
+  }
+}
 
-  shared_vpc_host = var.create_vpc
+resource "google_compute_route" "default_route" {
+  name             = "${local.prefix}-default-route"
+  dest_range       = "0.0.0.0/0"
+  network          = google_compute_network.vpc_network.id
+  next_hop_gateway = "default-internet-gateway"
+  priority         = 1000
+  project          = var.project_id
 }
 
 ################################################################################
@@ -58,7 +66,7 @@ resource "google_compute_router" "nat_router" {
   count   = var.enable_private_nodes ? 1 : 0
   name    = "${local.prefix}-router"
   region  = var.region
-  network = module.vpc.network_self_link
+  network = google_compute_network.vpc_network.id
   project = var.project_id
 }
 
@@ -76,27 +84,52 @@ resource "google_compute_router_nat" "nat" {
 ################################################################################
 # GKE CLUSTER MODULE
 ################################################################################
-module "gke" {
-  source  = "terraform-google-modules/kubernetes-engine/google"
-  version = "36.1.0"
+resource "google_container_cluster" "gke_cluster" {
+  name     = "${local.prefix}-cluster"
+  location = var.gke_cluster_location
 
-  project_id         = var.project_id
-  name               = "${local.prefix}-cluster"
-  region             = var.region  
-  zones              = var.gke_zones  # ✅ Provide the zone explicitly for single-zone
+  networking_mode = "VPC_NATIVE"
+  ip_allocation_policy {
+    cluster_secondary_range_name  = local.pods_range_name
+    services_secondary_range_name = local.services_range_name
+    # Or specify the CIDR blocks directly:
+    # cluster_ipv4_cidr_block  = "10.12.0.0/16"
+    # services_ipv4_cidr_block = "10.14.0.0/20"
+  }
 
-  network            = module.vpc.network_name
-  subnetwork         = module.vpc.subnets_self_links[0]
+  deletion_protection = false
 
-  ip_range_pods      = var.gke_cluster_ipv4_cidr
-  ip_range_services  = var.gke_services_ipv4_cidr
-  kubernetes_version = var.gke_master_version
+  initial_node_count = 1
+  remove_default_node_pool = true
 
-  http_load_balancing        = false
-  network_policy             = false
-  horizontal_pod_autoscaling = true
-  filestore_csi_driver       = false
-  dns_cache                  = false
+  datapath_provider = "ADVANCED_DATAPATH"
 
-  node_pools = var.gke_node_pools  # ✅ Properly structured node pools
+  private_cluster_config {
+    enable_private_nodes    = false
+    enable_private_endpoint = false
+    # master_ipv4_cidr_block  = "172.16.0.0/28"
+  }
+
+  network    = google_compute_network.vpc_network.name
+  subnetwork = google_compute_subnetwork.gke_subnet.name
+
+  min_master_version = "1.31.6-gke.1020000" 
 }
+
+resource "google_container_node_pool" "default_pool" {
+  cluster   = google_container_cluster.gke_cluster.name
+  location  = google_container_cluster.gke_cluster.location
+  name      = "kata-node-pool"
+
+  node_count = 1
+
+  node_config {
+    machine_type = "n2-highcpu-32"
+    image_type   = "UBUNTU_CONTAINERD"
+    advanced_machine_features {
+      threads_per_core = 1
+      enable_nested_virtualization = true
+    }
+  }
+}
+
