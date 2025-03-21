@@ -5,8 +5,6 @@ on:
   push:
     branches:
       - garvit/gcp-tf
-  # schedule:
-  #   - cron: '0 3 * * *'
   workflow_dispatch:
 
 jobs:
@@ -26,15 +24,25 @@ jobs:
           workload_identity_provider: "projects/354385559261/locations/global/workloadIdentityPools/dz-ga-dsh-pool/providers/dz-ga-dsh-provider"
           service_account: "dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com"
           create_credentials_file: true
+          token_format: "access_token"
 
       - name: Set GCP Credentials for Terraform
         run: echo "GOOGLE_APPLICATION_CREDENTIALS=${{ steps.auth.outputs.credentials_file_path }}" >> $GITHUB_ENV
+
+      - name: Setup gcloud CLI
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: devzero-kubernetes-sandbox
+          install_components: 'gke-gcloud-auth-plugin'
 
       - name: Clone DevZero Self-Hosted Repository
         env:
           GH_PAT: ${{ secrets.GH_TOKEN }}
         run: |
-          gcloud auth application-default login --no-browser --quiet
+          # Remove this line that was causing the error:
+          # gcloud auth application-default login --no-browser --quiet
+          
+          # Just clone the repository
           git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git --branch garvit/gcp-tf --depth 1
 
       - name: Set up Terraform
