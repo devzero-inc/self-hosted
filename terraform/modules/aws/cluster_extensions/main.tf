@@ -53,11 +53,11 @@ module "eks_blueprints_addons" {
   eks_addons = {
     eks-pod-identity-agent = {
       most_recent = true
-      preserve = false
+      preserve    = false
     }
     aws-ebs-csi-driver = {
       most_recent              = true
-      preserve = false
+      preserve                 = false
       service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
       configuration_values = jsonencode({
         controller = {
@@ -69,23 +69,23 @@ module "eks_blueprints_addons" {
     }
     coredns = {
       most_recent = true
-      preserve = false
+      preserve    = false
     }
     vpc-cni = {
       most_recent = true
-      preserve = false
+      preserve    = false
     }
     kube-proxy = {
       most_recent = true
-      preserve = false
+      preserve    = false
     }
     snapshot-controller = {
       most_recent = true
-      preserve = false
+      preserve    = false
     }
     aws-efs-csi-driver = {
       most_recent = true
-      preserve = false
+      preserve    = false
     }
   }
 
@@ -167,13 +167,13 @@ module "efs" {
   source  = "terraform-aws-modules/efs/aws"
   version = "1.6.5"
 
-  count = var.enable_efs ? 1: 0
+  count = var.enable_efs ? 1 : 0
 
-  name = data.aws_eks_cluster.this.id
+  name      = data.aws_eks_cluster.this.id
   encrypted = true
 
   performance_mode = "generalPurpose"
-  throughput_mode = "elastic"
+  throughput_mode  = "elastic"
 
   create_backup_policy = false
   enable_backup_policy = false
@@ -182,7 +182,7 @@ module "efs" {
     transition_to_ia = "AFTER_30_DAYS"
   }
 
-  mount_targets = { for i, r in data.aws_eks_cluster.this.vpc_config[0].subnet_ids : "mount_${i}" => {subnet_id : r } }
+  mount_targets = { for i, r in data.aws_eks_cluster.this.vpc_config[0].subnet_ids : "mount_${i}" => { subnet_id : r } }
 
   create_security_group      = true
   security_group_description = "EFS security group for ${data.aws_eks_cluster.this.id} EKS cluster"
@@ -199,7 +199,7 @@ module "efs" {
 }
 
 resource "kubernetes_storage_class" "efs_etcd" {
-  count = var.enable_efs ? 1: 0
+  count = var.enable_efs ? 1 : 0
 
   metadata {
     name = "efs-etcd"

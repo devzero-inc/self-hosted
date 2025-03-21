@@ -5,7 +5,7 @@ variable "cluster_name" {
   type        = string
   description = "Name of the cluster"
   validation {
-    condition = length(var.cluster_name) < 39
+    condition     = length(var.cluster_name) < 39
     error_message = "The name must be less than 39 characters"
   }
 }
@@ -26,9 +26,10 @@ variable "tags" {
 ################################################################################
 
 variable "enable_cluster_autoscaler" {
-  description = "Enable cluster autoscaler"
-  type = bool
-  default = false
+  description = "Enable Cluster autoscaler add-on"
+  type        = bool
+  default     = false
+}
 
 variable "enable_external_secrets" {
   description = "Enable External Secrets operator add-on"
@@ -43,6 +44,6 @@ variable "enable_external_secrets" {
 
 variable "enable_efs" {
   description = "Enable EFS"
-  type = bool
-  default = true
+  type        = bool
+  default     = true
 }
