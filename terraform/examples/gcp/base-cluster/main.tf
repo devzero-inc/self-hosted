@@ -85,7 +85,7 @@ resource "google_compute_router_nat" "nat" {
 # GKE CLUSTER MODULE
 ################################################################################
 resource "google_container_cluster" "gke_cluster" {
-  name     = "${local.prefix}-cluster"
+  name     = "${local.prefix}"
   location = var.gke_cluster_location
 
   networking_mode = "VPC_NATIVE"
