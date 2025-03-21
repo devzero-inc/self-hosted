@@ -20,12 +20,13 @@ jobs:
         uses: actions/checkout@v4
 
       - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v1'
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
         with:
+          workload_identity_provider: "projects/354385559261/locations/global/workloadIdentityPools/dz-ga-dsh-pool/providers/dz-ga-dsh-provider"
+          service_account: "dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com"
           create_credentials_file: true
-          workload_identity_provider: 'projects/devzero-kubernetes-sandbox/locations/global/workloadIdentityPools/dz-ga-dsh-pool/providers/dz-ga-dsh-provider'
-          service_account: 'dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com'
+          audience: "https://token.actions.githubusercontent.com"
 
       - name: Set GCP Credentials for Terraform
         run: echo "GOOGLE_APPLICATION_CREDENTIALS=${{ steps.auth.outputs.credentials_file_path }}" >> $GITHUB_ENV
