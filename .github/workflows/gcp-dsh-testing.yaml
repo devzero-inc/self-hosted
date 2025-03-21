@@ -11,38 +11,28 @@ jobs:
   setup-and-test:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - id: 'auth'
-        name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          workload_identity_provider: "projects/354385559261/locations/global/workloadIdentityPools/dz-ga-dsh-pool/providers/dz-ga-dsh-provider"
-          service_account: "dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com"
-          create_credentials_file: true
-          token_format: "access_token"
-
-      - name: Set GCP Credentials for Terraform
-        run: echo "GOOGLE_APPLICATION_CREDENTIALS=${{ steps.auth.outputs.credentials_file_path }}" >> $GITHUB_ENV
-
-      - name: Setup gcloud CLI
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          project_id: devzero-kubernetes-sandbox
-          install_components: 'gke-gcloud-auth-plugin'
+        
+      - name: Set up GCP Service Account Key
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        run: |
+          echo "$GCP_SA_KEY" > /tmp/gcp-key.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json" >> $GITHUB_ENV
+      
+      # Authenticate using the key
+      - name: Authenticate to Google Cloud
+        run: |
+          gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+          gcloud config set project devzero-kubernetes-sandbox
 
       - name: Clone DevZero Self-Hosted Repository
         env:
           GH_PAT: ${{ secrets.GH_TOKEN }}
         run: |
-          # Remove this line that was causing the error:
-          # gcloud auth application-default login --no-browser --quiet
-          
-          # Just clone the repository
           git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git --branch garvit/gcp-tf --depth 1
 
       - name: Set up Terraform
