@@ -29,6 +29,10 @@ jobs:
           gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
           gcloud config set project devzero-kubernetes-sandbox
 
+      - name: Install gke-gcloud-auth-plugin
+        run: |
+          gcloud components install gke-gcloud-auth-plugin -q
+
       - name: Clone DevZero Self-Hosted Repository
         env:
           GH_PAT: ${{ secrets.GH_TOKEN }}
