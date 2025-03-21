@@ -32,9 +32,10 @@ jobs:
       - name: Install gke-gcloud-auth-plugin
         run: |
           mkdir -p $HOME/.local/bin
-          curl -Lo $HOME/.local/bin/gke-gcloud-auth-plugin https://storage.googleapis.com/artifacts.cloud.google.com/binary/latest/linux/amd64/gke-gcloud-auth-plugin
-          chmod +x $HOME/.local/bin/gke-gcloud-auth-plugin
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        curl -Lo $HOME/.local/bin/gke-gcloud-auth-plugin https://storage.googleapis.com/artifacts.cloud.google.com/binary/latest/linux/amd64/gke-gcloud-auth-plugin
+        chmod +x $HOME/.local/bin/gke-gcloud-auth-plugin
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        echo "PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
 
       - name: Clone DevZero Self-Hosted Repository
         env:
