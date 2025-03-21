@@ -31,8 +31,10 @@ jobs:
 
       - name: Install gke-gcloud-auth-plugin
         run: |
-          sudo apt-get update
-          sudo apt-get install -y google-cloud-cli-gke-gcloud-auth-plugin
+          mkdir -p $HOME/.local/bin
+          curl -Lo $HOME/.local/bin/gke-gcloud-auth-plugin https://storage.googleapis.com/artifacts.cloud.google.com/binary/latest/linux/amd64/gke-gcloud-auth-plugin
+          chmod +x $HOME/.local/bin/gke-gcloud-auth-plugin
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Clone DevZero Self-Hosted Repository
         env:
