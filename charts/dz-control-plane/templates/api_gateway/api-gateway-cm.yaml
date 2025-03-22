@@ -7,15 +7,6 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
 data:
   self_hosted.yaml: |
-    auth0:
-      domains:
-        - auth.{{ .Values.domain }}
-      audience:
-        - https://{{ .Values.domain }}/webapi
-        - https://{{ .Values.domain }}/api/v2/
-    cors:
-      allowedOrigins:
-        - https://{{ .Values.domain }}
     listener_endpoint: "0.0.0.0:{{ .Values.gateway.service.port }}"
     listener_tls: false
     prometheus_port: {{ .Values.gateway.service.metricsPort }}
