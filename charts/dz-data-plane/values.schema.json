@@ -7,7 +7,7 @@
             "properties": {
                 "teamId": {
                     "type": "string",
-                    "description": "Team identifier",
+                    "description": "Team identifier. Only needed for SaaS self-hosted data plane",
                     "default": ""
                 },
                 "region": {
@@ -21,7 +21,7 @@
                         "server": {
                             "type": "string",
                             "description": "Vault server",
-                            "default": "https://csi.devzero.io"
+                            "default": "https://csi.example.com"
                         }
                     }
                 }
@@ -40,6 +40,11 @@
         "credentials": {
             "type": "object",
             "properties": {
+                "enable": {
+                    "type": "boolean",
+                    "description": "Enable docker hub credentials",
+                    "default": true
+                },
                 "registry": {
                     "type": "string",
                     "description": "Container registry URL",

@@ -16,6 +16,7 @@ nodeLabeler:
 
 ## @section Credentials Configuration
 credentials:
+  ## @param credentials.enable Enable docker hub credentials
   enable: true
   ## @param credentials.registry Container registry URL
   registry: ""
