@@ -122,33 +122,34 @@ The Helm chart installs the following components:
 
 ## Parameters
 
-### DevZero Configuration
+### Devzero
 
-| Name               | Description          | Value             |
-| ------------------ | -------------------- | ----------------- |
-| `devzero.teamId`   | Team identifier      | `""`              |
-| `devzero.region`   | Deployment region    | `""`              |
+| Name             | Description                                                  | Value |
+| ---------------- | ------------------------------------------------------------ | ----- |
+| `devzero.teamId` | Team identifier. Only needed for SaaS self-hosted data plane | `""`  |
+| `devzero.region` | Base Region                                                  | `""`  |
 
-### Vault Configuration
+### Vault
 
-| Name                   | Description      | Value                    |
-| ---------------------- | ---------------- | ------------------------ |
-| `devzero.vault.server` | Vault server URL | `https://csi.devzero.io` |
+| Name                   | Description  | Value                     |
+| ---------------------- | ------------ | ------------------------- |
+| `devzero.vault.server` | Vault server | `https://csi.example.com` |
 
 ### Node Labeler
 
-| Name                  | Description               | Value  |
-| --------------------- | ------------------------- | ------ |
-| `nodeLabeler.enabled` | Enable/disable node labeler | `true` |
+| Name                  | Description             | Value  |
+| --------------------- | ----------------------- | ------ |
+| `nodeLabeler.enabled` | Is node labeler enabled | `true` |
 
 ### Credentials Configuration
 
-| Name                   | Description              | Value |
-| ---------------------- | ------------------------ | ----- |
-| `credentials.registry` | Container registry URL   | `""`  |
-| `credentials.username` | Registry username        | `""`  |
-| `credentials.password` | Registry password        | `""`  |
-| `credentials.email`    | Registry email address   | `""`  |
+| Name                   | Description                   | Value  |
+| ---------------------- | ----------------------------- | ------ |
+| `credentials.enable`   | Enable docker hub credentials | `true` |
+| `credentials.registry` | Container registry URL        | `""`   |
+| `credentials.username` | Registry username             | `""`   |
+| `credentials.password` | Registry password             | `""`   |
+| `credentials.email`    | Registry email address        | `""`   |
 
 ## Uninstallation
 
