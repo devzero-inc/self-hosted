@@ -75,7 +75,7 @@ jobs:
 
       - name: Configure Kubernetes Access
         run: |
-          sudo apt-get update -y
+          sudo apt-get update -yhttps://github.com/devzero-inc/self-hosted/pull/69/files
           echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
             | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
           curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg \
@@ -142,7 +142,7 @@ jobs:
           find . -name "values.yaml" -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find . -name "values.yaml.bak" -delete
           make install
           kubectl delete runtimeclass kata
-          kubectl apply -f self-hosted/terraform/examples/gcp/base-cluster/runtimeclass.yaml
+          kubectl apply -f ../../terraform/examples/gcp/base-cluster/runtimeclass.yaml
 
       - name: Validate Data Plane
         run: |
