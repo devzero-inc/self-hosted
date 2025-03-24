@@ -17,18 +17,18 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
+      - name: 'Authenticate to Google Cloud'
+        id: 'auth'
         uses: 'google-github-actions/auth@v0.4.0'
         with:
-          workload_identity_provider: 'projects/354385559261/locations/global/workloadIdentityPools/dz-ga-dsh-pool/assertion.repository_owner/devzero-inc'
+          workload_identity_provider: 'projects/354385559261/locations/global/workloadIdentityPools/dz-ga-dsh-pool/providers/github'
           service_account: 'dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com'
-      
-      # Authenticate using the key
-      - name: Set up gcloud CLI
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          export_environment_variables: true
+          create_credentials_file: true
+
+      - name: Export Terraform-friendly environment variables
+        run: |
+          echo "GOOGLE_APPLICATION_CREDENTIALS=${{ steps.auth.outputs.credentials_file_path }}" >> $GITHUB_ENV
+          echo "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE=${{ steps.auth.outputs.credentials_file_path }}" >> $GITHUB_ENV
 
       - name: Clone DevZero Self-Hosted Repository
         env:
