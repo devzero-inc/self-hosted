@@ -166,7 +166,21 @@ jobs:
         run: |
           cd self-hosted/charts/dz-control-plane
           make delete
-      
+
+      - name: Check & Remove Finalizers (if needed)
+        run: |
+          NS_JSON=$(kubectl get namespace devzero -o json --ignore-not-found)
+          FINALIZERS=$(echo "$NS_JSON" | jq -r '.spec.finalizers | @sh' || echo "")
+
+          if [[ -n "$FINALIZERS" && "$FINALIZERS" != "null" ]]; then
+            echo "Namespace stuck with finalizers: $FINALIZERS. Force removing..."
+            echo "$NS_JSON" \
+              | jq 'del(.spec.finalizers)' \
+              | kubectl replace --raw "/api/v1/namespaces/devzero/finalize" -f -
+          else
+            echo "No finalizers found. Namespace should be clean."
+          fi
+
       - name: '[helm] Destroy control-plane-deps'
         if: always()
         run: |
