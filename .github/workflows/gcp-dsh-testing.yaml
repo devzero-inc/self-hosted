@@ -25,9 +25,10 @@ jobs:
           service_account: 'dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com'
       
       # Authenticate using the key
-      - name: Authenticate to Google Cloud
-        run: |
-          gcloud config set project devzero-kubernetes-sandbox
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          export_environment_variables: true
 
       - name: Clone DevZero Self-Hosted Repository
         env:
