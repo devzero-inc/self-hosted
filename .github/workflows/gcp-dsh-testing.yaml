@@ -16,17 +16,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up GCP Service Account Key
-        env:
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-        run: |
-          echo "$GCP_SA_KEY" > /tmp/gcp-key.json
-          echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json" >> $GITHUB_ENV
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0.4.0'
+        with:
+          workload_identity_provider: 'projects/354385559261/locations/global/workloadIdentityPools/dz-ga-dsh-pool/assertion.repository_owner/devzero-inc'
+          service_account: 'dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com'
       
       # Authenticate using the key
       - name: Authenticate to Google Cloud
         run: |
-          gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
           gcloud config set project devzero-kubernetes-sandbox
 
       - name: Clone DevZero Self-Hosted Repository
