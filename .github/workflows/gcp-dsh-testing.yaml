@@ -21,9 +21,14 @@ jobs:
         id: 'auth'
         uses: 'google-github-actions/auth@v0.4.0'
         with:
-          workload_identity_provider: 'projects/354385559261/locations/global/workloadIdentityPools/dz-ga-dsh-pool/providers/github'
+          workload_identity_provider: 'projects/354385559261/locations/global/workloadIdentityPools/dz-ga-dsh-pool/providers/dz-ga-dsh-provider'
           service_account: 'dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com'
           create_credentials_file: true
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '>= 363.0.0'
 
       - name: Export Terraform-friendly environment variables
         run: |
