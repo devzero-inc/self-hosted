@@ -187,7 +187,7 @@ jobs:
           cd self-hosted/charts/dz-control-plane-deps
           kubectl get namespace devzero -o json | jq '.spec.finalizers'
           make delete
-          kubectl get namespace devzero -o json | jq '.spec.finalizers'
+          kubectl get all -n devzero
     
       - name: '[terraform] Destroy base-cluster'
         if: always()
