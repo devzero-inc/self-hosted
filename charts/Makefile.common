@@ -63,7 +63,20 @@ _create-namespace:
 
 .PHONY: _delete-namespace
 _delete-namespace:
-	$(KUBECTL_BIN) delete namespace $(NAMESPACE) --ignore-not-found=true
+	@echo "Deleting namespace $(NAMESPACE)..."
+	@$(KUBECTL_BIN) delete namespace $(NAMESPACE) --ignore-not-found=true || true
+	@echo "Waiting up to 60s for namespace to be deleted..."
+	@for i in $$(seq 1 60); do \
+		if ! $(KUBECTL_BIN) get namespace $(NAMESPACE) >/dev/null 2>&1; then \
+			echo "Namespace $(NAMESPACE) deleted."; \
+			exit 0; \
+		fi; \
+		sleep 1; \
+	done; \
+	echo "Namespace $(NAMESPACE) is stuck. Removing finalizers..."; \
+	$(KUBECTL_BIN) get namespace $(NAMESPACE) -o json | jq 'del(.spec.finalizers)' | \
+	$(KUBECTL_BIN) replace --raw "/api/v1/namespaces/$(NAMESPACE)/finalize" -f -
+
 
 .PHONY: _delete-crds
 _delete-crds:
