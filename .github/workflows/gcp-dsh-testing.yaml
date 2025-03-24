@@ -7,15 +7,12 @@ on:
       - garvit/gcp-tf
   workflow_dispatch:
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
   setup-and-test:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
