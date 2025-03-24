@@ -27,7 +27,6 @@ jobs:
       # Authenticate using the key
       - name: Authenticate to Google Cloud
         run: |
-          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
           gcloud config set project devzero-kubernetes-sandbox
 
       - name: Clone DevZero Self-Hosted Repository
