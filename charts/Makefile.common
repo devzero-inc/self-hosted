@@ -64,26 +64,21 @@ _create-namespace:
 .PHONY: _delete-namespace
 _delete-namespace:
 	@echo "Deleting namespace $(NAMESPACE)..."
-	-@$(KUBECTL_BIN) delete namespace $(NAMESPACE) --ignore-not-found=true || true
 
-	@echo "Waiting for namespace $(NAMESPACE) to terminate..."
-	@ATTEMPTS=60; \
-	for i in $$(seq 1 $$ATTEMPTS); do \
-		if ! $(KUBECTL_BIN) get namespace $(NAMESPACE) >/dev/null 2>&1; then \
-			echo "Namespace $(NAMESPACE) deleted successfully."; \
-			break; \
-		fi; \
-		sleep 2; \
-	done
+	-@timeout 60s bash -c '\
+		kubectl delete namespace $(NAMESPACE) --ignore-not-found=true; \
+		echo "Waiting for namespace $(NAMESPACE) to terminate..."; \
+		for i in {1..30}; do \
+			if ! kubectl get namespace $(NAMESPACE) >/dev/null 2>&1; then \
+				echo "Namespace $(NAMESPACE) deleted successfully."; \
+				exit 0; \
+			fi; \
+			sleep 2; \
+		done; \
+		echo "Timeout waiting for namespace $(NAMESPACE) to terminate. Proceeding anyway."; \
+		exit 0'
 
-	@if $(KUBECTL_BIN) get namespace $(NAMESPACE) >/dev/null 2>&1; then \
-		echo "Namespace $(NAMESPACE) still exists. Trying to force remove finalizers..."; \
-		$(KUBECTL_BIN) get namespace $(NAMESPACE) -o json \
-			| jq 'del(.spec.finalizers)' \
-			| $(KUBECTL_BIN) replace --raw "/api/v1/namespaces/$(NAMESPACE)/finalize" -f -; \
-	else \
-		echo "Namespace $(NAMESPACE) is fully gone. No finalizer removal needed."; \
-	fi
+	@echo "Done deleting namespace $(NAMESPACE)"
 
 .PHONY: _delete-crds
 _delete-crds:
