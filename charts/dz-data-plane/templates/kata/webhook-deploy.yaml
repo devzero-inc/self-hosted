@@ -16,7 +16,7 @@ spec:
         app: kata-webhook
     spec:
       containers:
-        - image: public.ecr.aws/v1i4e1r2/kata-webhook:latest
+        - image: public.ecr.aws/v1i4e1r2/kata-webhook:v1.0.8
           imagePullPolicy: Always
           name: kata-webhook
           env:

@@ -1,8 +1,8 @@
-output "addons"{
+output "addons" {
   value = module.eks_blueprints_addons
 }
 
-output "efs"{
+output "efs" {
   value = var.enable_efs ? module.efs[0] : null
 }
 
