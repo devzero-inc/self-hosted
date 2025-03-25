@@ -63,7 +63,7 @@ install-ingress-nginx:
 		REPO_NAME=ingress-nginx \
 		REPO_URL=https://kubernetes.github.io/ingress-nginx \
 		REPO_APP_NAME=ingress-nginx \
-		VERSION=4.11.3 \
+		VERSION=4.12.1 \
 		NAMESPACE=ingress-nginx
 
 .PHONY: delete-ingress-nginx
