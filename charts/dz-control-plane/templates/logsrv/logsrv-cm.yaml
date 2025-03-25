@@ -18,11 +18,4 @@ data:
     
     self_hosted: true
 
-    allowed_cors_origins:
-      - https://{{ .Values.domain }}
-    auth0_domains:
-      - auth.{{ .Values.domain }}
-    auth0_audience:
-      - https://{{ .Values.domain }}/webapi
-      - https://{{ .Values.domain }}/api/v2/
     refresh_jwks_timer: {{ .Values.logsrv.refreshJwksTimer }}

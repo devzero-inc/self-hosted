@@ -1,4 +1,4 @@
-# https://github.com/kubernetes/ingress-nginx/blob/helm-chart-4.11.3/charts/ingress-nginx/values.yaml
+# https://github.com/kubernetes/ingress-nginx/blob/helm-chart-4.12.1/charts/ingress-nginx/values.yaml
 
 controller:
   replicaCount: 3

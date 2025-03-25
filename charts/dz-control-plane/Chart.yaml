@@ -1,8 +1,8 @@
 apiVersion: v2
-name: dz-control-plane
+name: control-plane
 description: DevZero Self Hosted Control Plane
 type: application
-version: 0.0.2
-appVersion: "v0.0.1"
+version: 0.0.3
+appVersion: "v0.0.3"
 home: https://docs.devzero.io/docs/self-hosted
 icon: https://avatars.githubusercontent.com/u/71745520?s=400&u=10cb3d6fb9e509873fc2591ca11220573399a5de&v=4 # TODO: maybe host this image in devzero.io/static/...

@@ -108,8 +108,8 @@ class ControlPlane:
         if control_plane_cfg.license_key:
             values['backend']['licenseKey'] = control_plane_cfg.license_key
 
-        if control_plane_cfg.docker_hub:
-            if control_plane_cfg.docker_hub.access:
+        if globals_cfg.docker_hub:
+            if globals_cfg.docker_hub.access:
                 values['credentials']['enable'] = False
             else:
                 values['credentials']['enable'] = True
