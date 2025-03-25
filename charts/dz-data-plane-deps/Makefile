@@ -19,7 +19,7 @@ install-devzero-data-ingress:
 		REPO_NAME=ingress-nginx \
 		REPO_URL=https://kubernetes.github.io/ingress-nginx \
 		REPO_APP_NAME=ingress-nginx \
-		VERSION=4.11.3 \
+		VERSION=4.12.1 \
 		NAMESPACE=devzero-data-ingress
 
 .PHONY: delete-devzero-data-ingress
@@ -29,7 +29,7 @@ delete-devzero-data-ingress:
 		REPO_NAME=ingress-nginx \
 		REPO_URL=https://kubernetes.github.io/ingress-nginx \
 		REPO_APP_NAME=ingress-nginx \
-		VERSION=4.11.3 \
+		VERSION=4.12.1 \
 		NAMESPACE=devzero-data-ingress
 	@$(MAKE) _delete-namespace NAMESPACE=devzero-data-ingress
 
