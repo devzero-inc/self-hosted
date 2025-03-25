@@ -153,7 +153,7 @@ data "google_kms_key_ring" "vault" {
 
 resource "google_kms_crypto_key" "vault" {
   count    = var.create_vault_crypto_key ? 1 : 0
-  name     = "${prefix}-crypto-key"
+  name     = "${local.prefix}-crypto-key"
   key_ring = "projects/${var.project_id}/locations/${var.vault_key_ring_location}/keyRings/${var.vault_key_ring_name}"
   purpose  = "ENCRYPT_DECRYPT"
   destroy_scheduled_duration = "86400s" # 24h
