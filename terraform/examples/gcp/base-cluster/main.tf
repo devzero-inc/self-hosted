@@ -104,6 +104,10 @@ resource "google_container_cluster" "gke_cluster" {
 
   datapath_provider = "ADVANCED_DATAPATH"
 
+  workload_identity_config {
+    workload_pool = "${var.project_id}.svc.id.goog"
+  }
+
   private_cluster_config {
     enable_private_nodes    = false
     enable_private_endpoint = false
@@ -126,6 +130,11 @@ resource "google_container_node_pool" "default_pool" {
   node_config {
     machine_type = "n2-highcpu-32"
     image_type   = "UBUNTU_CONTAINERD"
+
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+    
     advanced_machine_features {
       threads_per_core = 1
       enable_nested_virtualization = true
@@ -133,3 +142,40 @@ resource "google_container_node_pool" "default_pool" {
   }
 }
 
+################################################################################
+# Vault Auto-Unseal Key
+################################################################################
+data "google_kms_key_ring" "vault" {
+  name     = var.vault_key_ring_name
+  location = var.vault_key_ring_location
+  project  = var.project_id
+}
+
+resource "google_kms_crypto_key" "vault" {
+  count    = var.create_vault_crypto_key ? 1 : 0
+  name     = "${prefix}-crypto-key"
+  key_ring = "projects/${var.project_id}/locations/${var.vault_key_ring_location}/keyRings/${var.vault_key_ring_name}"
+  purpose  = "ENCRYPT_DECRYPT"
+  destroy_scheduled_duration = "86400s" # 24h
+
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+
+resource "google_kms_crypto_key_iam_member" "vault" {
+  count         = var.create_vault_crypto_key ? 1 : 0
+  crypto_key_id = google_kms_crypto_key.vault[0].id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${var.vault_unseal_service_account}"
+}
+
+resource "google_service_account_iam_binding" "vault_wi_binding" {
+  count              = var.create_vault_crypto_key ? 1 : 0
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.vault_unseal_service_account}"
+  role               = "roles/iam.workloadIdentityUser"
+
+  members = [
+    "serviceAccount:${var.project_id}.svc.id.goog[devzero/vault]"
+  ]
+}

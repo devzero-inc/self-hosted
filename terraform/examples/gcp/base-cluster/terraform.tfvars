@@ -17,4 +17,8 @@ gke_cluster_location = "us-central1-a"
 gke_zones = ["us-central1-a"]
 gke_master_version = "1.31.6-gke.1020000"
 
-# Don't need node_pools in tfvars since they're defined directly in main.tf
+# Vault
+create_vault_crypto_key = false
+vault_unseal_service_account = "dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com"
+vault_key_ring_name = "devzero-key-ring"
+vault_key_ring_location = "global"

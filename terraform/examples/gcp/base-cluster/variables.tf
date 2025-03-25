@@ -56,3 +56,26 @@ variable "gke_zones" {
   description = "List of zones for the GKE cluster (for a single-zone cluster, provide one zone)."
   type        = list(string)
 }
+
+variable "create_vault_crypto_key" {
+  description = "Whether to create a new KMS crypto key for Vault auto-unseal"
+  type        = bool
+  default     = false
+}
+
+variable "vault_key_ring_name" {
+  description = "Name of the KMS key ring to use for Vault"
+  type        = string
+}
+
+variable "vault_key_ring_location" {
+  description = "GCP location (region) of the KMS key ring"
+  type        = string
+  default     = "global"
+}
+
+variable "vault_unseal_service_account" {
+  description = "IAM service account email used by Vault for unsealing"
+  type        = string
+}
+

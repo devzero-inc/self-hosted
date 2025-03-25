@@ -74,11 +74,11 @@ data:
     if [ "$initialized" = "false" ]; then
       echo "Vault is not initialized. Initializing now..."
 
-      # Check if seal type is awskms
+      # Check if seal type is awskms or gcpckms
       seal_type=$(vault status -format=json | jq -r '.type')
       echo "Seal type: $seal_type"
 
-      if [ "$seal_type" = "awskms" ]; then
+      if [ "$seal_type" = "awskms" ] || [ "$seal_type" = "gcpckms" ]; then
         echo "Vault is using AWS KMS for auto-unsealing"
         vault operator init -format=json  > init_output.json
       else
