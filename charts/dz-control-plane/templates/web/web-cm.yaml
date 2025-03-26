@@ -8,10 +8,13 @@ metadata:
 data:
   API_BASE_URL: "http://{{ include "devzero.resourceName" (dict "ctx" . "component" "gateway")}}:{{ .Values.gateway.service.port}}/api/v0"
   API_BASE_URL_V2: "http://{{ include "devzero.resourceName" (dict "ctx" . "component" "gateway")}}:{{ .Values.gateway.service.port}}/backend/v0"
+  API_LOGS_URL: "https://logsrv.{{ .Values.domain }}"
+  HYDRA_URL: "https://hydra.{{ .Values.domain }}"
   NEXT_PUBLIC_API_LOGS_URL: "https://logsrv.{{ .Values.domain}}"
   NEXT_PUBLIC_GRAFANA_URL: "https://grafana.{{ .Values.domain }}"
   NEXT_PUBLIC_HYDRA_URL: "https://hydra.{{ .Values.domain}}"
   AUTH0_BASE_URL: "https://{{ .Values.domain }}"
+  GRAFANA_URL: "https://{{ .Values.domain }}"
   {{- $ctx := . -}}
   {{- range $key, $val := index .Values.web.env }}
   {{ $key }}: {{ tpl $val $ctx | quote }}
