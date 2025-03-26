@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kata-deploy-daemonset
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: kata-deploy-daemonset
+  template:
+    metadata:
+      labels:
+        name: kata-deploy-daemonset
+    spec:
+      serviceAccountName: kata-deploy-sa
+      initContainers:
+        - name: apply-kata-scripts
+          image: bitnami/kubectl:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              kubectl apply -f https://raw.githubusercontent.com/kata-containers/kata-containers/main/tools/packaging/kata-deploy/kata-deploy/base/kata-deploy.yaml
+      containers:
+        - name: sleep-container
+          image: busybox
+          command: ["sh", "-c", "sleep infinity"]
+      terminationGracePeriodSeconds: 30
