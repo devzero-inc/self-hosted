@@ -1,3 +1,16 @@
+
+
+## Step 1: Navigate to the Terraform Directory
+
+```bash
+cd self-hosted/terraform/examples/gcp/base-cluster
+```
+### Authenticate to GCP
+```bash
+gcloud auth login
+gcloud config set project devzero-kubernetes-sandbox
+```
+
 ### Apply Terraform
 
 ```bash
