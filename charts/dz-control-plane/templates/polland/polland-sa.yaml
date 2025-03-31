@@ -1,0 +1,9 @@
+{{- if .Values.polland.serviceAccount.create -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "polland") | nindent 4 }}
+automountServiceAccountToken: {{ .Values.polland.serviceAccount.automount }}
+{{- end }}

@@ -1,0 +1,9 @@
+{{- if .Values.backend.serviceAccount.create -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "backend") }}
+  labels:
+    {{- include "devzero.labels" (dict "ctx" . "component" "backend") | nindent 4 }}
+automountServiceAccountToken: {{ .Values.backend.serviceAccount.automount }}
+{{- end }}
