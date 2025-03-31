@@ -10,3 +10,7 @@ variable "region" {
   type = string
   description = "The AWS region where the EKS cluster is deployed"
 }
+
+variable "control_plane_chart_prefix" {
+  type = string
+}

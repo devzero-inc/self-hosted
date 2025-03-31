@@ -1,7 +1,7 @@
 locals {
   vault_auth_kubernetes_writer_path = "vault-csi-writer"
-  vault_kubernetes_writer_service_account_name_polland = "polland"
-  vault_kubernetes_writer_service_account_name_backend = "backend"
+  vault_kubernetes_writer_service_account_name_polland = "${var.control_plane_chart_prefix}-polland"
+  vault_kubernetes_writer_service_account_name_backend = "${var.control_plane_chart_prefix}-backend"
   vault_kubernetes_writer_service_account_namespace    = "devzero"
 }
 
