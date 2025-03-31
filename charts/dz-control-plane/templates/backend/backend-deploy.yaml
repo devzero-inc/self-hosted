@@ -49,6 +49,9 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{-if .Values.backend.serviceAccount.create }}
+      serviceAccountName: {{ include "devzero.resourceName" (dict "ctx" . "component" "backend") }}
+      {{-end }}
       containers:
         - name: {{ include "devzero.resourceName" (dict "ctx" . "component" "backend") }}
           image: "{{ .Values.image.repository }}/{{ .Values.backend.imageName}}:{{ .Values.image.tag | default .Chart.AppVersion }}"
