@@ -1,4 +1,3 @@
-control_plane_cluster_name = "devzero-dsh"
-control_plane_chart_prefix = "devzero-control-plane"
-domain = "devzero.internal"
+cluster_name = "devzero-emoreth"
+domain = "mauro.selfzero.net"
 region = "us-west-1"
