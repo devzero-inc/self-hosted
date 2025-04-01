@@ -184,6 +184,11 @@ gateway:
 
 ## @section Backend Configuration
 backend:
+  ## @subsection Backend Service Account Configuration
+  serviceAccount:
+    ## @param backend.serviceAccount.create Specifies whether a service account should be created
+    create: false
+
   ## @param backend.replicas Number of replicas for Backend
   replicas: 1
 
@@ -663,6 +668,11 @@ logsrv:
 
 ## @section Polland Configuration
 polland:
+  ## @subsection Polland Service Account Configuration
+  serviceAccount:
+    ## @param polland.serviceAccount.create Specifies whether a service account should be created
+    create: false
+
   ## @subsection Polland Worker Configuration
   worker:
     ## @param polland.worker.replicas Number of replicas for Polland Worker

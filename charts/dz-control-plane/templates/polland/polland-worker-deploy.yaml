@@ -50,9 +50,9 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{-if .Values.polland.serviceAccount.create }}
+      {{- if $root.Values.polland.serviceAccount.create }}
       serviceAccountName: {{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}
-      {{-end }}
+      {{- end }}
       {{- if $root.Values.image.pullSecrets }}
       imagePullSecrets:
       {{- range $root.Values.image.pullSecrets }}
