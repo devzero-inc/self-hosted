@@ -377,6 +377,16 @@
         "backend": {
             "type": "object",
             "properties": {
+                "serviceAccount": {
+                    "type": "object",
+                    "properties": {
+                        "create": {
+                            "type": "boolean",
+                            "description": "Specifies whether a service account should be created",
+                            "default": false
+                        }
+                    }
+                },
                 "replicas": {
                     "type": "number",
                     "description": "Number of replicas for Backend",
@@ -1350,6 +1360,16 @@
         "polland": {
             "type": "object",
             "properties": {
+                "serviceAccount": {
+                    "type": "object",
+                    "properties": {
+                        "create": {
+                            "type": "boolean",
+                            "description": "Specifies whether a service account should be created",
+                            "default": false
+                        }
+                    }
+                },
                 "worker": {
                     "type": "object",
                     "properties": {

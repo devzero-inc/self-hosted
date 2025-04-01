@@ -1,9 +1,15 @@
 name: Control Plane Chart CI
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'charts/**'
+  workflow_dispatch:
   pull_request:
     paths:
-      - 'charts/dz-control-plane/**'
+      - 'charts/**'
 
 jobs:
   check-docs:
@@ -16,6 +22,9 @@ jobs:
       - name: Generate documentation
         working-directory: charts/dz-control-plane
         run: make docs
+
+      - name: Lint helm charts
+        run: make lint-all-charts
 
       - name: Check for modified files
         run: |
