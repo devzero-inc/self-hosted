@@ -24,6 +24,7 @@ jobs:
         run: make docs
 
       - name: Lint helm charts
+        working-directory: charts
         run: make lint-all-charts
 
       - name: Check for modified files
