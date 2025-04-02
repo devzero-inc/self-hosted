@@ -1,0 +1,9 @@
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: kata-nginx-pod
+    spec:
+      runtimeClassName: kata
+      containers:
+      - name: my-container
+        image: nginx 
