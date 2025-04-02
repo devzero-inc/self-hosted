@@ -224,7 +224,7 @@ data "google_kms_key_ring" "vault" {
 }
 
 data "google_kms_crypto_key" "existing_vault_key" {
-  name     = "${local.prefix}-crypto-key"
+  name     = var.vault_key_ring_name
   key_ring = data.google_kms_key_ring.vault.id
 }
 
