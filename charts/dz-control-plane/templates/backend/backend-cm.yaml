@@ -68,6 +68,7 @@ data:
         use_http: true
       dxi:
         enabled: {{ .Values.backend.grafana.enabled }}
+      enable_open_signup: {{ .Values.backend.enableOpenSignup | default "false"}}
     self_hosted: true
     license_key: {{ .Values.backend.licenseKey }}
     arch: {{ .Values.backend.arch }}

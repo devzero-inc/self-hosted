@@ -219,6 +219,9 @@ backend:
   ## @param backend.annotations Annotations
   annotations: {}
 
+  ## @param backend.enableOpenSignup Whether or not to allow people sign up without an invite
+  enableOpenSignup: false
+
   ## @subsection Backend Redis Configuration
   redis:
     ## @param backend.redis.url Redis URL for Backend

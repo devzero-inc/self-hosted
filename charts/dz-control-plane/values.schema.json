@@ -438,6 +438,11 @@
                     "description": "Annotations",
                     "default": {}
                 },
+                "enableOpenSignup": {
+                    "type": "boolean",
+                    "description": "Whether or not to allow people sign up without an invite",
+                    "default": false
+                },
                 "redis": {
                     "type": "object",
                     "properties": {
