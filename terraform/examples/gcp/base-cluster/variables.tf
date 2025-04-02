@@ -74,8 +74,42 @@ variable "vault_key_ring_location" {
   default     = "global"
 }
 
-variable "vault_unseal_service_account" {
+variable "devzero_service_account" {
   description = "IAM service account email used by Vault for unsealing"
+  type        = string
+}
+
+variable "enable_cluster_autoscaler" {
+  description = "Enable autoscaling of node pool"
+  type        = bool
+  default     = false
+}
+
+################################################################################
+# Example of using custom DERP server
+################################################################################
+variable "create_derp" {
+  description = "Create custom DERP server"
+  type        = bool
+  default     = false
+}
+
+################################################################################
+# VPN
+################################################################################
+variable "create_vpn" {
+  description = "Controls if VPN gateway and VPN resources will be created."
+  type        = bool
+  default     = true
+}
+
+variable "vpn_client_list" {
+  description = "List of VPN client names (used for generating client certs)"
+  type        = set(string)
+}
+
+variable "domain" {
+  description = "Base domain name for server cert DNS SANs"
   type        = string
 }
 

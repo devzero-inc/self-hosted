@@ -6,14 +6,16 @@ output "gke_cluster_name" {
   value = resource.google_container_cluster.gke_cluster.name
 }
 
-# output "gke_cluster_endpoint" {
-#   value = google_container_cluster.gke_cluster_endpoint
-# }
+output "vpc_id" {
+  value = resource.google_compute_network.vpc_network.name
+}
 
-# output "gke_cluster_kubernetes_version" {
-#   value = google_container_cluster.gke_cluster.min_master_version
-# }
+output "derp_ip" {
+  value = module.derp[0].derp_ip
+}
 
-# output "gke_node_pool_version" {
-#   value = google_container_node_pool.default_pool.version
-# }
+output "derp_ssh_private_key" {
+  value       = module.derp[0].private_key_pem
+  description = "Private key to SSH into the DERP server"
+  sensitive   = true
+}

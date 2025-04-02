@@ -14,16 +14,8 @@ provider "google" {
   region  = var.region
 }
 
-data "google_client_config" "default" {}
-
-provider "kubernetes" {
-  host                   = "https://${module.gke.endpoint}"
-  token                  = data.google_client_config.default.access_token
-  cluster_ca_certificate = base64decode(module.gke.ca_certificate)
-}
-
 ################################################################################
-# VPC - DIRECT RESOURCES INSTEAD OF MODULE
+# VPC
 ################################################################################
 resource "google_compute_network" "vpc_network" {
   name                    = "${local.prefix}-vpc"
@@ -34,19 +26,19 @@ resource "google_compute_network" "vpc_network" {
 
 resource "google_compute_subnetwork" "gke_subnet" {
   name          = local.subnet_name
-  ip_cidr_range = var.gke_subnet_cidr  # "10.1.0.0/20"
+  ip_cidr_range = var.gke_subnet_cidr 
   region        = var.region
   network       = google_compute_network.vpc_network.id
   project       = var.project_id
 
   secondary_ip_range {
     range_name    = local.pods_range_name
-    ip_cidr_range = "10.12.0.0/16"  # Changed from 10.8.0.0/16
+    ip_cidr_range = "10.12.0.0/16"  
   }
 
   secondary_ip_range {
     range_name    = local.services_range_name
-    ip_cidr_range = "10.14.0.0/20"  # Changed from 10.4.0.0/20
+    ip_cidr_range = "10.14.0.0/20"  
   }
 }
 
@@ -82,7 +74,7 @@ resource "google_compute_router_nat" "nat" {
 }
 
 ################################################################################
-# GKE CLUSTER MODULE
+# GKE CLUSTER
 ################################################################################
 resource "google_container_cluster" "gke_cluster" {
   name     = "${local.prefix}"
@@ -114,6 +106,12 @@ resource "google_container_cluster" "gke_cluster" {
     # master_ipv4_cidr_block  = "172.16.0.0/28"
   }
 
+  addons_config {
+    gcp_filestore_csi_driver_config {
+      enabled = true
+    }
+  }
+
   network    = google_compute_network.vpc_network.name
   subnetwork = google_compute_subnetwork.gke_subnet.name
 
@@ -126,6 +124,14 @@ resource "google_container_node_pool" "default_pool" {
   name      = "kata-node-pool"
 
   node_count = 1
+
+  dynamic "autoscaling" {
+    for_each = var.enable_cluster_autoscaler ? [1] : []
+    content {
+      min_node_count = 1
+      max_node_count = 5
+    }
+  }
 
   node_config {
     machine_type = "n2-highcpu-32"
@@ -143,6 +149,72 @@ resource "google_container_node_pool" "default_pool" {
 }
 
 ################################################################################
+# VPN
+################################################################################
+
+module "vpn" {
+  count = var.create_vpn ? 1 : 0
+
+  source = "../../../modules/gcp/vpn"
+
+  name               = local.prefix
+  project_id         = var.project_id
+  region             = var.region
+  location           = var.gke_cluster_location
+  network            = google_compute_network.vpc_network.name
+  subnet             = google_compute_subnetwork.gke_subnet.name
+  vpn_client_list    = var.vpn_client_list
+  bucket_location    = var.region
+  machine_type       = "e2-medium"
+  devzero_service_account = var.devzero_service_account
+  boot_image         = data.google_compute_image.ubuntu.self_link
+  additional_server_dns_names = [
+    "${var.domain}",
+    "*.${var.domain}"
+  ]
+}
+
+data "google_compute_image" "ubuntu" {
+  family  = "ubuntu-2004-lts"
+  project = "ubuntu-os-cloud"
+}
+
+
+################################################################################
+# Example of using custom DERP server in GCP
+################################################################################
+
+module "derp" {
+  source = "../../../modules/gcp/derp"
+
+  count  = var.create_derp ? 1 : 0
+
+  region    = var.region
+  zone      = var.gke_cluster_location
+
+  network     = google_compute_network.vpc_network.id
+  subnetwork  = google_compute_subnetwork.gke_subnet.id
+
+  instance_type = "e2-medium"
+  volume_size   = 20
+
+  public_derp   = true
+  existing_ip   = ""
+
+  name_prefix   = "devzero"
+  hostname      = "derp.devzero.net"
+
+  ingress_cidr_blocks = ["0.0.0.0/0"]
+  service_account_email = var.devzero_service_account
+
+  tags = {
+    environment = "production"
+    team        = "devops"
+    project     = "derp"
+  }
+}
+
+################################################################################
 # Vault Auto-Unseal Key
 ################################################################################
 data "google_kms_key_ring" "vault" {
@@ -151,28 +223,21 @@ data "google_kms_key_ring" "vault" {
   project  = var.project_id
 }
 
-resource "google_kms_crypto_key" "vault" {
-  count    = var.create_vault_crypto_key ? 1 : 0
+data "google_kms_crypto_key" "existing_vault_key" {
   name     = "${local.prefix}-crypto-key"
-  key_ring = "projects/${var.project_id}/locations/${var.vault_key_ring_location}/keyRings/${var.vault_key_ring_name}"
-  purpose  = "ENCRYPT_DECRYPT"
-  destroy_scheduled_duration = "86400s" # 24h
-
-  lifecycle {
-    prevent_destroy = false
-  }
+  key_ring = data.google_kms_key_ring.vault.id
 }
 
 resource "google_kms_crypto_key_iam_member" "vault" {
   count         = var.create_vault_crypto_key ? 1 : 0
-  crypto_key_id = google_kms_crypto_key.vault[0].id
+  crypto_key_id = data.google_kms_crypto_key.existing_vault_key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${var.vault_unseal_service_account}"
+  member        = "serviceAccount:${var.devzero_service_account}"
 }
 
 resource "google_service_account_iam_binding" "vault_wi_binding" {
   count              = var.create_vault_crypto_key ? 1 : 0
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.vault_unseal_service_account}"
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.devzero_service_account}"
   role               = "roles/iam.workloadIdentityUser"
 
   members = [

@@ -1,46 +1,61 @@
-variable "project_id" {
+variable "name" {
+  description = "Prefix or name used for VPN resources"
   type        = string
-  description = "GCP Project ID"
+}
+
+variable "project_id" {
+  description = "GCP project ID"
+  type        = string
 }
 
 variable "region" {
+  description = "GCP region"
   type        = string
-  description = "GCP Region"
+}
+
+variable "location" {
+  description = "GCP zone where the VPN instance will be created"
+  type        = string
 }
 
 variable "network" {
+  description = "Name of the VPC network"
   type        = string
-  description = "GCP VPC Network"
 }
 
-variable "peer_ip" {
+variable "subnet" {
+  description = "Name of the subnet to attach VPN instance"
   type        = string
-  description = "External IP of the peer VPN gateway"
 }
 
-variable "vpn_shared_secret" {
-  type        = string
-  description = "Shared secret for VPN authentication"
+variable "vpn_client_list" {
+  description = "List of client identifiers (used for generating client certs and ovpn files)"
+  type        = set(string)
 }
 
-variable "allowed_ip_range" {
+variable "bucket_location" {
+  description = "Location of the GCS bucket for storing OVPN files"
   type        = string
-  description = "Allowed IP range for VPN connection"
 }
 
-variable "name" {
+variable "machine_type" {
+  description = "GCE instance machine type for OpenVPN server"
   type        = string
-  description = "VPN setup name"
+  default     = "e2-medium"
 }
 
-variable "pem_private_key" {
-  description = "The private key file for VPN"
+variable "boot_image" {
+  description = "Image to use for the VPN server instance (e.g. ubuntu-2004 image)"
   type        = string
-  default     = null
 }
 
-variable "pem_certificate" {
-  description = "The certificate file for VPN"
+variable "additional_server_dns_names" {
+  description = "Additional DNS SANs for the server certificate"
+  type        = list(string)
+  default     = []
+}
+
+variable "devzero_service_account" {
+  description = "IAM service account email used by Vault for unsealing"
   type        = string
-  default     = null
 }

@@ -1,9 +1,9 @@
-output "derp_server_ip" {
-  description = "DERP Server Public IP (if enabled)"
-  value       = var.public_derp ? google_compute_address.derp_static_ip[0].address : null
+output "derp_ip" {
+  value = local.ip_address
 }
 
-output "derp_server_private_ip" {
-  description = "DERP Server Private IP"
-  value       = google_compute_instance.derp_server.network_interface[0].network_ip
+output "private_key_pem" {
+  value       = tls_private_key.ssh_key.private_key_pem
+  description = "Private key to SSH into the DERP server"
+  sensitive   = true
 }
