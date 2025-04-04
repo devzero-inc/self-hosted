@@ -11,6 +11,7 @@ global:
       postgresPassword: postgres
 
 primary:
+  resourcesPreset: small
   persistentVolumeClaimRetentionPolicy:
     enabled: true
     whenDeleted: Delete
