@@ -184,6 +184,11 @@ gateway:
 
 ## @section Backend Configuration
 backend:
+  ## @subsection Backend Service Account Configuration
+  serviceAccount:
+    ## @param backend.serviceAccount.create Specifies whether a service account should be created
+    create: false
+
   ## @param backend.replicas Number of replicas for Backend
   replicas: 1
 
@@ -213,6 +218,9 @@ backend:
 
   ## @param backend.annotations Annotations
   annotations: {}
+
+  ## @param backend.enableOpenSignup Whether or not to allow people sign up without an invite
+  enableOpenSignup: false
 
   ## @subsection Backend Redis Configuration
   redis:
@@ -663,6 +671,11 @@ logsrv:
 
 ## @section Polland Configuration
 polland:
+  ## @subsection Polland Service Account Configuration
+  serviceAccount:
+    ## @param polland.serviceAccount.create Specifies whether a service account should be created
+    create: false
+
   ## @subsection Polland Worker Configuration
   worker:
     ## @param polland.worker.replicas Number of replicas for Polland Worker
@@ -865,7 +878,7 @@ polland:
     # ClusterAutoscaler https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#what-types-of-pods-can-prevent-ca-from-removing-a-node
     DISALLOW_POD_EVICTION_ANNOTATION: '{"cluster-autoscaler.kubernetes.io/safe-to-evict": "false"}'
     # karpenter < 1.0 https://karpenter.sh/v1.0/upgrading/v1-migration/
-    # DISALLOW_POD_EVICTION_ANNOTATION: '{"karpenter.sh/do-not-disrupt": "true"}'
+    # DISALLOW_POD_EVICTION_ANNOTATION: '{"karpenter.sh/do-not-evict": "true"}'
     # karpenter > 1.0 https://karpenter.sh/v1.0/upgrading/v1-migration/
     # DISALLOW_POD_EVICTION_ANNOTATION: '{"karpenter.sh/do-not-disrupt": "false"}'
 

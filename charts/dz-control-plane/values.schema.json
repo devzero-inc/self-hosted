@@ -377,6 +377,16 @@
         "backend": {
             "type": "object",
             "properties": {
+                "serviceAccount": {
+                    "type": "object",
+                    "properties": {
+                        "create": {
+                            "type": "boolean",
+                            "description": "Specifies whether a service account should be created",
+                            "default": false
+                        }
+                    }
+                },
                 "replicas": {
                     "type": "number",
                     "description": "Number of replicas for Backend",
@@ -427,6 +437,11 @@
                     "type": "object",
                     "description": "Annotations",
                     "default": {}
+                },
+                "enableOpenSignup": {
+                    "type": "boolean",
+                    "description": "Whether or not to allow people sign up without an invite",
+                    "default": false
                 },
                 "redis": {
                     "type": "object",
@@ -1350,6 +1365,16 @@
         "polland": {
             "type": "object",
             "properties": {
+                "serviceAccount": {
+                    "type": "object",
+                    "properties": {
+                        "create": {
+                            "type": "boolean",
+                            "description": "Specifies whether a service account should be created",
+                            "default": false
+                        }
+                    }
+                },
                 "worker": {
                     "type": "object",
                     "properties": {

@@ -31,9 +31,9 @@ spec:
       {{- if .Values.polland.priorityClassName }}
       priorityClassName: {{ .Values.polland.priorityClassName }}
       {{- end }}
-      {{-if .Values.polland.serviceAccount.create }}
+      {{- if .Values.polland.serviceAccount.create }}
       serviceAccountName: {{ include "devzero.resourceName" (dict "ctx" . "component" "polland") }}
-      {{-end }}
+      {{- end }}
       {{- if .Values.image.pullSecrets }}
       imagePullSecrets:
       {{- range .Values.image.pullSecrets }}

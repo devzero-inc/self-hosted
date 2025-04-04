@@ -115,7 +115,9 @@ _delete-chart-helm:
 _delete-local-chart-helm:
 	$(HELM_BIN) delete $(APP_NAME) -n $(NAMESPACE) --ignore-not-found
 
-
+.PHONY: lint-helm
+lint-helm:
+	$(HELM_BIN) lint
 
 ################################################################################
 # Kubectl Strategy
