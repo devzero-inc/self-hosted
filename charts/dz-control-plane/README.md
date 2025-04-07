@@ -455,7 +455,7 @@ The Helm chart installs the following components:
 | `polland.env.VAULT_SECRETS_MOUNT_POINT`                 | Vault secrets mount point                             | `vault-csi-production-writer`                                 |
 | `polland.env.LOGSRV_DEFAULT_QUEUE`                      | Default LogSrv queue URL                              | `http://elasticmq:9324/queue/logsrv.fifo`                     |
 | `polland.env.LOGSRV_DEFAULT_REGION`                     | Default LogSrv region                                 | `elasticmq`                                                   |
-| `polland.env.DOCKER_REGISTRY`                           | Use custom docker registry                            | `docker-registry.example.com`                                 |
+| `polland.env.DOCKER_REGISTRY`                           | Use custom docker registry                            | `docker-registry.{{ .Values.domain }}`                        |
 | `polland.env.DEVBOX_INGRESS_CLASS_NAME`                 | Use custom nginx ingress controller                   | `devzero-data-ingress`                                        |
 | `polland.env.ALLOW_POD_EVICTION_ANNOTATION`             | JSON style annotations to allow pod eviction          | `{"cluster-autoscaler.kubernetes.io/safe-to-evict": "true"}`  |
 | `polland.env.DISALLOW_POD_EVICTION_ANNOTATION`          | JSON style annotations to disallow pod eviction       | `{"cluster-autoscaler.kubernetes.io/safe-to-evict": "false"}` |

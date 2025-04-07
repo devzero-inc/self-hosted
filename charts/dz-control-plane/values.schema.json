@@ -1651,7 +1651,7 @@
                         "DOCKER_REGISTRY": {
                             "type": "string",
                             "description": "Use custom docker registry",
-                            "default": "docker-registry.example.com"
+                            "default": "docker-registry.{{ .Values.domain }}"
                         },
                         "DEVBOX_INGRESS_CLASS_NAME": {
                             "type": "string",
