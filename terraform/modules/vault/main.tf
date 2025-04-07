@@ -1,8 +1,11 @@
 locals {
   vault_auth_kubernetes_writer_path = "vault-csi-writer"
+  vault_auth_kubernetes_reader_path = "vault-csi-reader"
   vault_kubernetes_writer_service_account_name_polland = "${var.chart_prefix}-polland"
   vault_kubernetes_writer_service_account_name_backend = "${var.chart_prefix}-backend"
   vault_kubernetes_writer_service_account_namespace    = "devzero"
+  vault_kubernetes_reader_service_account_name = "vault-customer-secret-reader"
+  vault_kubernetes_reader_service_account_namespace    = "devzero-self-hosted"
 }
 
 
@@ -43,6 +46,31 @@ resource "vault_kubernetes_auth_backend_role" "kubernetes_writer_customersecretw
     vault_policy.customer_secret_writer.name,
     vault_policy.customer_secret_reader.name,
     vault_policy.auth_backend_manager.name,
+  ]
+  audience          = null
+  alias_name_source = "serviceaccount_name"
+}
+
+resource "vault_auth_backend" "kubernetes-reader" {
+  type = "kubernetes"
+  path = local.vault_auth_kubernetes_reader_path
+}
+
+resource "vault_kubernetes_auth_backend_config" "kubernetes-reader" {
+  backend                = vault_auth_backend.kubernetes-reader.path
+  kubernetes_host        = var.cluster_host
+  kubernetes_ca_cert     = sensitive(base64decode(var.cluster_ca_certificate))
+  disable_iss_validation = true
+}
+
+resource "vault_kubernetes_auth_backend_role" "kubernetes_reader_customersecretreader" {
+  backend                          = vault_auth_backend.kubernetes-reader.path
+  role_name                        = local.vault_kubernetes_reader_role
+  bound_service_account_names      = [local.vault_kubernetes_reader_service_account_name]
+  bound_service_account_namespaces = [local.vault_kubernetes_reader_service_account_namespace]
+  token_ttl                        = 3600
+  token_policies = [
+    vault_policy.customer_secret_reader.name,
   ]
   audience          = null
   alias_name_source = "serviceaccount_name"

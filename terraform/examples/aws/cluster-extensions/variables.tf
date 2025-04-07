@@ -30,3 +30,9 @@ variable "enable_cluster_autoscaler" {
   type = bool
   default = false
 }
+
+variable "enable_external_secrets" {
+  description = "Enable external secrets"
+  type = bool
+  default = false
+}

@@ -89,7 +89,7 @@ dashboards:
     kubernetes-cluster-autoscaler-via-prometheus:
       gnetId: 3831
       revision: 1
-      datasource: prometheus 
+      datasource: prometheus
     arc-performance:
       json: |
         {
@@ -1483,11 +1483,11 @@ ingress:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   ingressClassName: "nginx"
   hosts:
-  - "grafana.example.com"
+  - "grafana.mauro.selfzero.net"
   tls:
   - secretName: devzero-grafana-tls
     hosts:
-    - grafana.example.com
+    - grafana.mauro.selfzero.net
 command:
 - "sh"
 - "-c"

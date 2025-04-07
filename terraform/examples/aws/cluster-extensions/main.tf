@@ -42,5 +42,5 @@ module "cluster_extensions"{
   region = var.region
   cluster_name = var.cluster_name
   enable_cluster_autoscaler = var.enable_cluster_autoscaler
-
+  enable_external_secrets = var.enable_external_secrets
 }
