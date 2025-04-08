@@ -416,7 +416,7 @@ hydra:
   ## @subsection Hydra CIDR Configuration
   cidr:
     ## @param hydra.cidr.v6 IPv6 CIDR range
-    v6: fd7a:115c:a1e0::/48
+    v6: fd90:8ac:deb0::/48
     ## @param hydra.cidr.v4 IPv4 CIDR range
     v4: 100.64.0.0/10
 
@@ -1205,12 +1205,16 @@ web:
   ## @param web.annotations Annotations for Web
   annotations: {}
 
+  nextAuthSecret: "HX47TauArWW39+HLmBeN8lxCWxaiuIuU9mjvnudpT7c="
+  nextAuthUrl: "https://{{ .Values.domain }}"
   ## @subsection Web Environment Configuration
   env:
     ## @param web.env.NEXT_PUBLIC_SELF_HOSTED Self-hosted mode for Next.js
     NEXT_PUBLIC_SELF_HOSTED: "true"
     ## @param web.env.NODE_TLS_REJECT_UNAUTHORIZED ignore SSL mode for Next.js
     NODE_TLS_REJECT_UNAUTHORIZED: "0"
+
+    NEXTAUTH_URL: "https://{{ .Values.domain }}"
 
   ## @subsection Web Autoscaling Configuration
   autoscaling:
