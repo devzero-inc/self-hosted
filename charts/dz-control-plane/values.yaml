@@ -44,7 +44,7 @@ image:
   ## @param image.tag Devzero container image tag
   tag: "v1.0.8"
   ## @param image.pullPolicy Container pull policy
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # -- Optionally specify an array of imagePullSecrets
   # pullSecrets:
   #   - pull-secret
@@ -1134,7 +1134,7 @@ buildqd:
       ## @param buildqd.buildkit.image.repository Buildkit repository
       repository: docker.io/moby/buildkit
       ## @param buildqd.buildkit.image.pullPolicy Buildkit image policy
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
       ## @param buildqd.buildkit.image.tag Buildkit image tag
       tag: "v0.15.1"
 
@@ -1205,7 +1205,7 @@ web:
   ## @param web.annotations Annotations for Web
   annotations: {}
 
-  nextAuthSecret: "HX47TauArWW39+HLmBeN8lxCWxaiuIuU9mjvnudpT7c="
+  nextAuthSecret: ""
   nextAuthUrl: "https://{{ .Values.domain }}"
   ## @subsection Web Environment Configuration
   env:
