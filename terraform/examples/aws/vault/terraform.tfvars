@@ -1,3 +1,3 @@
 cluster_name = "devzero-dsh"
-domain = "mauro.selfzero.net"
+domain = "devzero.internal"
 region = "us-west-1"
