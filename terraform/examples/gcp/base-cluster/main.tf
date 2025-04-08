@@ -17,38 +17,18 @@ provider "google" {
 ################################################################################
 # VPC
 ################################################################################
-resource "google_compute_network" "vpc_network" {
-  name                    = "${local.prefix}-vpc"
-  auto_create_subnetworks = false
-  mtu                     = var.mtu
-  project                 = var.project_id
-}
-
-resource "google_compute_subnetwork" "gke_subnet" {
-  name          = local.subnet_name
-  ip_cidr_range = var.gke_subnet_cidr 
-  region        = var.region
-  network       = google_compute_network.vpc_network.id
-  project       = var.project_id
-
-  secondary_ip_range {
-    range_name    = local.pods_range_name
-    ip_cidr_range = "10.12.0.0/16"  
-  }
-
-  secondary_ip_range {
-    range_name    = local.services_range_name
-    ip_cidr_range = "10.14.0.0/20"  
-  }
-}
-
-resource "google_compute_route" "default_route" {
-  name             = "${local.prefix}-default-route"
-  dest_range       = "0.0.0.0/0"
-  network          = google_compute_network.vpc_network.id
-  next_hop_gateway = "default-internet-gateway"
-  priority         = 1000
-  project          = var.project_id
+module "vpc" {
+  source                        = "../../../modules/gcp/vpc"
+  project_id                    = var.project_id
+  region                        = var.region
+  mtu                           = var.mtu
+  gke_subnet_cidr               = var.gke_subnet_cidr
+  prefix                        = local.prefix
+  subnet_name                   = local.subnet_name
+  pods_range_name               = local.pods_range_name
+  services_range_name           = local.services_range_name
+  pods_secondary_range_cidr     = var.pods_secondary_range_cidr
+  services_secondary_range_cidr = var.services_secondary_range_cidr
 }
 
 ################################################################################
@@ -58,7 +38,7 @@ resource "google_compute_router" "nat_router" {
   count   = var.enable_private_nodes ? 1 : 0
   name    = "${local.prefix}-router"
   region  = var.region
-  network = google_compute_network.vpc_network.id
+  network = module.vpc.vpc_network_id
   project = var.project_id
 }
 
@@ -112,8 +92,8 @@ resource "google_container_cluster" "gke_cluster" {
     }
   }
 
-  network    = google_compute_network.vpc_network.name
-  subnetwork = google_compute_subnetwork.gke_subnet.name
+  network    = module.vpc.vpc_network_name
+  subnetwork = module.vpc.gke_subnet_name
 
   min_master_version = "1.31.6-gke.1020000" 
 }
@@ -123,7 +103,7 @@ resource "google_container_node_pool" "default_pool" {
   location  = google_container_cluster.gke_cluster.location
   name      = "kata-node-pool"
 
-  node_count = 1
+  node_count = 3
 
   dynamic "autoscaling" {
     for_each = var.enable_cluster_autoscaler ? [1] : []
@@ -161,8 +141,8 @@ module "vpn" {
   project_id         = var.project_id
   region             = var.region
   location           = var.gke_cluster_location
-  network            = google_compute_network.vpc_network.name
-  subnet             = google_compute_subnetwork.gke_subnet.name
+  network            = module.vpc.vpc_network_name
+  subnet             = module.vpc.gke_subnet_name
   vpn_client_list    = var.vpn_client_list
   bucket_location    = var.region
   machine_type       = "e2-medium"
@@ -192,8 +172,8 @@ module "derp" {
   region    = var.region
   zone      = var.gke_cluster_location
 
-  network     = google_compute_network.vpc_network.id
-  subnetwork  = google_compute_subnetwork.gke_subnet.id
+  network     = module.vpc.vpc_network_id
+  subnetwork  = module.vpc.gke_subnet_id
 
   instance_type = "e2-medium"
   volume_size   = 20
@@ -217,30 +197,13 @@ module "derp" {
 ################################################################################
 # Vault Auto-Unseal Key
 ################################################################################
-data "google_kms_key_ring" "vault" {
-  name     = var.vault_key_ring_name
-  location = var.vault_key_ring_location
-  project  = var.project_id
+module "vault" {
+  count                    = var.create_vault_crypto_key ? 1 : 0
+  source                   = "../../../modules/gcp/vault"
+  vault_key_ring_name      = var.vault_key_ring_name
+  vault_key_ring_location  = var.vault_key_ring_location
+  project_id               = var.project_id
+  devzero_service_account  = var.devzero_service_account
+  create_vault_crypto_key  = var.create_vault_crypto_key
 }
 
-data "google_kms_crypto_key" "existing_vault_key" {
-  name     = var.vault_key_ring_name
-  key_ring = data.google_kms_key_ring.vault.id
-}
-
-resource "google_kms_crypto_key_iam_member" "vault" {
-  count         = var.create_vault_crypto_key ? 1 : 0
-  crypto_key_id = data.google_kms_crypto_key.existing_vault_key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${var.devzero_service_account}"
-}
-
-resource "google_service_account_iam_binding" "vault_wi_binding" {
-  count              = var.create_vault_crypto_key ? 1 : 0
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.devzero_service_account}"
-  role               = "roles/iam.workloadIdentityUser"
-
-  members = [
-    "serviceAccount:${var.project_id}.svc.id.goog[devzero/vault]"
-  ]
-}

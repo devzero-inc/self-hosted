@@ -1,13 +1,9 @@
-output "subnet_secondary_ranges" {
-  value = google_compute_subnetwork.gke_subnet.secondary_ip_range
+output "vpc_name" {
+  value = module.vpc.vpc_network_name
 }
 
 output "gke_cluster_name" {
   value = resource.google_container_cluster.gke_cluster.name
-}
-
-output "vpc_id" {
-  value = resource.google_compute_network.vpc_network.name
 }
 
 output "derp_ip" {

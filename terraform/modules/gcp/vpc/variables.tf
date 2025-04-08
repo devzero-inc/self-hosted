@@ -1,33 +1,49 @@
 variable "project_id" {
   type        = string
-  description = "GCP Project ID"
+  description = "GCP project ID"
 }
 
 variable "region" {
   type        = string
-  description = "GCP Region"
+  description = "Region for subnets"
 }
 
-variable "vpc_name" {
+variable "mtu" {
+  type        = number
+  description = "MTU for the VPC"
+}
+
+variable "gke_subnet_cidr" {
   type        = string
-  description = "VPC Name"
+  description = "CIDR for GKE subnet"
 }
 
 variable "prefix" {
   type        = string
-  description = "Resource Prefix"
+  description = "Name prefix for resources"
 }
 
-variable "subnets" {
-  type = list(object({
-    name          = string
-    ip_cidr_range = string
-    region        = string
-    secondary_ip_range = list(object({
-      range_name    = string
-      ip_cidr_range = string
-    }))
-  }))
-  description = "List of subnets"
+variable "subnet_name" {
+  type        = string
+  description = "Name of the GKE subnet"
 }
 
+variable "pods_range_name" {
+  type        = string
+  description = "Secondary range name for pods"
+}
+
+variable "services_range_name" {
+  type        = string
+  description = "Secondary range name for services"
+}
+
+variable "pods_secondary_range_cidr" {
+  type        = string
+  description = "CIDR block for the secondary range used by pods"
+}
+
+variable "services_secondary_range_cidr" {
+  type        = string
+  description = "CIDR block for the secondary range used by services"
+}

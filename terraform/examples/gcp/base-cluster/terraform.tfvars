@@ -9,6 +9,8 @@ domain       = "devzero.internal"
 gke_subnet_cidr = "10.1.0.0/20"
 mtu = 1460
 create_vpc = true
+pods_secondary_range_cidr = "10.12.0.0/16"
+services_secondary_range_cidr = "10.14.0.0/20"
 
 # NAT Gateway (Enable only if using private nodes)
 enable_private_nodes = false
@@ -20,7 +22,7 @@ gke_zones = ["us-central1-a"]
 gke_master_version = "1.31.6-gke.1020000"
 
 # Vault
-create_vault_crypto_key = false
+create_vault_crypto_key = true
 devzero_service_account = "dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com"
 vault_key_ring_name = "devzero-key-ring"
 vault_key_ring_location = "global"

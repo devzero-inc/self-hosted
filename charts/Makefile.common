@@ -112,7 +112,7 @@ _install-helm-chart-helm:
 		--namespace $(NAMESPACE) \
 		--create-namespace \
 		--values values/$(APP_NAME).yaml \
-		--values values/$(APP_NAME)_overrides.yaml
+		--values values/$(APP_NAME)_overrides.yaml $(EXTRA_ARGS)
 
 .PHONY: _install-oci-helm-chart-helm
 _install-oci-helm-chart-helm:

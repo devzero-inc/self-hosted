@@ -1,59 +1,33 @@
-locals {
-  prefix = var.prefix
-}
-
-# VPC
-resource "google_compute_network" "vpc" {
-  name                    = var.vpc_name
+resource "google_compute_network" "vpc_network" {
+  name                    = "${var.prefix}-vpc"
   auto_create_subnetworks = false
+  mtu                     = var.mtu
   project                 = var.project_id
-
-  routing_mode = "GLOBAL"
 }
 
-# Subnets
-resource "google_compute_subnetwork" "private_subnets" {
-  for_each = {for subnets in var.subnets : subnets.name => subnets}
-
-  name          = each.key
-  project       = var.project_id
-  ip_cidr_range = each.value.ip_cidr_range
-  network       = google_compute_network.vpc.id
+resource "google_compute_subnetwork" "gke_subnet" {
+  name          = var.subnet_name
+  ip_cidr_range = var.gke_subnet_cidr
   region        = var.region
+  network       = google_compute_network.vpc_network.id
+  project       = var.project_id
 
-  dynamic "secondary_ip_range" {
-    for_each = each.value.secondary_ip_range
-    content {
-      range_name = secondary_ip_range.value.range_name
-      ip_cidr_range = secondary_ip_range.value.ip_cidr_range
-    }
+  secondary_ip_range {
+    range_name    = var.pods_range_name
+    ip_cidr_range = var.pods_secondary_range_cidr
+  }
+
+  secondary_ip_range {
+    range_name    = var.services_range_name
+    ip_cidr_range = var.services_secondary_range_cidr
   }
 }
 
-# Firewall Rules
-resource "google_compute_firewall" "allow_internal" {
-  name    = "fw-${local.prefix}-allow-internal"
-  network = google_compute_network.vpc.id
-  project = var.project_id
-
-  allow {
-    protocol = "all"
-    ports    = []
-  }
-
-  source_ranges = ["10.0.0.0/8"]
-
-}
-
-module "cloud_nat" {
-  source       = "terraform-google-modules/cloud-nat/google"
-  project_id   = var.project_id
-  region       = var.region
-
-  create_router = true
-  router        = "r-${local.prefix}-router"
-  network       = google_compute_network.vpc.self_link 
-
-  nat_ips   = []
-  
+resource "google_compute_route" "default_route" {
+  name             = "${var.prefix}-default-route"
+  dest_range       = "0.0.0.0/0"
+  network          = google_compute_network.vpc_network.id
+  next_hop_gateway = "default-internet-gateway"
+  priority         = 1000
+  project          = var.project_id
 }

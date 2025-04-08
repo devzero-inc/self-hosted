@@ -96,11 +96,11 @@ jobs:
           cd self-hosted/terraform/examples/gcp/base-cluster
           kubectl apply -f kata-sa.yaml
           kubectl apply -f daemonset.yaml
-          NODE_NAME=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
-          kubectl label node $NODE_NAME kata-runtime=running --overwrite
-          kubectl label node $NODE_NAME node-role.kubernetes.io/kata-devpod-node=1 --overwrite
-
-
+          for NODE in $(kubectl get nodes -o name); do
+            kubectl label "$NODE" kata-runtime=running --overwrite
+            kubectl label "$NODE" node-role.kubernetes.io/kata-devpod-node=1 --overwrite
+          done
+          
       - name: Deploy Control Plane Dependencies (and modify domains)
         run: |
           cd self-hosted/charts/dz-control-plane-deps

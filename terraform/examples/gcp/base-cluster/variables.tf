@@ -30,6 +30,16 @@ variable "create_vpc" {
   default     = true
 }
 
+variable "pods_secondary_range_cidr" {
+  type        = string
+  description = "CIDR block for the secondary range used by pods"
+}
+
+variable "services_secondary_range_cidr" {
+  type        = string
+  description = "CIDR block for the secondary range used by services"
+}
+
 variable "enable_private_nodes" {
   description = "Enable private nodes in GKE"
   type        = bool
