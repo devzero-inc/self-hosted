@@ -383,7 +383,7 @@
                         "create": {
                             "type": "boolean",
                             "description": "Specifies whether a service account should be created",
-                            "default": false
+                            "default": true
                         }
                     }
                 },
@@ -1371,7 +1371,7 @@
                         "create": {
                             "type": "boolean",
                             "description": "Specifies whether a service account should be created",
-                            "default": false
+                            "default": true
                         }
                     }
                 },
@@ -1631,12 +1631,12 @@
                         "VAULT_AUTH_METHOD": {
                             "type": "string",
                             "description": "Vault auth method",
-                            "default": "token"
+                            "default": "kubernetes"
                         },
                         "VAULT_SECRETS_MOUNT_POINT": {
                             "type": "string",
                             "description": "Vault secrets mount point",
-                            "default": "vault-csi-production-writer"
+                            "default": "vault-csi-writer"
                         },
                         "LOGSRV_DEFAULT_QUEUE": {
                             "type": "string",

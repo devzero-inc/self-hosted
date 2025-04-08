@@ -222,7 +222,7 @@ The Helm chart installs the following components:
 
 | Name                                                    | Description                                              | Value                                                                                      |
 | ------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `backend.serviceAccount.create`                         | Specifies whether a service account should be created    | `false`                                                                                    |
+| `backend.serviceAccount.create`                         | Specifies whether a service account should be created    | `true`                                                                                     |
 | `backend.replicas`                                      | Number of replicas for Backend                           | `1`                                                                                        |
 | `backend.imageName`                                     | Image name for Backend service                           | `backend`                                                                                  |
 | `backend.schedulerName`                                 | Optionally set the scheduler for pods                    | `""`                                                                                       |
@@ -387,7 +387,7 @@ The Helm chart installs the following components:
 
 | Name                                                    | Description                                           | Value                                                         |
 | ------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------- |
-| `polland.serviceAccount.create`                         | Specifies whether a service account should be created | `false`                                                       |
+| `polland.serviceAccount.create`                         | Specifies whether a service account should be created | `true`                                                        |
 | `polland.worker.replicas`                               | Number of replicas for Polland Worker                 | `3`                                                           |
 | `polland.worker.terminationGracePeriodSeconds`          | Termination grace period in seconds                   | `3600`                                                        |
 | `polland.worker.queues[0].name`                         | Configuration for the fast queue                      | `fast`                                                        |
@@ -451,8 +451,8 @@ The Helm chart installs the following components:
 | `polland.env.USE_INSECURE_REGISTRY`                     | Use insecure registry                                 | `True`                                                        |
 | `polland.env.USE_ECR_REGISTRY`                          | Use ECR registry                                      | `False`                                                       |
 | `polland.env.USE_LOCAL_LOGSRV`                          | Use local LogSrv                                      | `True`                                                        |
-| `polland.env.VAULT_AUTH_METHOD`                         | Vault auth method                                     | `token`                                                       |
-| `polland.env.VAULT_SECRETS_MOUNT_POINT`                 | Vault secrets mount point                             | `vault-csi-production-writer`                                 |
+| `polland.env.VAULT_AUTH_METHOD`                         | Vault auth method                                     | `kubernetes`                                                  |
+| `polland.env.VAULT_SECRETS_MOUNT_POINT`                 | Vault secrets mount point                             | `vault-csi-writer`                                            |
 | `polland.env.LOGSRV_DEFAULT_QUEUE`                      | Default LogSrv queue URL                              | `http://elasticmq:9324/queue/logsrv.fifo`                     |
 | `polland.env.LOGSRV_DEFAULT_REGION`                     | Default LogSrv region                                 | `elasticmq`                                                   |
 | `polland.env.DOCKER_REGISTRY`                           | Use custom docker registry                            | `docker-registry.{{ .Values.domain }}`                        |
