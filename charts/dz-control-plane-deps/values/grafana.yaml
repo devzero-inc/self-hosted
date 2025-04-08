@@ -1483,11 +1483,11 @@ ingress:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   ingressClassName: "nginx"
   hosts:
-  - "grafana.mauro.selfzero.net"
+  - "grafana.example.com"
   tls:
   - secretName: devzero-grafana-tls
     hosts:
-    - grafana.mauro.selfzero.net
+    - grafana.example.com
 command:
 - "sh"
 - "-c"
