@@ -459,6 +459,10 @@ The Helm chart installs the following components:
 | `polland.env.DEVBOX_INGRESS_CLASS_NAME`                 | Use custom nginx ingress controller                   | `devzero-data-ingress`                                        |
 | `polland.env.ALLOW_POD_EVICTION_ANNOTATION`             | JSON style annotations to allow pod eviction          | `{"cluster-autoscaler.kubernetes.io/safe-to-evict": "true"}`  |
 | `polland.env.DISALLOW_POD_EVICTION_ANNOTATION`          | JSON style annotations to disallow pod eviction       | `{"cluster-autoscaler.kubernetes.io/safe-to-evict": "false"}` |
+| `polland.env.VIRTUAL_CLUSTER_AFFINITY`                  | JSON style affinity for all virtual cluster pods      | `{}`                                                          |
+| `polland.env.DEVBOX_AFFINITY`                           | JSON style affinity for all devbox pods               | `{}`                                                          |
+| `polland.env.DEVBOX_TOLERATIONS`                        | JSON style tolerations for all devbox pods            | `[]`                                                          |
+| `polland.env.DEVBOX_NODE_SELECTORS`                     | JSON style nodeSelector for all devbox pods           | `{}`                                                          |
 | `polland.autoscaling.enabled`                           | Enable autoscaling for Polland                        | `false`                                                       |
 | `polland.autoscaling.minReplicas`                       | Minimum autoscaling replicas for Polland              | `1`                                                           |
 | `polland.autoscaling.maxReplicas`                       | Maximum autoscaling replicas for Polland              | `3`                                                           |

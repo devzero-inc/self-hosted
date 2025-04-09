@@ -1667,6 +1667,26 @@
                             "type": "string",
                             "description": "JSON style annotations to disallow pod eviction",
                             "default": "{\"cluster-autoscaler.kubernetes.io/safe-to-evict\": \"false\"}"
+                        },
+                        "VIRTUAL_CLUSTER_AFFINITY": {
+                            "type": "string",
+                            "description": "JSON style affinity for all virtual cluster pods",
+                            "default": "{}"
+                        },
+                        "DEVBOX_AFFINITY": {
+                            "type": "string",
+                            "description": "JSON style affinity for all devbox pods",
+                            "default": "{}"
+                        },
+                        "DEVBOX_TOLERATIONS": {
+                            "type": "string",
+                            "description": "JSON style tolerations for all devbox pods",
+                            "default": "[]"
+                        },
+                        "DEVBOX_NODE_SELECTORS": {
+                            "type": "string",
+                            "description": "JSON style nodeSelector for all devbox pods",
+                            "default": "{}"
                         }
                     }
                 },

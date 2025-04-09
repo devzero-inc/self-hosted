@@ -884,6 +884,18 @@ polland:
     # karpenter > 1.0 https://karpenter.sh/v1.0/upgrading/v1-migration/
     # DISALLOW_POD_EVICTION_ANNOTATION: '{"karpenter.sh/do-not-disrupt": "false"}'
 
+    ## @param polland.env.VIRTUAL_CLUSTER_AFFINITY JSON style affinity for all virtual cluster pods
+    VIRTUAL_CLUSTER_AFFINITY: "{}"
+
+    ## @param polland.env.DEVBOX_AFFINITY JSON style affinity for all devbox pods
+    DEVBOX_AFFINITY: "{}"
+
+    ## @param polland.env.DEVBOX_TOLERATIONS JSON style tolerations for all devbox pods
+    DEVBOX_TOLERATIONS: "[]"
+
+    ## @param polland.env.DEVBOX_NODE_SELECTORS JSON style nodeSelector for all devbox pods
+    DEVBOX_NODE_SELECTORS: "{}"
+
   ## @subsection Polland Autoscaling Configuration
   autoscaling:
     ## @param polland.autoscaling.enabled Enable autoscaling for Polland
