@@ -103,6 +103,12 @@ jobs:
           
       - name: Deploy Control Plane Dependencies (and modify domains)
         run: |
+          DEFAULT_SC=$(kubectl get sc -o jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].metadata.name}')
+          kubectl get sc "$DEFAULT_SC" -o yaml | \
+            sed "s/name: $DEFAULT_SC/name: gp2/" | \
+            sed "/^  uid:/d; /^  resourceVersion:/d; /^  creationTimestamp:/d" | \
+            kubectl apply -f -
+            
           cd self-hosted/charts/dz-control-plane-deps
           find values -type f -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find values -name "*.bak" -delete
           make install

@@ -1,59 +1,65 @@
-provider "google" {
-  project = "devzero-kubernetes-sandbox"
-  region  = "us-central1"
-}
-
-resource "google_compute_subnetwork" "default_subnet" {
-  name          = "gke-subnet"
-  region        = "us-central1"
-  network       = "default"  # Using the default VPC
-  ip_cidr_range = "10.1.0.0/20"  # IPv4 range for the subnet
-  stack_type    = "IPV4_IPV6"
-  ipv6_access_type = "EXTERNAL"
-}
-
 resource "google_container_cluster" "gke_cluster" {
-  name     = "garvit-kata"
-  location = "us-central1-a"
+  name     = var.cluster_name
+  location = var.gke_cluster_location
 
   networking_mode = "VPC_NATIVE"
+
   ip_allocation_policy {
-    cluster_ipv4_cidr_block  = "10.8.0.0/16"  # IPv4 range for the pods
-    services_ipv4_cidr_block = "10.4.0.0/20"  # IPv4 range for the services
-    stack_type               = "IPV4_IPV6"    # Enable IPv6 support for the cluster
+    cluster_secondary_range_name  = var.pods_range_name
+    services_secondary_range_name = var.services_range_name
   }
 
-  deletion_protection = false
-
-  initial_node_count = 1
+  deletion_protection     = false
+  initial_node_count      = 1
   remove_default_node_pool = true
+  datapath_provider       = "ADVANCED_DATAPATH"
 
-  datapath_provider = "ADVANCED_DATAPATH"
+  workload_identity_config {
+    workload_pool = "${var.project_id}.svc.id.goog"
+  }
 
   private_cluster_config {
     enable_private_nodes    = false
     enable_private_endpoint = false
-    # master_ipv4_cidr_block  = "172.16.0.0/28"
   }
 
-  network    = "default"  # Use the default network
-  subnetwork = google_compute_subnetwork.default_subnet.name  # Reference the subnet
+  addons_config {
+    gcp_filestore_csi_driver_config {
+      enabled = true
+    }
+  }
 
-  min_master_version = "1.31.6-gke.1020000" 
+  network    = var.network
+  subnetwork = var.subnetwork
+
+  min_master_version = var.min_master_version
 }
 
 resource "google_container_node_pool" "default_pool" {
   cluster   = google_container_cluster.gke_cluster.name
   location  = google_container_cluster.gke_cluster.location
-  name      = "kata-node-pool"
+  name      = var.node_pool_name
 
-  node_count = 1
+  node_count = var.node_count
+
+  dynamic "autoscaling" {
+    for_each = var.enable_cluster_autoscaler ? [1] : []
+    content {
+      min_node_count = var.min_node_count
+      max_node_count = var.max_node_count
+    }
+  }
 
   node_config {
-    machine_type = "n2-highcpu-32"
-    image_type   = "UBUNTU_CONTAINERD"
+    machine_type = var.machine_type
+    image_type   = var.image_type
+
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+
     advanced_machine_features {
-      threads_per_core = 1
+      threads_per_core           = 1
       enable_nested_virtualization = true
     }
   }

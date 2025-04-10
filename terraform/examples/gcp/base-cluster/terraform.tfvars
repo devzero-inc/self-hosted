@@ -20,9 +20,10 @@ enable_private_endpoint = false
 gke_cluster_location = "us-central1-a"  
 gke_zones = ["us-central1-a"]
 gke_master_version = "1.31.6-gke.1020000"
+node_count = 3
 
 # Vault
-create_vault_crypto_key = true
+create_vault_crypto_key = false
 devzero_service_account = "dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com"
 vault_key_ring_name = "devzero-key-ring"
 vault_key_ring_location = "global"

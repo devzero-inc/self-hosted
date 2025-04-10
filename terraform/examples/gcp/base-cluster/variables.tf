@@ -67,6 +67,12 @@ variable "gke_zones" {
   type        = list(string)
 }
 
+variable "node_count" {
+  description = "Number of nodes in GKE node pool"
+  type        = number
+  default     = 3
+}
+
 variable "create_vault_crypto_key" {
   description = "Whether to create a new KMS crypto key for Vault auto-unseal"
   type        = bool

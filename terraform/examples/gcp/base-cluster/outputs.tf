@@ -3,7 +3,7 @@ output "vpc_name" {
 }
 
 output "gke_cluster_name" {
-  value = resource.google_container_cluster.gke_cluster.name
+  value = module.gke_cluster.gke_cluster_name
 }
 
 output "derp_ip" {
