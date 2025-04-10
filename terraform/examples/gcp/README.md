@@ -104,6 +104,15 @@ kubectl label node <node-name> kata-runtime=running
 kubectl label node <node-name> node-role.kubernetes.io/kata-devpod-node=1
 ```
 
+Or you can automatically label all your nodes like this:
+
+```bash
+for NODE in $(kubectl get nodes -o name); do
+    kubectl label "$NODE" kata-runtime=running --overwrite
+    kubectl label "$NODE" node-role.kubernetes.io/kata-devpod-node=1 --overwrite
+done
+```
+
 ### 11. Install DevZero Self-Hosted
 
 Refer to the [Charts README](../charts/README.md) for further steps to deploy the Control Plane and Data Plane.
