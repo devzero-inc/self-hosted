@@ -44,7 +44,7 @@ image:
   ## @param image.tag Devzero container image tag
   tag: "v1.0.10"
   ## @param image.pullPolicy Container pull policy
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # -- Optionally specify an array of imagePullSecrets
   # pullSecrets:
   #   - pull-secret
@@ -424,7 +424,7 @@ hydra:
   ## @subsection Hydra CIDR Configuration
   cidr:
     ## @param hydra.cidr.v6 IPv6 CIDR range
-    v6: fd7a:115c:a1e0::/48
+    v6: fd90:8ac:deb0::/48
     ## @param hydra.cidr.v4 IPv4 CIDR range
     v4: 100.64.0.0/10
 
@@ -1161,7 +1161,7 @@ buildqd:
       ## @param buildqd.buildkit.image.repository Buildkit repository
       repository: docker.io/moby/buildkit
       ## @param buildqd.buildkit.image.pullPolicy Buildkit image policy
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
       ## @param buildqd.buildkit.image.tag Buildkit image tag
       tag: "v0.15.1"
 
@@ -1232,12 +1232,16 @@ web:
   ## @param web.annotations Annotations for Web
   annotations: {}
 
+  nextAuthSecret: ""
+  nextAuthUrl: "https://{{ .Values.domain }}"
   ## @subsection Web Environment Configuration
   env:
     ## @param web.env.NEXT_PUBLIC_SELF_HOSTED Self-hosted mode for Next.js
     NEXT_PUBLIC_SELF_HOSTED: "true"
     ## @param web.env.NODE_TLS_REJECT_UNAUTHORIZED ignore SSL mode for Next.js
     NODE_TLS_REJECT_UNAUTHORIZED: "0"
+
+    NEXTAUTH_URL: "https://{{ .Values.domain }}"
 
   ## @subsection Web Autoscaling Configuration
   autoscaling:
