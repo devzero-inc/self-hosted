@@ -68,6 +68,16 @@ data:
         use_http: true
       dxi:
         enabled: {{ .Values.backend.grafana.enabled }}
+      default_kubernetes_resources:
+        # CPU settings in millicores (1000m = 1 CPU)
+        workspace_limits_cpu: 1000
+        workspace_requests_cpu: 10
+        cluster_requests_default_cpu: 50
+        cluster_limits_min_cpu: 10
+        # Memory settings in Mi (1024Mi = 1Gi)
+        workspace_limits_memory: 2048
+        workspace_requests_memory: 1024
+      enable_open_signup: {{ .Values.backend.enableOpenSignup | default "false"}}
     self_hosted: true
     license_key: {{ .Values.backend.licenseKey }}
     arch: {{ .Values.backend.arch }}

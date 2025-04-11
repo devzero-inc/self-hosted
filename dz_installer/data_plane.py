@@ -68,7 +68,7 @@ class DataPlane:
         values = yaml.load(file)
 
         if globals_cfg.domain_name:
-            values['devzero']['vault']['server'] = f"https://csi.{globals_cfg.domain_name}"
+            values['devzero']['vault']['server'] = f"https://vault.{globals_cfg.domain_name}"
 
         if globals_cfg.docker_hub:
             if globals_cfg.docker_hub.access:

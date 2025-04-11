@@ -6,6 +6,6 @@ region = "us-west-1"
 # private_subnet_ids = ["MY_SUBNET_ID_3", "MY_SUBNET_ID_3"]
 
 # Cluster
-enable_cluster_autoscaler = false
-
+enable_cluster_autoscaler = true
+enable_external_secrets = true
 cluster_name = "devzero-dsh" 

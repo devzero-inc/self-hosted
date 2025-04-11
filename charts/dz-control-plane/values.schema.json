@@ -68,7 +68,7 @@
                 "tag": {
                     "type": "string",
                     "description": "Devzero container image tag",
-                    "default": "v1.0.8"
+                    "default": "v1.0.10"
                 },
                 "pullPolicy": {
                     "type": "string",
@@ -377,6 +377,16 @@
         "backend": {
             "type": "object",
             "properties": {
+                "serviceAccount": {
+                    "type": "object",
+                    "properties": {
+                        "create": {
+                            "type": "boolean",
+                            "description": "Specifies whether a service account should be created",
+                            "default": true
+                        }
+                    }
+                },
                 "replicas": {
                     "type": "number",
                     "description": "Number of replicas for Backend",
@@ -427,6 +437,11 @@
                     "type": "object",
                     "description": "Annotations",
                     "default": {}
+                },
+                "enableOpenSignup": {
+                    "type": "boolean",
+                    "description": "Whether or not to allow people sign up without an invite",
+                    "default": false
                 },
                 "redis": {
                     "type": "object",
@@ -1350,6 +1365,16 @@
         "polland": {
             "type": "object",
             "properties": {
+                "serviceAccount": {
+                    "type": "object",
+                    "properties": {
+                        "create": {
+                            "type": "boolean",
+                            "description": "Specifies whether a service account should be created",
+                            "default": true
+                        }
+                    }
+                },
                 "worker": {
                     "type": "object",
                     "properties": {
@@ -1606,12 +1631,12 @@
                         "VAULT_AUTH_METHOD": {
                             "type": "string",
                             "description": "Vault auth method",
-                            "default": "token"
+                            "default": "kubernetes"
                         },
                         "VAULT_SECRETS_MOUNT_POINT": {
                             "type": "string",
                             "description": "Vault secrets mount point",
-                            "default": "vault-csi-production-writer"
+                            "default": "vault-csi-writer"
                         },
                         "LOGSRV_DEFAULT_QUEUE": {
                             "type": "string",
@@ -1626,7 +1651,7 @@
                         "DOCKER_REGISTRY": {
                             "type": "string",
                             "description": "Use custom docker registry",
-                            "default": "docker-registry.example.com"
+                            "default": "docker-registry.{{ .Values.domain }}"
                         },
                         "DEVBOX_INGRESS_CLASS_NAME": {
                             "type": "string",
@@ -1642,6 +1667,26 @@
                             "type": "string",
                             "description": "JSON style annotations to disallow pod eviction",
                             "default": "{\"cluster-autoscaler.kubernetes.io/safe-to-evict\": \"false\"}"
+                        },
+                        "VIRTUAL_CLUSTER_AFFINITY": {
+                            "type": "string",
+                            "description": "JSON style affinity for all virtual cluster pods",
+                            "default": "{}"
+                        },
+                        "DEVBOX_AFFINITY": {
+                            "type": "string",
+                            "description": "JSON style affinity for all devbox pods",
+                            "default": "{}"
+                        },
+                        "DEVBOX_TOLERATIONS": {
+                            "type": "string",
+                            "description": "JSON style tolerations for all devbox pods",
+                            "default": "[]"
+                        },
+                        "DEVBOX_NODE_SELECTORS": {
+                            "type": "string",
+                            "description": "JSON style nodeSelector for all devbox pods",
+                            "default": "{}"
                         }
                     }
                 },

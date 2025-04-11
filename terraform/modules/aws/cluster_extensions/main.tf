@@ -65,6 +65,9 @@ module "eks_blueprints_addons" {
             "cluster-autoscaler.kubernetes.io/safe-to-evict" : "true"
           }
         }
+        node = {
+          volumeAttachLimit = var.max_volumes_per_node
+        }
       })
     }
     coredns = {

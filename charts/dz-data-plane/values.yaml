@@ -7,7 +7,7 @@ devzero:
   ## @section Vault
   vault:
     ## @param devzero.vault.server Vault server
-    server: "https://csi.example.com"
+    server: "https://vault.example.com"
 
 ## @section Node Labeler
 nodeLabeler:

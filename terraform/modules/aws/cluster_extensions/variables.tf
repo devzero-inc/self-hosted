@@ -37,6 +37,11 @@ variable "enable_external_secrets" {
   default     = false
 }
 
+variable "max_volumes_per_node" {
+  description = "Maximum number of volumes per node"
+  type        = number
+  default     = 23
+}
 
 ################################################################################
 # EFS
