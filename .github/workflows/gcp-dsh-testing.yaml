@@ -80,7 +80,7 @@ jobs:
 
       - name: Set up Kata
         run: |
-          cd self-hosted/terraform/examples/gcp/base-cluster
+          cd terraform/examples/gcp/base-cluster
           kubectl apply -f kata-sa.yaml
           kubectl apply -f daemonset.yaml
           for NODE in $(kubectl get nodes -o name); do
@@ -96,7 +96,7 @@ jobs:
             sed "/^  uid:/d; /^  resourceVersion:/d; /^  creationTimestamp:/d" | \
             kubectl apply -f -
             
-          cd self-hosted/charts/dz-control-plane-deps
+          cd charts/dz-control-plane-deps
 
           for file in $(find values -type f -name "*.yaml"); do
             yq -i 'walk(
@@ -116,14 +116,14 @@ jobs:
           # also setting image.pullsecrets to empty to make sure that each of the deployments dont try to pull their relevant OCI images from this registry
           # backend license key is ... needed
 
-          yq e '.credentials.enable = false | .backend.licenseKey = strenv(BACKEND_LICENSE_KEY) | .image.pullSecrets = []' -i self-hosted/charts/dz-control-plane/values.yaml
+          yq e '.credentials.enable = false | .backend.licenseKey = strenv(BACKEND_LICENSE_KEY) | .image.pullSecrets = []' -i charts/dz-control-plane/values.yaml
 
       - name: Deploy DevZero Control Plane (after configuring kubernetes to use dockerhub creds, and patching all the deployments to point to the right domain)
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          cd self-hosted/charts/dz-control-plane
+          cd charts/dz-control-plane
           make add-docker-creds
 
           for file in $(find . -name "values.yaml"); do
@@ -196,7 +196,7 @@ jobs:
       - name: '[helm] Destroy control-plane'
         if: always()
         run: |
-          cd self-hosted/charts/dz-control-plane
+          cd charts/dz-control-plane
           make delete
 
       - name: Check & Remove Finalizers
@@ -216,13 +216,13 @@ jobs:
       - name: '[helm] Destroy control-plane-deps'
         if: always()
         run: |
-          cd self-hosted/charts/dz-control-plane-deps
+          cd charts/dz-control-plane-deps
           make delete
     
       - name: '[terraform] Destroy base-cluster'
         if: always()
         run: |
-          cd self-hosted/terraform/examples/gcp/base-cluster
+          cd terraform/examples/gcp/base-cluster
           terraform destroy -auto-approve
 
 
