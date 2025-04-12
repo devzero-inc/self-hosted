@@ -71,7 +71,7 @@ jobs:
         run: |
           cd terraform/examples/gcp/base-cluster
           terraform init
-          terraform apply -auto-approve -var="prefix=$JOB_IDENTIFIER"
+          terraform apply -auto-approve -var="prefix=$JOB_IDENTIFIER" -var="project_id=devzero-kubernetes-sandbox"
 
       - name: Configure Kubernetes Access
         run: |
