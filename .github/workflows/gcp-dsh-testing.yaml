@@ -97,7 +97,15 @@ jobs:
             kubectl apply -f -
             
           cd self-hosted/charts/dz-control-plane-deps
-          find values -type f -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find values -name "*.bak" -delete
+
+          for file in $(find values -type f -name "*.yaml"); do
+            yq -i 'walk(
+              if type == "string" and test("example\\.com") 
+              then sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net") 
+              else . end
+            )' "$file"
+          done
+
           make install
 
       - name: Update values.yaml for dz-control-plane
@@ -117,7 +125,17 @@ jobs:
         run: |
           cd self-hosted/charts/dz-control-plane
           make add-docker-creds
-          find . -name "values.yaml" -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find . -name "values.yaml.bak" -delete
+
+          for file in $(find . -name "values.yaml"); do
+            yq -i '
+              walk(
+                if type == "string" and test("example\\.com") 
+                then sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net") 
+                else . end
+              )
+            ' "$file"
+          done
+
           make install
 
       - name: Validate Control Plane
@@ -127,13 +145,33 @@ jobs:
       - name: Deploy Data Plane Dependencies
         run: |
           cd charts/dz-data-plane-deps
-          find values -type f -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find values -name "*.bak" -delete
+
+          for file in $(find values -type f -name "*.yaml"); do
+            yq -i '
+              walk(
+                if type == "string" and test("example\\.com")
+                then sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net")
+                else . end
+              )
+            ' "$file"
+          done
+
           make install
 
       - name: Deploy DevZero Data Plane
         run: |
           cd charts/dz-data-plane
-          find . -name "values.yaml" -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find . -name "values.yaml.bak" -delete
+          
+          for file in $(find . -name "values.yaml"); do
+            yq -i '
+              walk(
+                if type == "string" and test("example\\.com")
+                then sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net")
+                else . end
+              )
+            ' "$file"
+          done
+
           make install
           kubectl delete runtimeclass kata
           kubectl apply -f ../../terraform/examples/gcp/base-cluster/runtimeclass.yaml
