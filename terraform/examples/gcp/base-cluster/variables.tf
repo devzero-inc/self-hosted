@@ -67,6 +67,11 @@ variable "gke_zones" {
   type        = list(string)
 }
 
+variable "machine_type" { 
+  description = "GKE node pool machine type"
+  type        = string 
+}
+
 variable "node_count" {
   description = "Number of nodes in GKE node pool"
   type        = number

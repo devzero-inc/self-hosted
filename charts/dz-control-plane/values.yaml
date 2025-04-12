@@ -44,7 +44,7 @@ image:
   ## @param image.tag Devzero container image tag
   tag: "v1.0.10"
   ## @param image.pullPolicy Container pull policy
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   # -- Optionally specify an array of imagePullSecrets
   # pullSecrets:
   #   - pull-secret
@@ -1161,7 +1161,7 @@ buildqd:
       ## @param buildqd.buildkit.image.repository Buildkit repository
       repository: docker.io/moby/buildkit
       ## @param buildqd.buildkit.image.pullPolicy Buildkit image policy
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       ## @param buildqd.buildkit.image.tag Buildkit image tag
       tag: "v0.15.1"
 
@@ -1232,8 +1232,7 @@ web:
   ## @param web.annotations Annotations for Web
   annotations: {}
 
-  nextAuthSecret: ""
-  nextAuthUrl: "https://{{ .Values.domain }}"
+  nextAuthSecret: "gH/h/QzDseWnOLsY8SHwYU49xqQOLXbI45XjCxoddMg=" # Generate a Base64 encoded 32-byte random value. You can use `openssl rand -base64 32`
   ## @subsection Web Environment Configuration
   env:
     ## @param web.env.NEXT_PUBLIC_SELF_HOSTED Self-hosted mode for Next.js

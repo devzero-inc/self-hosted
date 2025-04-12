@@ -1,3 +1,6 @@
+echo -e "\nPods in namespace  devzero:"
+kubectl get pods -n devzero
+
 echo "Checking pods in namespace: devzero"
 PODS=$(kubectl get pods -n devzero --no-headers)
 
@@ -48,3 +51,4 @@ echo "CrashLoopBackOff: $COUNT_CRASHLOOPBACKOFF"
 echo "Unknown: $COUNT_UNKNOWN"
 
 echo -e "\nIngress in namespace  devzero:"
+kubectl get ingress -n devzero

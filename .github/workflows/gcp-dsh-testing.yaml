@@ -35,12 +35,6 @@ jobs:
           echo "GOOGLE_APPLICATION_CREDENTIALS=${{ steps.auth.outputs.credentials_file_path }}" >> $GITHUB_ENV
           echo "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE=${{ steps.auth.outputs.credentials_file_path }}" >> $GITHUB_ENV
 
-      - name: Clone DevZero Self-Hosted Repository
-        env:
-          GH_PAT: ${{ secrets.GH_TOKEN }}
-        run: |
-          git clone https://$GH_PAT@github.com/devzero-inc/self-hosted.git --branch garvit/gcp-tf --depth 1
-
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -63,7 +57,7 @@ jobs:
 
       - name: Add Backend Override (Base Cluster)
         run: |
-          cd self-hosted/terraform/examples/gcp/base-cluster
+          cd terraform/examples/gcp/base-cluster
           cat <<EOF > backend_override.tf
           terraform {
             backend "gcs" {
@@ -75,20 +69,12 @@ jobs:
 
       - name: Initialize and Apply Terraform (Base Cluster)
         run: |
-          cd self-hosted/terraform/examples/gcp/base-cluster
+          cd terraform/examples/gcp/base-cluster
           terraform init
           terraform apply -auto-approve -var="prefix=$JOB_IDENTIFIER"
 
       - name: Configure Kubernetes Access
         run: |
-          sudo apt-get update -yhttps://github.com/devzero-inc/self-hosted/pull/69/files
-          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
-            | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
-          curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg \
-            | gpg --dearmor | sudo tee /usr/share/keyrings/cloud.google.gpg > /dev/null
-          sudo apt-get update
-          sudo apt-get install -y google-cloud-cli-gke-gcloud-auth-plugin
-          gke-gcloud-auth-plugin --version
           gcloud container clusters get-credentials $JOB_IDENTIFIER --zone us-central1-a --project devzero-kubernetes-sandbox
 
       - name: Set up Kata
@@ -135,22 +121,17 @@ jobs:
 
       - name: Validate Control Plane
         run: |
-          echo -e "\nPods in namespace  devzero:"
-          kubectl get pods -n devzero
-          chmod +x self-hosted/.github/scripts/dsh-pod-test.sh
-          self-hosted/.github/scripts/dsh-pod-test.sh
-          echo -e "\nIngress in namespace  devzero:"
-          kubectl get ingress -n devzero
+          .github/scripts/dsh-pod-test.sh          
       
       - name: Deploy Data Plane Dependencies
         run: |
-          cd self-hosted/charts/dz-data-plane-deps
+          cd charts/dz-data-plane-deps
           find values -type f -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find values -name "*.bak" -delete
           make install
 
       - name: Deploy DevZero Data Plane
         run: |
-          cd self-hosted/charts/dz-data-plane
+          cd charts/dz-data-plane
           find . -name "values.yaml" -exec sed -i'.bak' "s/example\.com/$JOB_IDENTIFIER\.ci\.selfzero\.net/g" {} \; && find . -name "values.yaml.bak" -delete
           make install
           kubectl delete runtimeclass kata
@@ -164,13 +145,13 @@ jobs:
       - name: '[helm] Destroy data-plane'
         if: always()
         run: |
-          cd self-hosted/charts/dz-data-plane
+          cd charts/dz-data-plane
           make delete
       
       - name: '[helm] Destroy data-plane-deps'
         if: always()
         run: |
-          cd self-hosted/charts/dz-data-plane-deps
+          cd charts/dz-data-plane-deps
           make delete
 
       - name: '[helm] Destroy control-plane'

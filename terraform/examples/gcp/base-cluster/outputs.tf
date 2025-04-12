@@ -1,9 +1,9 @@
 output "vpc_name" {
-  value = module.vpc.vpc_network_name
+  value = module.vpc.network_name
 }
 
 output "gke_cluster_name" {
-  value = module.gke_cluster.gke_cluster_name
+  value = module.gke_cluster.name
 }
 
 output "project_id" {
@@ -11,7 +11,7 @@ output "project_id" {
 }
 
 output "location" {
-  var.gke_cluster_location
+  value = var.gke_cluster_location
 }
 
 output "derp_ip" {

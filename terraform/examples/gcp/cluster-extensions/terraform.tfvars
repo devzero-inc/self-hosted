@@ -1,7 +1,7 @@
 # Required Inputs
-project_id     = "devzero-kubernetes-sandbox"
+project_id     = "devzero-project"
 location       = "us-central1-a"
-cluster_name   = "garvit"
+cluster_name   = "devzero"
 
 # Tags
 tags = {

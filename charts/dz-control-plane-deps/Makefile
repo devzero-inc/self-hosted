@@ -146,9 +146,7 @@ install-devzero-db:
 		REPO_URL=https://charts.bitnami.com/bitnami \
 		REPO_APP_NAME=postgresql \
 		VERSION=16.3.5 \
-		NAMESPACE=devzero \
-		EXTRA_ARGS='--set primary.resources.requests.memory=512Mi \
-		            --set primary.resources.limits.memory=1Gi'
+		NAMESPACE=devzero
 
 .PHONY: delete-devzero-db
 delete-devzero-db:

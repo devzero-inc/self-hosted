@@ -35,8 +35,7 @@ resource "kubernetes_storage_class" "filestore" {
 
   parameters = {
     volume = "vol1"
-    # Use consistent location formatting - use the same location where filestore is created
-    instance = "garvit-filestore"
+    instance = "${var.cluster_name}-filestore"
     # Add network parameter
     network = var.vpc_name
   }

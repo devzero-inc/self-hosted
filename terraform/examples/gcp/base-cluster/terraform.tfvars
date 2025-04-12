@@ -1,6 +1,6 @@
 # General
 prefix = "devzero"
-project_id = "devzero-kubernetes-sandbox"
+project_id = "devzero-project"
 region = "us-central1"
 
 domain       = "devzero.internal"
@@ -21,6 +21,7 @@ gke_cluster_location = "us-central1-a"
 gke_zones = ["us-central1-a"]
 gke_master_version = "1.31.6-gke.1020000"
 node_count = 3
+machine_type = "n2-highcpu-32"
 
 # Vault
 create_vault_crypto_key = false
