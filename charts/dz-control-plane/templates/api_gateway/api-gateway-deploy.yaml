@@ -86,7 +86,7 @@ spec:
           resources:
             {{ toYaml .Values.gateway.resources | nindent 12 }}
           volumeMounts:
-            - mountPath: /root/config/self_hosted.yaml
+            - mountPath: /config/self_hosted.yaml
               name: config
               subPath: self_hosted.yaml
           env:
