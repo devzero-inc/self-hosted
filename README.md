@@ -35,7 +35,6 @@ Welcome to the **self-hosted** repository. This repository contains all the nece
      - **DevZero Cluster**: A Kubernetes cluster.
      - **DevZero Workspace**: A microVM-based environment built from a recipe.
 
-
 ## Repository Structure
 
 ```bash

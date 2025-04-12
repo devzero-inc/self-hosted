@@ -14,7 +14,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 ## @param domain Domain name for the installation
-domain: "example.com"
+domain: "ci.selfzero.net"
 
 ## @section Credentials Configuration
 credentials:
