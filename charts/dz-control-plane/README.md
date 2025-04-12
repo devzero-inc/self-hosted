@@ -143,7 +143,7 @@ The Helm chart installs the following components:
 | ------------------- | ----------------------------------------------- | ---------------------- |
 | `image.repository`  | Devzero container image repository              | `docker.io/devzeroinc` |
 | `image.repository`  | Devzero container image repository              | `docker.io/devzeroinc` |
-| `image.tag`         | Devzero container image tag                     | `v1.0.10`              |
+| `image.tag`         | Devzero container image tag                     | `v1.0.11`              |
 | `image.pullPolicy`  | Container pull policy                           | `IfNotPresent`         |
 | `image.pullSecrets` | Optionally specify an array of imagePullSecrets | `["pull-secret"]`      |
 
