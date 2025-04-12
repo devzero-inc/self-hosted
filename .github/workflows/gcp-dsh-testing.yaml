@@ -76,7 +76,7 @@ jobs:
 
       - name: Configure Kubernetes Access
         run: |
-          gcloud container clusters get-credentials $JOB_IDENTIFIER --zone us-central1-a --project devzero-kubernetes-sandbox
+          gcloud container clusters get-credentials $JOB_IDENTIFIER --zone us-central1 --project devzero-kubernetes-sandbox
 
       - name: Set up Kata
         run: |
