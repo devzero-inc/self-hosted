@@ -76,7 +76,7 @@ _delete-namespace:
 	done; \
 
 	echo "Timeout waiting for namespace $(NAMESPACE) to terminate. Proceeding anyway."; \
-	exit 0'
+	exit 0
 
 	@echo "Done deleting namespace $(NAMESPACE)"
 

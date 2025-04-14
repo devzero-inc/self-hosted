@@ -106,11 +106,12 @@ jobs:
           cd charts/dz-control-plane-deps
 
           for file in $(find values -type f -name "*.yaml"); do
-            yq -i 'walk(
-              if type == "string" and test("example\\.com") 
-              then sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net") 
-              else . end
-            )' "$file"
+            yq e -i '
+              walk(
+                if type == "string" and test("example\\.com") 
+                then sub("example\\.com"; strenv(JOB_IDENTIFIER) + ".ci.selfzero.net") 
+                else . end
+              )' "$file"
           done
 
           make install
@@ -134,7 +135,7 @@ jobs:
           make add-docker-creds
 
           for file in $(find . -name "values.yaml"); do
-            yq -i '
+            yq e -i '
               walk(
                 if type == "string" and test("example\\.com") 
                 then sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net") 
@@ -154,7 +155,7 @@ jobs:
           cd charts/dz-data-plane-deps
 
           for file in $(find values -type f -name "*.yaml"); do
-            yq -i '
+            yq e -i '
               walk(
                 if type == "string" and test("example\\.com")
                 then sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net")
@@ -170,7 +171,7 @@ jobs:
           cd charts/dz-data-plane
           
           for file in $(find . -name "values.yaml"); do
-            yq -i '
+            yq e -i '
               walk(
                 if type == "string" and test("example\\.com")
                 then sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net")
