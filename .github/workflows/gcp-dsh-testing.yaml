@@ -105,8 +105,12 @@ jobs:
             
           cd charts/dz-control-plane-deps
 
-          for file in $(find values -type f -name "*.yaml"); do
-            yq e -i 'walk(if type == "string" and test("example\.com") then sub("example\.com"; strenv(JOB_IDENTIFIER) + ".ci.selfzero.net") else . end)' "$file"
+          find . -name "values.yaml" -print0 | while IFS= read -r -d '' file; do
+            yq e -i '.. |= (
+              (tag == "!!str") 
+              and test("example\\.com") 
+              | sub("example\\.com"; strenv("JOB_IDENTIFIER") + ".ci.selfzero.net")
+            )' "$file"
           done
 
           make install
@@ -128,9 +132,13 @@ jobs:
         run: |
           cd charts/dz-control-plane
           make add-docker-creds
-
-          for file in $(find values -type f -name "*.yaml"); do
-            yq e -i 'walk(if type == "string" and test("example\.com") then sub("example\.com"; strenv(JOB_IDENTIFIER) + ".ci.selfzero.net") else . end)' "$file"
+          
+          find . -name "values.yaml" -print0 | while IFS= read -r -d '' file; do
+            yq e -i '.. |= (
+              (tag == "!!str") 
+              and test("example\\.com") 
+              | sub("example\\.com"; strenv("JOB_IDENTIFIER") + ".ci.selfzero.net")
+            )' "$file"
           done
 
           make install
@@ -142,9 +150,13 @@ jobs:
       - name: Deploy Data Plane Dependencies
         run: |
           cd charts/dz-data-plane-deps
-
-          for file in $(find values -type f -name "*.yaml"); do
-            yq e -i 'walk(if type == "string" and test("example\.com") then sub("example\.com"; strenv(JOB_IDENTIFIER) + ".ci.selfzero.net") else . end)' "$file"
+          
+          find . -name "values.yaml" -print0 | while IFS= read -r -d '' file; do
+            yq e -i '.. |= (
+              (tag == "!!str") 
+              and test("example\\.com") 
+              | sub("example\\.com"; strenv("JOB_IDENTIFIER") + ".ci.selfzero.net")
+            )' "$file"
           done
 
           make install
@@ -153,10 +165,14 @@ jobs:
         run: |
           cd charts/dz-data-plane
           
-          for file in $(find values -type f -name "*.yaml"); do
-            yq e -i 'walk(if type == "string" and test("example\.com") then sub("example\.com"; strenv(JOB_IDENTIFIER) + ".ci.selfzero.net") else . end)' "$file"
+          find . -name "values.yaml" -print0 | while IFS= read -r -d '' file; do
+            yq e -i '.. |= (
+              (tag == "!!str") 
+              and test("example\\.com") 
+              | sub("example\\.com"; strenv("JOB_IDENTIFIER") + ".ci.selfzero.net")
+            )' "$file"
           done
-
+          
           make install
           kubectl delete runtimeclass kata
           kubectl apply -f ../../terraform/examples/gcp/base-cluster/runtimeclass.yaml
