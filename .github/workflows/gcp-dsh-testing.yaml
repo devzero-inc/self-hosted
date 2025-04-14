@@ -106,11 +106,7 @@ jobs:
           cd charts/dz-control-plane-deps
 
           find . -name "values.yaml" -print0 | while IFS= read -r -d '' file; do
-            yq e -i '.. |= (
-              (tag == "!!str") 
-              and test("example\\.com") 
-              | sub("example\\.com"; strenv("JOB_IDENTIFIER") + ".ci.selfzero.net")
-            )' "$file"
+            yq e -i '.. |= select(tag == "!!str" and test("example\\.com")) |= sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net")' "$file"
           done
 
           make install
@@ -134,11 +130,7 @@ jobs:
           make add-docker-creds
           
           find . -name "values.yaml" -print0 | while IFS= read -r -d '' file; do
-            yq e -i '.. |= (
-              (tag == "!!str") 
-              and test("example\\.com") 
-              | sub("example\\.com"; strenv("JOB_IDENTIFIER") + ".ci.selfzero.net")
-            )' "$file"
+            yq e -i '.. |= select(tag == "!!str" and test("example\\.com")) |= sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net")' "$file"
           done
 
           make install
@@ -152,11 +144,7 @@ jobs:
           cd charts/dz-data-plane-deps
           
           find . -name "values.yaml" -print0 | while IFS= read -r -d '' file; do
-            yq e -i '.. |= (
-              (tag == "!!str") 
-              and test("example\\.com") 
-              | sub("example\\.com"; strenv("JOB_IDENTIFIER") + ".ci.selfzero.net")
-            )' "$file"
+            yq e -i '.. |= select(tag == "!!str" and test("example\\.com")) |= sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net")' "$file"
           done
 
           make install
@@ -166,11 +154,7 @@ jobs:
           cd charts/dz-data-plane
           
           find . -name "values.yaml" -print0 | while IFS= read -r -d '' file; do
-            yq e -i '.. |= (
-              (tag == "!!str") 
-              and test("example\\.com") 
-              | sub("example\\.com"; strenv("JOB_IDENTIFIER") + ".ci.selfzero.net")
-            )' "$file"
+            yq e -i '.. |= select(tag == "!!str" and test("example\\.com")) |= sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net")' "$file"
           done
 
           make install
