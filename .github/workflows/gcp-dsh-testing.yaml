@@ -208,6 +208,6 @@ jobs:
         if: always()
         run: |
           cd terraform/examples/gcp/base-cluster
-          terraform destroy -auto-approve
+          terraform destroy -auto-approve -var="prefix=$JOB_IDENTIFIER" -var="project_id=devzero-kubernetes-sandbox"
 
 
