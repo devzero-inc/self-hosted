@@ -1,0 +1,12 @@
+{{- if .Values.buildqd.caCertificates.certificates }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "devzero.resourceName" (dict "ctx" . "component" "buildqd") }}-ca-certs
+  namespace: {{ .Release.Namespace | quote }}
+type: Opaque
+data:
+  {{- range $filename, $certData := .Values.buildqd.caCertificates.certificates }}
+  {{ $filename }}: {{ $certData | quote }}
+  {{- end }}
+{{- end }}
