@@ -1,6 +1,6 @@
 # General
 prefix = "devzero"
-project_id = "devzero-project"
+project_id = "devzero-self-hosted"
 region = "us-central1"
 
 domain       = "devzero.internal"
@@ -22,10 +22,10 @@ gke_zones = ["us-central1-a"]
 gke_master_version = "1.31.6-gke.1020000"
 node_count = 3
 machine_type = "n2-highcpu-32"
+devzero_service_account = "devzero-self-hosted@devzero-self-hosted.iam.gserviceaccount.com"
 
 # Vault
 create_vault_crypto_key = false
-devzero_service_account = "dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com"
 vault_key_ring_name = "devzero-key-ring"
 vault_key_ring_location = "global"
 

@@ -1,5 +1,5 @@
 # Required Inputs
-project_id     = "devzero-project"
+project_id = "devzero-self-hosted"
 location       = "us-central1-a"
 cluster_name   = "devzero"
 
