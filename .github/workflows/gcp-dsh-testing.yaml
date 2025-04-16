@@ -50,8 +50,6 @@ jobs:
       
       - name: Install yq
         run: |
-          gcloud auth list
-          gcloud config list account
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.35.2/yq_linux_amd64 -O /usr/local/bin/yq
           sudo chmod +x /usr/local/bin/yq
       
@@ -185,20 +183,6 @@ jobs:
         run: |
           cd charts/dz-control-plane
           make delete
-
-      - name: Check & Remove Finalizers
-        run: |
-          NS_JSON=$(kubectl get namespace devzero -o json --ignore-not-found)
-          FINALIZERS=$(echo "$NS_JSON" | jq -r '.spec.finalizers | @sh' || echo "")
-
-          if [[ -n "$FINALIZERS" && "$FINALIZERS" != "null" ]]; then
-            echo "Namespace stuck with finalizers: $FINALIZERS. Force removing..."
-            echo "$NS_JSON" \
-              | jq 'del(.spec.finalizers)' \
-              | kubectl replace --raw "/api/v1/namespaces/devzero/finalize" -f -
-          else
-            echo "No finalizers found. Namespace should be clean."
-          fi
 
       - name: '[helm] Destroy control-plane-deps'
         if: always()
