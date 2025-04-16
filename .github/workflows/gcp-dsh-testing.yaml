@@ -21,7 +21,6 @@ jobs:
         id: 'auth'
         uses: 'google-github-actions/auth@v2'
         with:
-          token_format: 'access_token'
           workload_identity_provider: 'projects/926977153451/locations/global/workloadIdentityPools/dsh-testing-pool-id/providers/github-actions-pool'
           service_account: 'devzero-self-hosted@devzero-self-hosted.iam.gserviceaccount.com'
           create_credentials_file: true
@@ -53,7 +52,6 @@ jobs:
         run: |
           gcloud auth list
           gcloud config list account
-          echo "${{ steps.auth.outputs.id_token }}" | cut -d '.' -f2 | base64 -d | jq
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.35.2/yq_linux_amd64 -O /usr/local/bin/yq
           sudo chmod +x /usr/local/bin/yq
       
