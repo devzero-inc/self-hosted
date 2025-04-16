@@ -50,6 +50,8 @@ jobs:
       
       - name: Install yq
         run: |
+          gcloud auth list
+          gcloud config list account
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.35.2/yq_linux_amd64 -O /usr/local/bin/yq
           sudo chmod +x /usr/local/bin/yq
       
