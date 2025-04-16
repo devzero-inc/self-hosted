@@ -21,8 +21,8 @@ jobs:
         id: 'auth'
         uses: 'google-github-actions/auth@v1'
         with:
-          workload_identity_provider: 'projects/354385559261/locations/global/workloadIdentityPools/dz-ga-dsh-pool/providers/dz-ga-dsh-provider'
-          service_account: 'dsh-testing-github-actions@devzero-kubernetes-sandbox.iam.gserviceaccount.com'
+          workload_identity_provider: 'projects/926977153451/locations/global/workloadIdentityPools/dsh-testing-pool-id/providers/github-actions-pool'
+          service_account: 'devzero-self-hosted@devzero-self-hosted.iam.gserviceaccount.com'
           create_credentials_file: true
           export_environment_variables: true
 
@@ -79,11 +79,11 @@ jobs:
         run: |
           cd terraform/examples/gcp/base-cluster
           terraform init
-          terraform apply -auto-approve -var="prefix=$JOB_IDENTIFIER" -var="project_id=devzero-kubernetes-sandbox"
+          terraform apply -auto-approve -var="prefix=$JOB_IDENTIFIER" 
 
       - name: Configure Kubernetes Access
         run: |
-          gcloud container clusters get-credentials $JOB_IDENTIFIER --zone us-central1 --project devzero-kubernetes-sandbox
+          gcloud container clusters get-credentials $JOB_IDENTIFIER --zone us-central1 --project devzero-self-hosted
 
       - name: Set up Kata
         run: |
@@ -208,6 +208,6 @@ jobs:
         if: always()
         run: |
           cd terraform/examples/gcp/base-cluster
-          terraform destroy -auto-approve -var="prefix=$JOB_IDENTIFIER" -var="project_id=devzero-kubernetes-sandbox"
+          terraform destroy -auto-approve -var="prefix=$JOB_IDENTIFIER"
 
 
