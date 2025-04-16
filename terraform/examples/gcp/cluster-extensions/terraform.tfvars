@@ -1,7 +1,7 @@
 # Required Inputs
 project_id = "devzero-self-hosted"
 location       = "us-central1-a"
-cluster_name   = "devzero"
+prefix   = "devzero"
 
 # Tags
 tags = {

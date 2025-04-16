@@ -1,6 +1,6 @@
 variable "project_id" {}
 variable "location" {}
-variable "cluster_name" {}
+variable "prefix" {}
 variable "tags" {
   type    = map(string)
   default = {

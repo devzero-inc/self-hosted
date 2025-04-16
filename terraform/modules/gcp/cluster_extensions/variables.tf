@@ -1,4 +1,4 @@
-variable "cluster_name" {
+variable "prefix" {
   type        = string
   description = "Name of the cluster"
 }

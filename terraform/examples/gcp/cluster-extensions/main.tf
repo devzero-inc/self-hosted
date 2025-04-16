@@ -8,7 +8,7 @@ provider "google" {
 }
 
 data "google_container_cluster" "this" {
-  name     = var.cluster_name
+  name     = var.prefix
   location = var.location
   project  = var.project_id
 }
@@ -30,8 +30,8 @@ module "cluster_extensions" {
 
   project_id                             = var.project_id
   location                               = var.location
-  cluster_name                           = var.cluster_name
-  vpc_name                               = "${var.cluster_name}-vpc"
+  prefix                                 = var.prefix
+  vpc_name                               = "${var.prefix}-vpc"
   tags                                   = var.tags
 
   enable_pd_csi_driver                   = var.enable_pd_csi_driver

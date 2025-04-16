@@ -4,7 +4,7 @@
 
 resource "google_filestore_instance" "primary" {
   count     = var.enable_filestore ? 1 : 0
-  name      = "${var.cluster_name}-filestore"
+  name      = "${var.prefix}-filestore"
   location  = var.location
   tier      = "STANDARD"
   project   = var.project_id
@@ -35,7 +35,7 @@ resource "kubernetes_storage_class" "filestore" {
 
   parameters = {
     volume = "vol1"
-    instance = "${var.cluster_name}-filestore"
+    instance = "${var.prefix}-filestore"
     # Add network parameter
     network = var.vpc_name
   }
