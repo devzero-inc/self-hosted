@@ -158,8 +158,6 @@ jobs:
           done
 
           make install
-          kubectl delete runtimeclass kata
-          kubectl apply -f ../../terraform/examples/gcp/base-cluster/runtimeclass.yaml
 
       - name: Validate Data Plane
         run: |
