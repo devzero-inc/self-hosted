@@ -22,6 +22,16 @@ server:
   # Disable vault anti-affinity that requires one pod on each node. This allows vault to run on a single node cluster.
   affinity: ""
 
+  # Configure the service account if using GCP KMS for auto-unsealing.
+  # serviceAccount:
+  #   create: true
+  #   name: vault
+  #   annotations:
+  #     iam.gke.io/gcp-service-account: gcp-service-account
+
+  # extraEnvironmentVars:
+  #   GOOGLE_APPLICATION_CREDENTIALS: ""  # explicitly blank; use Workload Identity
+    
   ha:
     enabled: true
     replicas: 3
@@ -48,8 +58,18 @@ server:
       # This configuration can be found as the output if the devzero's base_cluster module when 
       # create_vault_auto_unseal_key variable is set to true. 
       # seal "awskms" {
-      #   kms_key_id = "KMS_KEY_ID"
+      #   kms_key_id = "KMS_KEY_ID" 
       #   region = "AWS_REGION"
+      # }
+
+      # This is used to configure the Vault server to use GCP KMS for auto-unsealing.
+      # This configuration can be found as the output if the devzero's base_cluster module when 
+      # create_vault_auto_unseal_key variable is set to true. 
+      # seal "gcpckms" {
+      #   project     = "PROJECT_ID"
+      #   region      = "global"
+      #   key_ring    = "GCP_KEY_RING"
+      #   crypto_key  = "GCP_CRYPTO_KEY"
       # }
 
   ingress:

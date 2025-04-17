@@ -63,11 +63,26 @@ _create-namespace:
 
 .PHONY: _delete-namespace
 _delete-namespace:
-	$(KUBECTL_BIN) delete namespace $(NAMESPACE) --ignore-not-found=true
+	@echo "Deleting namespace $(NAMESPACE)..."
+
+	$(KUBECTL_BIN) delete namespace $(NAMESPACE) --wait --timeout=60s --ignore-not-found=true; \
+	echo "Waiting for namespace $(NAMESPACE) to terminate..."; \
+	for i in {1..30}; do \
+		if ! $(KUBECTL_BIN) get namespace $(NAMESPACE) >/dev/null 2>&1; then \
+			echo "Namespace $(NAMESPACE) deleted successfully."; \
+			exit 0; \
+		fi; \
+		sleep 2; \
+	done; \
+
+	echo "Timeout waiting for namespace $(NAMESPACE) to terminate. Proceeding anyway."; \
+	exit 0
+
+	@echo "Done deleting namespace $(NAMESPACE)"
 
 .PHONY: _delete-crds
 _delete-crds:
-	$(KUBECTL_BIN) get crds -o name | grep '$(CRD_NAME)' | xargs $(KUBECTL_BIN) delete --ignore-not-found=true || true
+	$(KUBECTL_BIN) get crds -o name | grep '$(CRD_NAME)' | xargs $(KUBECTL_BIN) delete --ignore-not-found=true || true	
 
 
 ################################################################################
@@ -97,7 +112,7 @@ _install-helm-chart-helm:
 		--namespace $(NAMESPACE) \
 		--create-namespace \
 		--values values/$(APP_NAME).yaml \
-		--values values/$(APP_NAME)_overrides.yaml
+		--values values/$(APP_NAME)_overrides.yaml $(EXTRA_ARGS)
 
 .PHONY: _install-oci-helm-chart-helm
 _install-oci-helm-chart-helm:
