@@ -107,6 +107,7 @@ module "gke_cluster" {
       image_type       = "UBUNTU_CONTAINERD"
       auto_repair      = true
       service_account  = var.devzero_service_account
+      enable_nested_virtualization = true
     }
   ]
 

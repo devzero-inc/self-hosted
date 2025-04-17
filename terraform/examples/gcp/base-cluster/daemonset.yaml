@@ -33,11 +33,11 @@ spec:
             - name: DEBUG
               value: "false"
             - name: SHIMS
-              value: "clh cloud-hypervisor dragonball fc qemu qemu-coco-dev qemu-runtime-rs qemu-se-runtime-rs qemu-sev qemu-snp qemu-tdx stratovirt qemu-nvidia-gpu qemu-nvidia-gpu-snp qemu-nvidia-gpu-tdx"
+              value: "cloud-hypervisor"
             - name: DEFAULT_SHIM
-              value: "qemu"
+              value: "cloud-hypervisor"
             - name: CREATE_RUNTIMECLASSES
-              value: "true"
+              value: "false"
             - name: CREATE_DEFAULT_RUNTIMECLASS
               value: "false"
             - name: ALLOWED_HYPERVISOR_ANNOTATIONS
@@ -63,6 +63,32 @@ spec:
               mountPath: /etc/containerd/
             - name: host
               mountPath: /host/
+        - name: patch-containerd-handler
+          image: alpine:3.18
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: host
+              mountPath: /host
+          command:
+            - /bin/sh
+            - -c
+            - |
+              apk add --no-cache util-linux
+
+              echo "Waiting for kata-cloud-hypervisor config block..."
+              while ! grep -q '\[plugins.*kata-cloud-hypervisor\]' /host/etc/containerd/config.toml; do
+                sleep 2
+              done
+
+              echo "Patching config.toml to rename kata-cloud-hypervisor → kata..."
+              sed -i 's/kata-cloud-hypervisor/kata/g' /host/etc/containerd/config.toml
+
+              echo "Restarting containerd..."
+              nsenter --target 1 --mount --uts --ipc --net --pid systemctl restart containerd
+
+              # exit to let the sidecar terminate
+              echo "Patch done. Exiting sidecar."
       volumes:
         - name: crio-conf
           hostPath:
