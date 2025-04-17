@@ -1,5 +1,4 @@
 name: "[GCP] DevZero self-hosted deployment"
-run-name: '[GCP] self-hosted test run'
 
 on:
   push:
