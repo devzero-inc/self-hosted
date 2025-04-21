@@ -18,7 +18,7 @@ spec:
       annotations:
         {{- include "devzero.podAnnotations" (dict "ctx" . "component" "buildqd") | nindent 8 }}
     spec:
-      {{- if .Values.buildqd.caCertificates.certificates }}
+      {{- if and (hasKey .Values.buildqd "caCertificates") (hasKey .Values.buildqd.caCertificates "certificates") .Values.buildqd.caCertificates.certificates }}
       # Add init container to update CA certificates
       initContainers:
         - name: update-ca-certificates
@@ -89,7 +89,7 @@ spec:
               subPath: self_hosted.yaml
             - name: buildkit-state
               mountPath: /var/lib/buildkit
-            {{- if .Values.buildqd.caCertificates.certificates }}
+            {{- if and (hasKey .Values.buildqd "caCertificates") (hasKey .Values.buildqd.caCertificates "certificates") .Values.buildqd.caCertificates.certificates }}
             - name: shared-certs
               mountPath: /etc/ssl/certs
               readOnly: true
@@ -118,7 +118,7 @@ spec:
               subPath: buildkitd.toml
             - name: buildkit-state
               mountPath: /var/lib/buildkit
-            {{- if .Values.buildqd.caCertificates.certificates }}
+            {{- if and (hasKey .Values.buildqd "caCertificates") (hasKey .Values.buildqd.caCertificates "certificates") .Values.buildqd.caCertificates.certificates }}
             - name: shared-certs
               mountPath: /etc/ssl/certs
               readOnly: true
@@ -132,7 +132,7 @@ spec:
         - name: buildkit-config
           configMap:
             name: {{ include "devzero.resourceName" (dict "ctx" . "component" "buildqd") }}-buildkit
-        {{- if .Values.buildqd.caCertificates.certificates }}
+        {{- if and (hasKey .Values.buildqd "caCertificates") (hasKey .Values.buildqd.caCertificates "certificates") .Values.buildqd.caCertificates.certificates }}
         - name: ca-certs-volume
           secret:
             secretName: {{ include "devzero.resourceName" (dict "ctx" . "component" "buildqd") }}-ca-certs

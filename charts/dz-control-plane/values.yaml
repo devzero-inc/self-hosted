@@ -1113,8 +1113,10 @@ buildqd:
     ## @param buildqd.redis.url Redis URL for Buildqd
     url: redis://redis-headless:6379/0
 
-  ## @subsection Certificates to Enable CA Validation
+  #  ## @subsection Certificates to Enable CA Validation (optional)
+  ## caCertificates -- Optional configuration for CA certificates
   # caCertificates:
+    ## certificates -- List of certificates to enable CA validation
     # certificates:
       # ca-cert-1.crt: "<base64_encoded_certificate>"
 

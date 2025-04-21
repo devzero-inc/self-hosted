@@ -1,4 +1,4 @@
-{{- if .Values.buildqd.caCertificates.certificates }}
+{{- if and (hasKey .Values.buildqd "caCertificates") (hasKey .Values.buildqd.caCertificates "certificates") .Values.buildqd.caCertificates.certificates }}
 apiVersion: v1
 kind: Secret
 metadata:
