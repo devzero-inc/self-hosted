@@ -1114,9 +1114,11 @@ buildqd:
     url: redis://redis-headless:6379/0
 
   ## @subsection Certificates to Enable CA Validation
-  # caCertificates:
-    # certificates:
-      # ca-cert-1.crt: "<base64_encoded_certificate>"
+  caCertificates:
+    ## @param buildqd.caCertificates.enabled Whether to enable custom certificates for CA validation
+    enabled: false
+#    certificates:
+#       ca-cert-1.crt: "<base64_encoded_certificate>"
 
   ## @subsection Buildqd Autoscaling Configuration
   autoscaling:
