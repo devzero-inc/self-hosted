@@ -1,3 +1,5 @@
+# This is a DaemonSet configuration for deploying Kata Containers on Kubernetes nodes. Find it here: https://github.com/kata-containers/kata-containers/blob/main/tools/packaging/kata-deploy/kata-deploy/base/kata-deploy.yaml
+
 ---
 apiVersion: apps/v1
 kind: DaemonSet

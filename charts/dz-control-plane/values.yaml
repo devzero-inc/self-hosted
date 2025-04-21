@@ -419,7 +419,8 @@ hydra:
   ## @subsection Hydra CIDR Configuration
   cidr:
     ## @param hydra.cidr.v6 IPv6 CIDR range
-    v6: fd20:1984:42::/48
+    v6: fd7a:115c:a1e0::/48
+    ## v6: fd20:1984:42::/48     ## Use this ipv6 if installing in GCP
     ## @param hydra.cidr.v4 IPv4 CIDR range
     v4: 100.64.0.0/10
   ## @subsection Hydra DERP Configuration
