@@ -531,43 +531,44 @@ The Helm chart installs the following components:
 
 ### Buildqd Configuration
 
-| Name                                                    | Description                                      | Value                                                                            |
-| ------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------- |
-| `buildqd.replicas`                                      | Number of replicas for Buildqd                   | `1`                                                                              |
-| `buildqd.imageName`                                     | Image name for Buildqd                           | `buildqd`                                                                        |
-| `buildqd.schedulerName`                                 | Scheduler name for Buildqd pods                  | `""`                                                                             |
-| `buildqd.priorityClassName`                             | Priority class name for Buildqd pods             | `""`                                                                             |
-| `buildqd.nodeSelector`                                  | Node selector for Buildqd pods                   | `{}`                                                                             |
-| `buildqd.affinity`                                      | Affinity settings for Buildqd pods               | `{}`                                                                             |
-| `buildqd.tolerations`                                   | Tolerations for Buildqd pods                     | `[]`                                                                             |
-| `buildqd.logsrv.queue`                                  | Queue URL for LogSrv                             | `http://elasticmq:9324/queue/logsrv.fifo`                                        |
-| `buildqd.logsrv.region`                                 | Region for LogSrv                                | `elasticmq`                                                                      |
-| `buildqd.redis.url`                                     | Redis URL for Buildqd                            | `redis://redis-headless:6379/0`                                                  |
-| `buildqd.autoscaling.enabled`                           | Enable autoscaling for Buildqd                   | `false`                                                                          |
-| `buildqd.autoscaling.minReplicas`                       | Minimum autoscaling replicas for Buildqd         | `1`                                                                              |
-| `buildqd.autoscaling.maxReplicas`                       | Maximum autoscaling replicas for Buildqd         | `3`                                                                              |
-| `buildqd.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilisation percentage for Buildqd    | `60`                                                                             |
-| `buildqd.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilisation percentage for Buildqd | `80`                                                                             |
-| `buildqd.resources.limits.cpu`                          | CPU resource limits for Buildqd                  | `1000m`                                                                          |
-| `buildqd.resources.limits.memory`                       | Memory resource limits for Buildqd               | `1Gi`                                                                            |
-| `buildqd.resources.requests.cpu`                        | CPU resource requests for Buildqd                | `100m`                                                                           |
-| `buildqd.resources.requests.memory`                     | Memory resource requests for Buildqd             | `128Mi`                                                                          |
-| `buildqd.service.port`                                  | Port of the Buildqd service                      | `8443`                                                                           |
-| `buildqd.service.metricsPort`                           | Port of the Buildqd Metrics service              | `9090`                                                                           |
-| `buildqd.service.type`                                  | Type of the Buildqd service                      | `ClusterIP`                                                                      |
-| `buildqd.service.annotations`                           | Annotations for the Buildqd service              | `{}`                                                                             |
-| `buildqd.service.labels`                                | Labels for the Buildqd service                   | `{}`                                                                             |
-| `buildqd.buildkit.image.repository`                     | Buildkit repository                              | `docker.io/moby/buildkit`                                                        |
-| `buildqd.buildkit.image.pullPolicy`                     | Buildkit image policy                            | `IfNotPresent`                                                                   |
-| `buildqd.buildkit.image.tag`                            | Buildkit image tag                               | `v0.15.1`                                                                        |
-| `buildqd.buildkit.securityContext.privileged`           | Privileged mode for Buildkit container           | `true`                                                                           |
-| `buildqd.buildkit.command`                              | Buildkit command                                 | `buildkitd`                                                                      |
-| `buildqd.buildkit.args`                                 | Buildkit args                                    | `["--addr","unix:///run/buildkit/buildkitd.sock","--addr","tcp://0.0.0.0:1234"]` |
-| `buildqd.buildkit.resources.limits.cpu`                 | CPU resource limits for Buildkit                 | `1000m`                                                                          |
-| `buildqd.buildkit.resources.limits.memory`              | Memory resource limits for Buildkit              | `1Gi`                                                                            |
-| `buildqd.buildkit.resources.requests.cpu`               | CPU resource requests for Buildkit               | `100m`                                                                           |
-| `buildqd.buildkit.resources.requests.memory`            | Memory resource requests for Buildkit            | `128Mi`                                                                          |
-| `buildqd.buildkit.persistentVolumeClaim.storageSize`    | Storage size for Buildkit shared cache           | `100Gi`                                                                          |
+| Name                                                    | Description                                             | Value                                                                            |
+| ------------------------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `buildqd.replicas`                                      | Number of replicas for Buildqd                          | `1`                                                                              |
+| `buildqd.imageName`                                     | Image name for Buildqd                                  | `buildqd`                                                                        |
+| `buildqd.schedulerName`                                 | Scheduler name for Buildqd pods                         | `""`                                                                             |
+| `buildqd.priorityClassName`                             | Priority class name for Buildqd pods                    | `""`                                                                             |
+| `buildqd.nodeSelector`                                  | Node selector for Buildqd pods                          | `{}`                                                                             |
+| `buildqd.affinity`                                      | Affinity settings for Buildqd pods                      | `{}`                                                                             |
+| `buildqd.tolerations`                                   | Tolerations for Buildqd pods                            | `[]`                                                                             |
+| `buildqd.logsrv.queue`                                  | Queue URL for LogSrv                                    | `http://elasticmq:9324/queue/logsrv.fifo`                                        |
+| `buildqd.logsrv.region`                                 | Region for LogSrv                                       | `elasticmq`                                                                      |
+| `buildqd.redis.url`                                     | Redis URL for Buildqd                                   | `redis://redis-headless:6379/0`                                                  |
+| `buildqd.caCertificates.enabled`                        | Whether to enable custom certificates for CA validation | `false`                                                                          |
+| `buildqd.autoscaling.enabled`                           | Enable autoscaling for Buildqd                          | `false`                                                                          |
+| `buildqd.autoscaling.minReplicas`                       | Minimum autoscaling replicas for Buildqd                | `1`                                                                              |
+| `buildqd.autoscaling.maxReplicas`                       | Maximum autoscaling replicas for Buildqd                | `3`                                                                              |
+| `buildqd.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilisation percentage for Buildqd           | `60`                                                                             |
+| `buildqd.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilisation percentage for Buildqd        | `80`                                                                             |
+| `buildqd.resources.limits.cpu`                          | CPU resource limits for Buildqd                         | `1000m`                                                                          |
+| `buildqd.resources.limits.memory`                       | Memory resource limits for Buildqd                      | `1Gi`                                                                            |
+| `buildqd.resources.requests.cpu`                        | CPU resource requests for Buildqd                       | `100m`                                                                           |
+| `buildqd.resources.requests.memory`                     | Memory resource requests for Buildqd                    | `128Mi`                                                                          |
+| `buildqd.service.port`                                  | Port of the Buildqd service                             | `8443`                                                                           |
+| `buildqd.service.metricsPort`                           | Port of the Buildqd Metrics service                     | `9090`                                                                           |
+| `buildqd.service.type`                                  | Type of the Buildqd service                             | `ClusterIP`                                                                      |
+| `buildqd.service.annotations`                           | Annotations for the Buildqd service                     | `{}`                                                                             |
+| `buildqd.service.labels`                                | Labels for the Buildqd service                          | `{}`                                                                             |
+| `buildqd.buildkit.image.repository`                     | Buildkit repository                                     | `docker.io/moby/buildkit`                                                        |
+| `buildqd.buildkit.image.pullPolicy`                     | Buildkit image policy                                   | `IfNotPresent`                                                                   |
+| `buildqd.buildkit.image.tag`                            | Buildkit image tag                                      | `v0.15.1`                                                                        |
+| `buildqd.buildkit.securityContext.privileged`           | Privileged mode for Buildkit container                  | `true`                                                                           |
+| `buildqd.buildkit.command`                              | Buildkit command                                        | `buildkitd`                                                                      |
+| `buildqd.buildkit.args`                                 | Buildkit args                                           | `["--addr","unix:///run/buildkit/buildkitd.sock","--addr","tcp://0.0.0.0:1234"]` |
+| `buildqd.buildkit.resources.limits.cpu`                 | CPU resource limits for Buildkit                        | `1000m`                                                                          |
+| `buildqd.buildkit.resources.limits.memory`              | Memory resource limits for Buildkit                     | `1Gi`                                                                            |
+| `buildqd.buildkit.resources.requests.cpu`               | CPU resource requests for Buildkit                      | `100m`                                                                           |
+| `buildqd.buildkit.resources.requests.memory`            | Memory resource requests for Buildkit                   | `128Mi`                                                                          |
+| `buildqd.buildkit.persistentVolumeClaim.storageSize`    | Storage size for Buildkit shared cache                  | `100Gi`                                                                          |
 
 ### Web Configuration
 
