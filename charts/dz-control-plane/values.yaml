@@ -39,7 +39,7 @@ image:
   ## @param image.repository Devzero container image repository
   repository: docker.io/devzeroinc
   ## @param image.tag Devzero container image tag
-  tag: "v1.0.10"
+  tag: "v1.0.11"
   ## @param image.pullPolicy Container pull policy
   pullPolicy: IfNotPresent
   # -- Optionally specify an array of imagePullSecrets
@@ -1107,6 +1107,13 @@ buildqd:
   redis:
     ## @param buildqd.redis.url Redis URL for Buildqd
     url: redis://redis-headless:6379/0
+
+  ## @subsection Certificates to Enable CA Validation
+  caCertificates:
+    ## @param buildqd.caCertificates.enabled Whether to enable custom certificates for CA validation
+    enabled: false
+#    certificates:
+#       ca-cert-1.crt: "<base64_encoded_certificate>"
 
   ## @subsection Buildqd Autoscaling Configuration
   autoscaling:

@@ -68,7 +68,7 @@
                 "tag": {
                     "type": "string",
                     "description": "Devzero container image tag",
-                    "default": "v1.0.10"
+                    "default": "v1.0.11"
                 },
                 "pullPolicy": {
                     "type": "string",
@@ -2149,6 +2149,16 @@
                             "type": "string",
                             "description": "Redis URL for Buildqd",
                             "default": "redis://redis-headless:6379/0"
+                        }
+                    }
+                },
+                "caCertificates": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Whether to enable custom certificates for CA validation",
+                            "default": false
                         }
                     }
                 },

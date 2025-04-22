@@ -18,6 +18,58 @@ spec:
       annotations:
         {{- include "devzero.podAnnotations" (dict "ctx" . "component" "buildqd") | nindent 8 }}
     spec:
+      {{- if .Values.buildqd.caCertificates.enabled }}
+      # Add init container to update CA certificates
+      initContainers:
+        - name: update-ca-certificates
+          image: ubuntu:22.04
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              echo "Starting CA certificate setup..."
+              
+              # Check which package manager is available
+              if command -v apt-get &> /dev/null; then
+                echo "Using apt-get to install packages"
+                apt-get update && apt-get install -y ca-certificates
+              elif command -v apk &> /dev/null; then
+                echo "Using apk to install packages"
+                apk add --no-cache ca-certificates
+              else
+                echo "No supported package manager found"
+                exit 1
+              fi
+              
+              echo "Creating required directories..."
+              mkdir -p /usr/local/share/ca-certificates
+              mkdir -p /etc/ssl/certs
+              mkdir -p /shared-certs
+              
+              echo "Listing CA files to be copied:"
+              ls -la /ca-certs/
+              
+              echo "Copying certificates to ca-certificates directory..."
+              cp /ca-certs/* /usr/local/share/ca-certificates/ || echo "Warning: Copy to ca-certificates failed"
+              
+              echo "Updating CA certificates..."
+              update-ca-certificates || echo "Warning: update-ca-certificates failed"
+              
+              echo "Contents of /etc/ssl/certs/:"
+              ls -la /etc/ssl/certs/ || echo "Warning: /etc/ssl/certs/ doesn't exist or is empty"
+              
+              echo "Copying certs to shared volume..."
+              cp -r /etc/ssl/certs/* /shared-certs/ || echo "Warning: Copy to shared-certs failed"
+              
+              echo "Contents of shared-certs:"
+              ls -la /shared-certs/
+              
+              echo "CA certificate setup completed"
+          volumeMounts:
+            - name: ca-certs-volume
+              mountPath: /ca-certs
+            - name: shared-certs
+              mountPath: /shared-certs
+      {{- end }}
       containers:
         - name: buildqd
           image: "{{ .Values.image.repository }}/{{ .Values.buildqd.imageName }}:{{ .Values.image.tag }}"
@@ -37,6 +89,11 @@ spec:
               subPath: self_hosted.yaml
             - name: buildkit-state
               mountPath: /var/lib/buildkit
+            {{- if .Values.buildqd.caCertificates.enabled }}
+            - name: shared-certs
+              mountPath: /etc/ssl/certs
+              readOnly: true
+            {{- end }}
           env:
             - name: CONFIG_FILENAME
               value: "self_hosted"
@@ -61,6 +118,11 @@ spec:
               subPath: buildkitd.toml
             - name: buildkit-state
               mountPath: /var/lib/buildkit
+            {{- if .Values.buildqd.caCertificates.enabled }}
+            - name: shared-certs
+              mountPath: /etc/ssl/certs
+              readOnly: true
+            {{- end }}
           resources:
             {{- toYaml .Values.buildqd.buildkit.resources | nindent 12 }}
       volumes:
@@ -70,6 +132,13 @@ spec:
         - name: buildkit-config
           configMap:
             name: {{ include "devzero.resourceName" (dict "ctx" . "component" "buildqd") }}-buildkit
+        {{- if .Values.buildqd.caCertificates.enabled }}
+        - name: ca-certs-volume
+          secret:
+            secretName: {{ include "devzero.resourceName" (dict "ctx" . "component" "buildqd") }}-ca-certs
+        - name: shared-certs
+          emptyDir: {}
+        {{- end }}
       {{- with .Values.buildqd.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
