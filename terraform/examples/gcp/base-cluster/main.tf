@@ -95,7 +95,7 @@ module "gke_cluster" {
   network_policy             = false
   horizontal_pod_autoscaling = true
   filestore_csi_driver       = true
-  kubernetes_version         = "1.31.6-gke.1020000"
+  kubernetes_version         = "1.31.6-gke.1064001"
 
   node_pools = [
     {
