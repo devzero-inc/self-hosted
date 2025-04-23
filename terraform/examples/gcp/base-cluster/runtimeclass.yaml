@@ -1,9 +1,0 @@
-kind: RuntimeClass
-apiVersion: node.k8s.io/v1
-metadata:
-    name: kata
-handler: kata-cloud-hypervisor
-overhead:
-    podFixed:
-        memory: "130Mi"
-        cpu: "250m"
