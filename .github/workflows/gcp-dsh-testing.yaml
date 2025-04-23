@@ -1,9 +1,6 @@
 name: "[GCP] DevZero self-hosted deployment"
 
 on:
-  push:
-    branches:
-      - garvit/gcp-tf
   workflow_dispatch:
 
 jobs:

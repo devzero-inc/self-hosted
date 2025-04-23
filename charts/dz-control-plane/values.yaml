@@ -1222,6 +1222,13 @@ web:
   podAnnotations: {}
   ## @param web.annotations Annotations for Web
   annotations: {}
+
+  # Optional: Provide a plain 32-character string (we'll encode it for you).
+  # This is used to persist user sessions across deployments.
+  # If left empty, a random secret will be generated on install.
+  nextAuthSecret: ""
+  # Example (32 characters): "D8f2E7vJk93mL5NpYqWxZaUoBtHgRvXc"
+
   ## @subsection Web Environment Configuration
   env:
     ## @param web.env.NEXT_PUBLIC_SELF_HOSTED Self-hosted mode for Next.js
