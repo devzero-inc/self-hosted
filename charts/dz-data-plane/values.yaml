@@ -17,9 +17,10 @@ nodeLabeler:
 ## @section Credentials Configuration
 credentials:
   ## @param credentials.enable Enable docker hub credentials
+  # Comment out image.pullSecrets if you disable this
   enable: true
   ## @param credentials.registry Container registry URL
-  registry: ""
+  registry: "docker.io"
   ## @param credentials.username Registry username
   username: ""
   ## @param credentials.password Registry password

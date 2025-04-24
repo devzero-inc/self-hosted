@@ -8,6 +8,7 @@ metadata:
 data:
   API_BASE_URL: "http://{{ include "devzero.resourceName" (dict "ctx" . "component" "gateway")}}:{{ .Values.gateway.service.port}}/api/v0"
   API_BASE_URL_V2: "http://{{ include "devzero.resourceName" (dict "ctx" . "component" "gateway")}}:{{ .Values.gateway.service.port}}/backend/v0"
+  NEXTAUTH_URL: "http://{{ .Values.domain }}"
   API_LOGS_URL: "https://logsrv.{{ .Values.domain }}"
   HYDRA_URL: "https://hydra.{{ .Values.domain }}"
   NEXT_PUBLIC_API_LOGS_URL: "https://logsrv.{{ .Values.domain}}"

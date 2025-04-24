@@ -9,13 +9,10 @@
 ## @section Chart Configuration
 ## @param nameOverride String to override the chart's name
 nameOverride: ""
-
 ## @param fullnameOverride String to override the chart's computed fullname
 fullnameOverride: ""
-
 ## @param domain Domain name for the installation
 domain: "example.com"
-
 ## @section Credentials Configuration
 credentials:
   ## @param credentials.enable Enable docker hub credentials
@@ -415,19 +412,17 @@ hydra:
     user: "hydra"
     ## @param hydra.postgres.password PostgreSQL password
     password: "hydra"
-
   ## @subsection Hydra Redis Configuration
   redis:
     ## @param hydra.redis.url Redis URL for Hydra
     url: redis://redis-headless:6379/2
-
   ## @subsection Hydra CIDR Configuration
   cidr:
     ## @param hydra.cidr.v6 IPv6 CIDR range
     v6: fd7a:115c:a1e0::/48
+    ## v6: fd20:1984:42::/48     ## Use this ipv6 if installing in GCP
     ## @param hydra.cidr.v4 IPv4 CIDR range
     v4: 100.64.0.0/10
-
   ## @subsection Hydra DERP Configuration
   derp:
     server:
@@ -1201,43 +1196,38 @@ buildqd:
         cpu: 100m
         ## @param buildqd.buildkit.resources.requests.memory Memory resource requests for Buildkit
         memory: 128Mi
-
     ## @subsection Buildkit Persistent Volume Configuration
     persistentVolumeClaim:
       ## @param buildqd.buildkit.persistentVolumeClaim.storageSize Storage size for Buildkit shared cache
       storageSize: 100Gi
-
 ## @section Web Configuration
 web:
   ## @param web.replicas Number of replicas for Web
   replicas: 1
-
   ## @param web.imageName Image name for Web
   imageName: "web"
-
   ## @param web.schedulerName Scheduler name for Web pods
   schedulerName: ""
-
   ## @param web.priorityClassName Priority class name for Web pods
   priorityClassName: ""
-
   ## @param web.nodeSelector Node selector for Web pods
   nodeSelector: {}
-
   ## @param web.affinity Affinity settings for Web pods
   affinity: {}
-
   ## @param web.tolerations Tolerations for Web pods
   tolerations: []
-
   ## @param web.podLabels Pod labels for Web
   podLabels: {}
-
   ## @param web.podAnnotations Pod annotations for Web
   podAnnotations: {}
-
   ## @param web.annotations Annotations for Web
   annotations: {}
+
+  # Optional: Provide a plain 32-character string (we'll encode it for you).
+  # This is used to persist user sessions across deployments.
+  # If left empty, a random secret will be generated on install.
+  nextAuthSecret: ""
+  # Example (32 characters): "D8f2E7vJk93mL5NpYqWxZaUoBtHgRvXc"
 
   ## @subsection Web Environment Configuration
   env:
@@ -1245,7 +1235,7 @@ web:
     NEXT_PUBLIC_SELF_HOSTED: "true"
     ## @param web.env.NODE_TLS_REJECT_UNAUTHORIZED ignore SSL mode for Next.js
     NODE_TLS_REJECT_UNAUTHORIZED: "0"
-
+    NEXTAUTH_URL: "https://{{ .Values.domain }}"
   ## @subsection Web Autoscaling Configuration
   autoscaling:
     ## @param web.autoscaling.enabled Enable autoscaling for Web
