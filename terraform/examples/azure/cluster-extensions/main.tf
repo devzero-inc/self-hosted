@@ -4,6 +4,7 @@
 
 provider "azurerm" {
   features {}
+  subscription_id = var.subscription_id
 }
 
 provider "azuread" {}
@@ -42,9 +43,9 @@ data "azurerm_kubernetes_cluster" "this" {
 module "cluster_extensions" {
   source = "../../../modules/azure/cluster_extensions"
 
-  cluster_name           = var.cluster_name
-  resource_group_name    = var.resource_group_name
-  location               = var.location
+  cluster_name            = var.cluster_name
+  resource_group_name     = var.resource_group_name
+  location                = var.location
   enable_external_secrets = var.enable_external_secrets
   enable_azure_files      = var.enable_azure_files
   tags                    = var.tags

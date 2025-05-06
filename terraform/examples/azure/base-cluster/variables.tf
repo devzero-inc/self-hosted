@@ -3,8 +3,6 @@ variable "resource_group_name" {
   type        = string
 }
 
-variable "prefix" {}
-
 variable "location" {
   description = "Azure region where the resources will be deployed"
   type        = string
@@ -22,11 +20,6 @@ variable "cluster_version" {
 
 variable "cidr" {
   description = "CIDR block for the virtual network"
-  type        = string
-}
-
-variable "subnet_id" {
-  description = "Subnet ID used by AKS cluster"
   type        = string
 }
 
@@ -96,13 +89,26 @@ variable "single_nat_gateway" {
   default     = false
 }
 
-variable "cluster_log_analytics_workspace_name" {}
-
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
   default     = {}
 } 
+
+################################################################################
+# Custom DERP server
+################################################################################
+variable "create_derp" {
+  description = "Create custom DERP server"
+  type        = bool
+  default     = false
+}
+
+variable "public_derp" {
+  type        = bool
+  default     = false
+  description = "Whether to make the DERP server public"
+}
 
 ################################################################################
 # Vault

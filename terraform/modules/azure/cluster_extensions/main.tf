@@ -45,14 +45,54 @@ resource "helm_release" "external_secrets" {
 }
 
 ################################################################################
-# Azure Files CSI StorageClass
+# Azure Files Backing Resources
+################################################################################
+
+resource "azurerm_storage_account" "azure_files" {
+  count = var.enable_azure_files ? 1 : 0
+
+  name                     = lower(replace("${var.cluster_name}files", "[^a-z0-9]", ""))
+  resource_group_name      = var.resource_group_name
+  location                 = var.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  account_kind             = "StorageV2"
+
+  tags = var.tags
+}
+
+resource "azurerm_storage_share" "efs_etcd_share" {
+  count               = var.enable_azure_files ? 1 : 0
+  name                = "efs-etcd"
+  storage_account_name = azurerm_storage_account.azure_files[0].name
+  quota               = 100
+}
+
+resource "kubernetes_secret" "azure_files_secret" {
+  count = var.enable_azure_files ? 1 : 0
+
+  metadata {
+    name      = "azure-files-secret"
+    namespace = "default"
+  }
+
+  data = {
+    azurestorageaccountname = azurerm_storage_account.azure_files[0].name
+    azurestorageaccountkey  = azurerm_storage_account.azure_files[0].primary_access_key
+  }
+
+  type = "Opaque"
+}
+
+################################################################################
+# Azure Files CSI StorageClass (named as `efs-etcd`)
 ################################################################################
 
 resource "kubernetes_storage_class" "azurefiles_csi" {
   count = var.enable_azure_files ? 1 : 0
 
   metadata {
-    name = "azurefiles-csi"
+    name = "efs-etcd"
     annotations = {
       "storageclass.kubernetes.io/is-default-class" = "true"
     }
@@ -64,6 +104,9 @@ resource "kubernetes_storage_class" "azurefiles_csi" {
   allow_volume_expansion = true
 
   parameters = {
-    skuName = "Standard_LRS"
+    skuName        = "Standard_LRS"
+    secretName     = "azure-files-secret"
+    secretNamespace = "default"
+    shareName      = "efs-etcd"
   }
 }

@@ -63,6 +63,7 @@ module "aks" {
   location            = var.location
   cluster_name        = var.cluster_name
   kubernetes_version  = var.cluster_version
+  prefix              = var.cluster_name
 
   vnet_subnet_id                   = module.vnet.vnet_subnets[0]
   network_plugin                   = "azure"
@@ -79,8 +80,7 @@ module "aks" {
 
   log_analytics_workspace_enabled = true
   log_retention_in_days           = 30
-  cluster_log_analytics_workspace_name       = var.cluster_log_analytics_workspace_name
-  prefix                                     = var.prefix
+  cluster_log_analytics_workspace_name       = "${var.cluster_name}-logs"
   
   key_vault_secrets_provider_enabled                 = true
   secret_rotation_enabled                            = true
@@ -96,6 +96,29 @@ module "aks" {
   agents_max_pods = 100
 
   tags = var.tags
+}
+
+################################################################################
+# Custom DERP server in Azure
+################################################################################
+
+module "derp" {
+  source = "../../../modules/azure/derp"
+
+  count  = var.create_derp ? 1 : 0
+
+  name_prefix          = var.cluster_name
+  location             = var.location
+  resource_group_name  = var.resource_group_name
+  subnet_id            = module.vnet.vnet_subnets[0]
+  public_derp          = var.public_derp
+  existing_ip          = ""
+  firewall_rule_name   = ""
+  ingress_cidr_blocks  = ["0.0.0.0/0"]
+  hostname             = "derp.devzero.net"
+  vm_size              = "Standard_B2s"
+  volume_size          = 30
+  tags                 = var.tags
 }
 
 ################################################################################

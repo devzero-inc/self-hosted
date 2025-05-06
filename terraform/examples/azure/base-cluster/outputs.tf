@@ -1,3 +1,23 @@
+output "subscription_id" {
+  description = "Azure Subscription ID"
+  value       = data.azurerm_client_config.current.subscription_id
+}
+
+output "resource_group_name" {
+  description = "The name of the resource group used for the AKS cluster."
+  value       = var.resource_group_name
+}
+
+output "cluster_name" {
+  description = "The name of the AKS cluster."
+  value       = var.cluster_name
+}
+
+output "location" {
+  description = "The Azure region where the AKS cluster is deployed."
+  value       = var.location
+}
+
 output "vault_sp_client_id" {
   value       = var.create_vault_auto_unseal_key ? azuread_application.vault[0].client_id : null
   description = "The client ID for Vault's Azure Key Vault integration."

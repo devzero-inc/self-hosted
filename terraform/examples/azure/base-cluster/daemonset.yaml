@@ -1,0 +1,107 @@
+# This is a DaemonSet configuration for deploying Kata Containers on Kubernetes nodes. Find it here: https://github.com/kata-containers/kata-containers/blob/main/tools/packaging/kata-deploy/kata-deploy/base/kata-deploy.yaml
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kata-deploy
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: kata-deploy
+  template:
+    metadata:
+      labels:
+        name: kata-deploy
+    spec:
+      serviceAccountName: kata-deploy-sa
+      hostPID: true
+      containers:
+        - name: kube-kata
+          image: quay.io/kata-containers/kata-deploy:latest
+          imagePullPolicy: Always
+          lifecycle:
+            preStop:
+              exec:
+                command: ["bash", "-c", "/opt/kata-artifacts/scripts/kata-deploy.sh cleanup"]
+          command: ["bash", "-c", "/opt/kata-artifacts/scripts/kata-deploy.sh install"]
+          # NOTE: Please don't change the order of the environment variables below.
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: DEBUG
+              value: "false"
+            - name: SHIMS
+              value: "cloud-hypervisor"
+            - name: DEFAULT_SHIM
+              value: "cloud-hypervisor"
+            - name: CREATE_RUNTIMECLASSES
+              value: "false"
+            - name: CREATE_DEFAULT_RUNTIMECLASS
+              value: "false"
+            - name: ALLOWED_HYPERVISOR_ANNOTATIONS
+              value: ""
+            - name: SNAPSHOTTER_HANDLER_MAPPING
+              value: ""
+            - name: AGENT_HTTPS_PROXY
+              value: ""
+            - name: AGENT_NO_PROXY
+              value: ""
+            - name: PULL_TYPE_MAPPING
+              value: ""
+            - name: INSTALLATION_PREFIX
+              value: ""
+            - name: MULTI_INSTALL_SUFFIX
+              value: ""
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: crio-conf
+              mountPath: /etc/crio/
+            - name: containerd-conf
+              mountPath: /etc/containerd/
+            - name: host
+              mountPath: /host/
+        - name: patch-containerd-handler
+          image: alpine:3.18
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: host
+              mountPath: /host
+          command:
+            - /bin/sh
+            - -c
+            - |
+              apk add --no-cache util-linux
+
+              echo "Waiting for kata-cloud-hypervisor config block..."
+              while ! grep -q '\[plugins.*kata-cloud-hypervisor\]' /host/etc/containerd/config.toml; do
+                sleep 2
+              done
+
+              echo "Patching config.toml to rename kata-cloud-hypervisor → kata..."
+              sed -i 's/kata-cloud-hypervisor/kata/g' /host/etc/containerd/config.toml
+
+              echo "Restarting containerd..."
+              nsenter --target 1 --mount --uts --ipc --net --pid systemctl restart containerd
+
+              # exit to let the sidecar terminate
+              echo "Patch done. Exiting sidecar."
+      volumes:
+        - name: crio-conf
+          hostPath:
+            path: /etc/crio/
+        - name: containerd-conf
+          hostPath:
+            path: /etc/containerd/
+        - name: host
+          hostPath:
+            path: /
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate

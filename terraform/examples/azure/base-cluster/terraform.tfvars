@@ -1,6 +1,6 @@
 resource_group_name = "dev-test"
 location            = "eastus"
-cluster_name        = "devzero-aks"
+cluster_name        = "devzero"
 cluster_version     = "1.30"
 cidr                = "10.240.0.0/16"
 
@@ -24,11 +24,11 @@ single_nat_gateway   = true
 
 tags = {
   environment = "dev"
-  project     = "devzero"
-  owner       = "garvit"
-} 
+  owner       = "devzero"
+  createdBy   = "terraform"
+}
 
-cluster_log_analytics_workspace_name = "devzero-logs"
-prefix = "devzero"
+create_derp = true
+public_derp = true
 
 create_vault_auto_unseal_key = true
