@@ -21,6 +21,9 @@ locals {
   vpc_dns_resolver = cidrhost(local.effective_vpc_cidr_block, 2)
   # Calculates the +2 host of the CIDR for VPN DNS resolving
 
+  # if ami_version is explicitly set, use that since the user wants to be specific about the AMI being used; if not, use the cluster_version
+  ami_version = length(var.ami_version) > 0 ? var.ami_version : var.cluster_version
+
 }
 
 data "aws_availability_zones" "available" {}
@@ -255,7 +258,7 @@ data "aws_ami" "devzero_amazon_eks_node_al2023" {
 
   filter {
     name   = "name"
-    values = ["devzero-amazon-eks-node-al2023-x86_64-standard-${var.cluster_version}-*"]
+    values = ["devzero-amazon-eks-node-al2023-x86_64-standard-${local.ami_version}-*"]
   }
   owners      = ["710271940431"] # Devzero public AMIs account
   most_recent = true
@@ -266,7 +269,7 @@ data "aws_ami" "devzero_ubuntu_eks_node_22_04" {
   
   filter {
     name   = "name"
-    values = ["devzero-ubuntu-eks-node-22.04-x86_64-standard-${var.cluster_version}-*"]
+    values = ["devzero-ubuntu-eks-node-22.04-x86_64-standard-${local.ami_version}-*"]
   }
   owners      = ["484907513542"]
   most_recent = true

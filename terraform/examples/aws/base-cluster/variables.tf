@@ -161,6 +161,12 @@ variable "cluster_version" {
   default     = "1.30"
 }
 
+variable "ami_version" {
+  type        = string
+  description = "AMI version to use for nodes in the EKS deployment"
+  default     = ""
+}
+
 variable "region" {
   type        = string
   description = "AWS region"
