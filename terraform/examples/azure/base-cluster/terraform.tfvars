@@ -28,7 +28,9 @@ tags = {
   createdBy   = "terraform"
 }
 
-create_derp = true
-public_derp = true
+create_derp = false
+public_derp = false
 
-create_vault_auto_unseal_key = true
+create_vault_auto_unseal_key = false
+
+create_vpn = true

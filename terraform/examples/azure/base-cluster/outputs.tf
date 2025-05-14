@@ -18,19 +18,19 @@ output "location" {
   value       = var.location
 }
 
-output "vault_sp_client_id" {
-  value       = var.create_vault_auto_unseal_key ? azuread_application.vault[0].client_id : null
+output "sp_client_id" {
+  value       = (var.create_vault_auto_unseal_key || var.create_vpn) ? azuread_application.sp[0].client_id : null
   description = "The client ID for Vault's Azure Key Vault integration."
 }
 
-output "vault_sp_client_secret" {
-  value       = var.create_vault_auto_unseal_key ? azuread_application_password.vault[0].value : null
+output "sp_client_secret" {
+  value       = (var.create_vault_auto_unseal_key || var.create_vpn) ? azuread_application_password.sp[0].value : null
   description = "The client secret for Vault's Azure Key Vault integration."
   sensitive   = true
 }
 
-output "vault_tenant_id" {
-  value       = var.create_vault_auto_unseal_key ? data.azurerm_client_config.current.tenant_id : null
+output "tenant_id" {
+  value       = (var.create_vault_auto_unseal_key || var.create_vpn) ? data.azurerm_client_config.current.tenant_id : null
   description = "The Azure Tenant ID."
 }
 

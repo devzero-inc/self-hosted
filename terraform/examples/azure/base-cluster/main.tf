@@ -16,15 +16,34 @@ provider "azuread" {}
 locals {
   public_subnet_names  = ["public-subnet-1"]
   private_subnet_names = ["private-subnet-1"]
+  gateway_subnet_names = var.create_vpn ? ["GatewaySubnet"] : []
 
   calculated_public_subnets_cidrs  = ["10.240.1.0/24"]
   calculated_private_subnets_cidrs = ["10.240.101.0/24"]
+  gateway_subnet_cidrs = var.create_vpn ? ["10.240.255.0/27"] : []
 }
 
 data "azurerm_client_config" "current" {}
 
+resource "azuread_application" "sp" {                                          
+  count        = (var.create_vault_auto_unseal_key || var.create_vpn) ? 1 : 0                                                       
+  display_name = "${var.cluster_name}-devzero-app"
+}
+
+resource "azuread_service_principal" "sp" {
+  count      = (var.create_vault_auto_unseal_key || var.create_vpn) ? 1 : 0
+  client_id  = azuread_application.sp[0].client_id
+}
+
+resource "azuread_application_password" "sp" {
+  count        = (var.create_vault_auto_unseal_key || var.create_vpn) ? 1 : 0
+  application_id = azuread_application.sp[0].id
+  display_name   = "DevZero SP Password"
+  end_date_relative = "8760h"
+}
+
 ################################################################################
-# VNET (updated to Azure/network/azurerm v5.3.0 with extended support)
+# VNET
 ################################################################################
 
 module "vnet" {
@@ -37,10 +56,11 @@ module "vnet" {
   vnet_name      = "${var.cluster_name}-vnet"
   address_space  = var.cidr
 
-  subnet_names   = concat(local.public_subnet_names, local.private_subnet_names)
+  subnet_names   = concat(local.public_subnet_names, local.private_subnet_names, local.gateway_subnet_names)
   subnet_prefixes = concat(
     local.calculated_public_subnets_cidrs,
-    local.calculated_private_subnets_cidrs
+    local.calculated_private_subnets_cidrs,
+    local.gateway_subnet_cidrs
   )
 
   subnet_enforce_private_link_endpoint_network_policies = {
@@ -50,9 +70,54 @@ module "vnet" {
   tags = var.tags
 }
 
+################################################################################
+# NAT Gateway
+################################################################################
+
+resource "azurerm_public_ip" "nat" {
+  count               = var.enable_nat_gateway ? 1 : 0
+  name                = "${var.cluster_name}-nat-ip"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+resource "azurerm_nat_gateway" "nat" {
+  count                = var.enable_nat_gateway ? 1 : 0
+  name                 = "${var.cluster_name}-nat-gateway"
+  location             = var.location
+  resource_group_name  = var.resource_group_name
+}
+
+resource "azurerm_nat_gateway_public_ip_association" "nat" {
+  count               = var.enable_nat_gateway ? 1 : 0
+  nat_gateway_id      = azurerm_nat_gateway.nat[count.index].id
+  public_ip_address_id = azurerm_public_ip.nat[count.index].id
+}
+
+resource "azurerm_route_table" "private_route_table" {
+  count               = var.enable_nat_gateway ? 1 : 0
+  name                = "${var.cluster_name}-private-route-table"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+
+  route {
+    name                   = "private-subnet-nat-route"
+    address_prefix         = "0.0.0.0/0"
+    next_hop_type          = "Internet"
+    next_hop_in_ip_address = azurerm_public_ip.nat[count.index].ip_address
+  }
+}
+
+resource "azurerm_subnet_route_table_association" "private_subnet_route_association" {
+  count               = var.enable_nat_gateway ? length(local.private_subnet_names) : 0
+  subnet_id           = module.vnet.vnet_subnets[1]  # Assuming the module outputs subnet_ids
+  route_table_id      = azurerm_route_table.private_route_table[0].id
+}
 
 ################################################################################
-# AKS CLUSTER (updated to valid parameters for v9.4.1 module)
+# AKS CLUSTER
 ################################################################################
 
 module "aks" {
@@ -96,6 +161,27 @@ module "aks" {
   agents_max_pods = 100
 
   tags = var.tags
+}
+
+################################################################################
+# VPN
+################################################################################
+
+module "vpn" {
+  count = var.create_vpn ? 1 : 0
+
+  source = "../../../modules/azure/vpn"
+
+  name                = var.cluster_name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  gateway_subnet_id   = module.vnet.vnet_subnets[2]
+  vpn_client_cidr     = "172.16.0.0/24"
+  vpn_client_list     = var.vpn_client_list
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  sp_object_id        = azuread_service_principal.sp[0].object_id
+
+  depends_on = [module.vnet]
 }
 
 ################################################################################
@@ -153,24 +239,7 @@ resource "azurerm_key_vault_key" "vault_auto_unseal" {
 resource "azurerm_role_assignment" "vault_key_usage" {
   count = var.create_vault_auto_unseal_key ? 1 : 0
 
-  principal_id         = azuread_service_principal.vault[0].object_id                                                                                                                                                                         
+  principal_id         = azuread_service_principal.sp[0].object_id                                                                                                                                                                         
   role_definition_name = "Key Vault Crypto User"
   scope                = azurerm_key_vault.vault_auto_unseal[0].id                                                                                                                            
-}
-
-resource "azuread_application" "vault" {                                          
-  count        = var.create_vault_auto_unseal_key ? 1 : 0                                                       
-  display_name = "${var.cluster_name}-vault-app"
-}
-
-resource "azuread_service_principal" "vault" {
-  count      = var.create_vault_auto_unseal_key ? 1 : 0
-  client_id  = azuread_application.vault[0].client_id
-}
-
-resource "azuread_application_password" "vault" {
-  count        = var.create_vault_auto_unseal_key ? 1 : 0
-  application_id = azuread_application.vault[0].id
-  display_name   = "Vault SP Password"
-  end_date_relative = "8760h"
 }

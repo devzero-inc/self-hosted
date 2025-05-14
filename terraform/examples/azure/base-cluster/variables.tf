@@ -80,7 +80,7 @@ variable "desired_size" {
 variable "enable_nat_gateway" {
   description = "Whether to enable NAT Gateway"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "single_nat_gateway" {
@@ -113,8 +113,25 @@ variable "public_derp" {
 ################################################################################
 # Vault
 ################################################################################
+
 variable "create_vault_auto_unseal_key" {
   description = "Whether or not to create a KMS key for Vault auto unseal"
   type = bool
   default = false
+}
+
+################################################################################
+# Vault
+################################################################################
+
+variable "create_vpn" {
+  description = "Controls if VPN gateway and VPN resources will be created."
+  type        = bool
+  default     = false
+}
+
+variable "vpn_client_list" {
+  description = "Subnets"
+  type        = set(string)
+  default     = ["root"]
 }
