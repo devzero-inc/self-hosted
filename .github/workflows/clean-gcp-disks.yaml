@@ -60,7 +60,7 @@ jobs:
           
           for zone in $zones; do
             ((current_zone++))
-            printf "\rProcessing zone %d/%d: %s" $current_zone $total_zones $zone
+            echo "Processing zone $current_zone/$total_zones: $zone"
             
             # List unused disks in the zone
             if ! unused_disks=$(gcloud compute disks list \
