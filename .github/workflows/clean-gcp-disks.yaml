@@ -41,15 +41,15 @@ jobs:
           
           echo "Scanning for unused disks across all zones..."
           # Get zones with error handling
-          zones=$(gcloud compute zones list --format="value(name)") || {
+          if ! zones=$(gcloud compute zones list --format="value(name)"); then
             echo "Error listing zones"
             exit 1
-          }
-          
+          fi
+
           if [ -z "$zones" ]; then
             echo "No zones found. Please check permissions and project configuration."
             exit 1
-          }
+          fi
           
           total_zones=$(echo "$zones" | wc -l)
           current_zone=0
