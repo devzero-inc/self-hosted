@@ -33,45 +33,68 @@ jobs:
 
       - name: List and delete unused disks
         run: |
+          # Verify authentication and project
+          echo "Verifying GCP authentication..."
+          gcloud auth list
+          echo "Current project: $(gcloud config get-value project)"
+          
           echo "Scanning for unused disks across all zones..."
-          zones=$(gcloud compute zones list --format="value(name)")
+          # Get zones with error handling
+          zones=$(gcloud compute zones list --format="value(name)" 2>&1) || {
+            echo "Error listing zones: $zones"
+            exit 1
+          }
+          
+          if [ -z "$zones" ]; then
+            echo "No zones found. Please check permissions and project configuration."
+            exit 1
+          }
+          
           total_zones=$(echo "$zones" | wc -l)
           current_zone=0
           total_unused=0
           zones_with_disks=""
           
+          echo "Found $total_zones zones to scan"
+          
           for zone in $zones; do
             ((current_zone++))
-            # Use carriage return to update the same line
             printf "\rProcessing zone %d/%d: %s" $current_zone $total_zones $zone
             
+            # Add error handling for disk listing
             unused_disks=$(gcloud compute disks list \
               --filter="zone:$zone AND (users=null OR NOT users:*)" \
-              --format="value(name)" 2>/dev/null)
+              --format="value(name)" \
+              --zones="$zone" 2>&1) || {
+              echo -e "\nError listing disks in zone $zone: $unused_disks"
+              continue
+            }
             
             if [ -n "$unused_disks" ]; then
               count=$(echo "$unused_disks" | wc -l)
               total_unused=$((total_unused + count))
               zones_with_disks="${zones_with_disks}${zone} (${count} disks), "
               
-              # Print on a new line when disks are found
               echo -e "\nFound $count unused disk(s) in $zone"
               for disk in $unused_disks; do
-                echo "→ Deleting disk: ${disk}"
-                gcloud compute disks delete "$disk" \
+                echo "→ Attempting to delete disk: ${disk}"
+                if gcloud compute disks delete "$disk" \
                   --zone="$zone" \
-                  --quiet >/dev/null 2>&1
+                  --quiet 2>&1; then
+                  echo "✓ Successfully deleted disk: ${disk}"
+                else
+                  echo "✗ Failed to delete disk: ${disk}"
+                fi
               done
             fi
           done
           
-          # Print final summary
           echo -e "\n-------------------------------------------"
           echo "Scan Complete!"
           if [ $total_unused -eq 0 ]; then
             echo "Status: No unused disks found in any zone"
           else
-            echo "Status: Deleted $total_unused unused disk(s)"
+            echo "Status: Found $total_unused unused disk(s)"
             echo "Affected zones: ${zones_with_disks%,*}"
           fi
           echo "Total zones scanned: $total_zones"
