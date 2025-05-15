@@ -63,13 +63,13 @@ jobs:
             printf "\rProcessing zone %d/%d: %s" $current_zone $total_zones $zone
             
             # List unused disks in the zone
-            unused_disks=$(gcloud compute disks list \
+            if ! unused_disks=$(gcloud compute disks list \
               --filter="zone:$zone AND (users=null OR NOT users:*)" \
               --format="value(name)" \
-              --zones="$zone") || {
+              --zones="$zone"); then
               echo -e "\nError listing disks in zone $zone"
               continue
-            }
+            fi
             
             if [ -n "$unused_disks" ]; then
               count=$(echo "$unused_disks" | wc -l)
