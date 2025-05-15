@@ -33,63 +33,38 @@ jobs:
 
       - name: List and delete unused disks
         run: |
-          set -xe
+          echo "🔍 Fetching all disks..."
+          all_disks=$(gcloud compute disks list --format=json)
 
-          project=$(gcloud config get-value project)
-          zones=$(gcloud compute zones list --format="value(name)")
+          unused_disks=$(echo "$all_disks" | jq -r '
+            .[]
+            | select((.users == null) or (.users == []))
+            | if .zone then 
+                "zonal,\(.name),\(.zone | split("/")[-1])" 
+              elif .region then 
+                "regional,\(.name),\(.region | split("/")[-1])" 
+              else 
+                empty 
+              end
+          ')
 
-          if [ -z "$zones" ]; then
-            echo "No zones found. Please check permissions and project configuration."
-            exit 1
+          if [[ -z "$unused_disks" ]]; then
+            echo "✅ No unused disks found."
+            return 0 2>/dev/null || true
           fi
 
-          total_zones=$(echo "$zones" | wc -l)
-          current_zone=0
-          total_unused=0
-          zones_with_disks=""
-
-          IFS=$'\n'
-          for zone in $zones; do
-            ((current_zone++))
-            echo "Processing zone $current_zone/$total_zones: $zone"
-
-            if ! unused_disks=$(gcloud compute disks list \
-              --filter="zone:$zone AND (users=null OR NOT users:*)" \
-              --format="value(name)" \
-              --zones="$zone"); then
-              echo -e "\nError listing disks in zone $zone"
-              continue
+          echo "🧹 Deleting unused disks..."
+          while IFS=',' read -r scope name location; do
+            if [[ -n "$name" && -n "$location" ]]; then
+              echo "→ Deleting $scope disk: $name in $location"
+              if [[ "$scope" == "zonal" ]]; then
+                gcloud compute disks delete "$name" --zone="$location" --quiet
+              elif [[ "$scope" == "regional" ]]; then
+                gcloud compute disks delete "$name" --region="$location" --quiet
+              else
+                echo "⚠️ Unknown scope for disk $name, skipping..."
+              fi
             fi
+          done <<< "$unused_disks"
 
-            if [ -n "$unused_disks" ]; then
-              count=$(echo "$unused_disks" | wc -l)
-              total_unused=$((total_unused + count))
-              zones_with_disks="${zones_with_disks}${zone} (${count} disks), "
-
-              echo -e "\nFound $count unused disk(s) in $zone"
-              IFS=$'\n'
-              for disk in $unused_disks; do
-                echo "→ Attempting to delete disk: ${disk}"
-                if gcloud compute disks delete "$disk" \
-                  --zone="$zone" \
-                  --quiet; then
-                  echo "✓ Successfully deleted disk: ${disk}"
-                else
-                  echo "✗ Failed to delete disk: ${disk}, continuing..."
-                fi
-              done
-              unset IFS
-            fi
-          done
-          unset IFS
-
-          echo -e "\n-------------------------------------------"
-          echo "Scan Complete!"
-          if [ $total_unused -eq 0 ]; then
-            echo "Status: No unused disks found in any zone"
-          else
-            echo "Status: Found and deleted $total_unused unused disk(s)"
-            echo "Affected zones: ${zones_with_disks%,*}"
-          fi
-          echo "Total zones scanned: $total_zones"
-          echo "-------------------------------------------"
+          echo "🎉 Cleanup complete: All unused disks deleted."
