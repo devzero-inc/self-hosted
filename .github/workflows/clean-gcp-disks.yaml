@@ -35,13 +35,14 @@ jobs:
         run: |
           # Verify authentication and project
           echo "Verifying GCP authentication..."
-          gcloud auth list
-          echo "Current project: $(gcloud config get-value project)"
+          gcloud auth list || exit 1
+          project=$(gcloud config get-value project)
+          echo "Current project: $project"
           
           echo "Scanning for unused disks across all zones..."
           # Get zones with error handling
-          zones=$(gcloud compute zones list --format="value(name)" 2>&1) || {
-            echo "Error listing zones: $zones"
+          zones=$(gcloud compute zones list --format="value(name)") || {
+            echo "Error listing zones"
             exit 1
           }
           
@@ -61,12 +62,12 @@ jobs:
             ((current_zone++))
             printf "\rProcessing zone %d/%d: %s" $current_zone $total_zones $zone
             
-            # Add error handling for disk listing
+            # List unused disks in the zone
             unused_disks=$(gcloud compute disks list \
               --filter="zone:$zone AND (users=null OR NOT users:*)" \
               --format="value(name)" \
-              --zones="$zone" 2>&1) || {
-              echo -e "\nError listing disks in zone $zone: $unused_disks"
+              --zones="$zone") || {
+              echo -e "\nError listing disks in zone $zone"
               continue
             }
             
@@ -80,7 +81,7 @@ jobs:
                 echo "→ Attempting to delete disk: ${disk}"
                 if gcloud compute disks delete "$disk" \
                   --zone="$zone" \
-                  --quiet 2>&1; then
+                  --quiet; then
                   echo "✓ Successfully deleted disk: ${disk}"
                 else
                   echo "✗ Failed to delete disk: ${disk}"
@@ -94,7 +95,7 @@ jobs:
           if [ $total_unused -eq 0 ]; then
             echo "Status: No unused disks found in any zone"
           else
-            echo "Status: Found $total_unused unused disk(s)"
+            echo "Status: Found and deleted $total_unused unused disk(s)"
             echo "Affected zones: ${zones_with_disks%,*}"
           fi
           echo "Total zones scanned: $total_zones"
