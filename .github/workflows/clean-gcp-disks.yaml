@@ -33,19 +33,15 @@ jobs:
 
       - name: List and delete unused disks
         run: |
-          # List all zones
           zones=$(gcloud compute zones list --format="value(name)")
           
           for zone in $zones; do
             echo "Checking zone: $zone"
             
-            # Get list of unused disks in the zone
             unused_disks=$(gcloud compute disks list \
-              --filter="NOT users:*" \
-              --zones="$zone" \
+              --filter="zone:$zone AND (users=null OR NOT users:*)" \
               --format="value(name)")
             
-            # Delete unused disks if any found
             if [ -n "$unused_disks" ]; then
               for disk in $unused_disks; do
                 echo "Deleting unused disk: $disk in zone $zone"
