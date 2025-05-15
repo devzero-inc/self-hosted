@@ -1,0 +1,59 @@
+name: Clean GCP Unused Disks
+
+on:
+  push:
+    branches:
+      - garvit/clean-gcp-disks
+  schedule:
+    - cron: '0 7 * * *'  # Runs daily at midnight Pacific Time (7:00 UTC)
+  workflow_dispatch: 
+
+jobs:
+  clean-disks:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: 'Authenticate to Google Cloud'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: 'projects/926977153451/locations/global/workloadIdentityPools/dsh-testing-pool-id/providers/github-actions-pool'
+          service_account: 'devzero-self-hosted@devzero-self-hosted.iam.gserviceaccount.com'
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '>= 363.0.0'
+
+      - name: List and delete unused disks
+        run: |
+          # List all zones
+          zones=$(gcloud compute zones list --format="value(name)")
+          
+          for zone in $zones; do
+            echo "Checking zone: $zone"
+            
+            # Get list of unused disks in the zone
+            unused_disks=$(gcloud compute disks list \
+              --filter="NOT users:*" \
+              --zones="$zone" \
+              --format="value(name)")
+            
+            # Delete unused disks if any found
+            if [ -n "$unused_disks" ]; then
+              for disk in $unused_disks; do
+                echo "Deleting unused disk: $disk in zone $zone"
+                gcloud compute disks delete "$disk" \
+                  --zone="$zone" \
+                  --quiet
+              done
+            else
+              echo "No unused disks found in zone $zone"
+            fi
+          done
