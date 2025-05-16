@@ -1,0 +1,56 @@
+name: Clean AWS Unused EC2 Volumes
+
+on:
+  push:
+    branches:
+      - garvit/clean-aws-volumes
+  schedule:
+    - cron: '0 7 * * *'  # Runs daily at 7:00 UTC
+  workflow_dispatch:
+
+jobs:
+  clean-ec2-volumes:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Configure AWS Credential
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::484907513542:role/github-actions-oidc-role
+          aws-region: us-west-1
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: List and delete unattached EC2 volumes across all regions
+        run: |
+          echo "🌍 Fetching all available AWS regions..."
+          regions=$(aws ec2 describe-regions --query "Regions[].RegionName" --output text)
+
+          for region in $regions; do
+            echo "🔍 Checking region: $region"
+
+            volumes=$(aws ec2 describe-volumes \
+              --region "$region" \
+              --filters Name=status,Values=available \
+              --query "Volumes[].VolumeId" \
+              --output text)
+
+            if [[ -z "$volumes" ]]; then
+              echo "✅ No unused EC2 volumes found in $region."
+              continue
+            fi
+
+            for volume_id in $volumes; do
+              echo "→ Deleting volume $volume_id in $region"
+              aws ec2 delete-volume --region "$region" --volume-id "$volume_id"
+            done
+
+            echo "🧹 Cleanup done for region: $region"
+          done
+
+          echo "🎉 Cleanup complete!"
