@@ -41,7 +41,9 @@ jobs:
       - name : Generate unique job identifier
         id   : job-identifier
         shell: bash      
-        run  : echo "JOB_IDENTIFIER=gh-azure-ci-${{ github.event.inputs.base_image }}-${SHORT_SHA}" >> $GITHUB_ENV
+        run  : |
+          SAFE_ID=$(echo "gha${SHORT_SHA}" | tr -cd 'a-z0-9' | cut -c1-20)
+          echo "JOB_IDENTIFIER=$SAFE_ID" >> $GITHUB_ENV
 
       - name: Add Backend Override (Base Cluster)
         run: |
