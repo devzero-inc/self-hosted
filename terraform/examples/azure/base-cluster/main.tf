@@ -13,6 +13,10 @@ provider "azurerm" {
 
 provider "azuread" {}
 
+provider "azapi" {
+  use_oidc = true
+}
+
 locals {
   public_subnet_names  = ["public-subnet-1"]
   private_subnet_names = ["private-subnet-1"]
