@@ -35,11 +35,11 @@ output "tenant_id" {
 }
 
 output "vault_key_name" {
-  value       = var.create_vault_auto_unseal_key ? azurerm_key_vault_key.vault_auto_unseal[0].name : null
+  value       = var.create_vault_auto_unseal_key ? module.vault[0].vault_key_name : null
   description = "The name of the Key Vault key."
 }
 
 output "vault_keyvault_name" {
-  value       = var.create_vault_auto_unseal_key ? azurerm_key_vault.vault_auto_unseal[0].name : null
+  value       = var.create_vault_auto_unseal_key ? module.vault[0].vault_keyvault_name: null
   description = "The name of the Key Vault instance."
 }

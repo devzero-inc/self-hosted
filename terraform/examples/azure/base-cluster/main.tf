@@ -81,47 +81,13 @@ module "vnet" {
 ################################################################################
 # NAT Gateway
 ################################################################################
-
-resource "azurerm_public_ip" "nat" {
+module "nat_gateway" {
+  source              = "../../../modules/azure/nat"
   count               = var.enable_nat_gateway ? 1 : 0
-  name                = "${var.cluster_name}-nat-ip"
+  cluster_name        = var.cluster_name
   location            = var.location
   resource_group_name = var.resource_group_name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-}
-
-resource "azurerm_nat_gateway" "nat" {
-  count                = var.enable_nat_gateway ? 1 : 0
-  name                 = "${var.cluster_name}-nat-gateway"
-  location             = var.location
-  resource_group_name  = var.resource_group_name
-}
-
-resource "azurerm_nat_gateway_public_ip_association" "nat" {
-  count               = var.enable_nat_gateway ? 1 : 0
-  nat_gateway_id      = azurerm_nat_gateway.nat[count.index].id
-  public_ip_address_id = azurerm_public_ip.nat[count.index].id
-}
-
-resource "azurerm_route_table" "private_route_table" {
-  count               = var.enable_nat_gateway ? 1 : 0
-  name                = "${var.cluster_name}-private-route-table"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-
-  route {
-    name                   = "private-subnet-nat-route"
-    address_prefix         = "0.0.0.0/0"
-    next_hop_type          = "Internet"
-    next_hop_in_ip_address = azurerm_public_ip.nat[count.index].ip_address
-  }
-}
-
-resource "azurerm_subnet_route_table_association" "private_subnet_route_association" {
-  count               = var.enable_nat_gateway ? length(local.private_subnet_names) : 0
-  subnet_id           = module.vnet.vnet_subnets[1]  # Assuming the module outputs subnet_ids
-  route_table_id      = azurerm_route_table.private_route_table[0].id
+  private_subnet_ids  = [module.vnet.vnet_subnets[1]]  # or a list of actual subnet IDs
 }
 
 ################################################################################
@@ -219,35 +185,14 @@ module "derp" {
 # Azure Key Vault for Vault Auto-Unseal
 ################################################################################
 
-resource "azurerm_key_vault" "vault_auto_unseal" {
+module "vault" {
+  source = "../../../modules/azure/vault"
+
   count = var.create_vault_auto_unseal_key ? 1 : 0
 
-  name                        = "${var.cluster_name}-vault-kv"
+  cluster_name                = var.cluster_name
   location                    = var.location
   resource_group_name         = var.resource_group_name
   tenant_id                   = data.azurerm_client_config.current.tenant_id
-  sku_name                    = "standard"
-  purge_protection_enabled    = true
-  soft_delete_retention_days  = 10
-  enable_rbac_authorization   = true
-}
-
-resource "azurerm_key_vault_key" "vault_auto_unseal" {
-  count = var.create_vault_auto_unseal_key ? 1 : 0
-
-  name         = "${var.cluster_name}-auto-unseal"
-  key_vault_id = azurerm_key_vault.vault_auto_unseal[0].id
-  key_type     = "RSA"
-  key_size     = 2048
-  key_opts     = ["decrypt", "encrypt", "sign", "verify", "wrapKey", "unwrapKey"]
-
-  depends_on = [azurerm_key_vault.vault_auto_unseal]
-}
-
-resource "azurerm_role_assignment" "vault_key_usage" {
-  count = var.create_vault_auto_unseal_key ? 1 : 0
-
-  principal_id         = azuread_service_principal.sp[0].object_id                                                                                                                                                                         
-  role_definition_name = "Key Vault Crypto User"
-  scope                = azurerm_key_vault.vault_auto_unseal[0].id                                                                                                                            
+  service_principal_object_id = azuread_service_principal.sp[0].object_id
 }
