@@ -1,6 +1,6 @@
-# DevZero Self-Hosted - Terraform Setup - GCP
+# DevZero Self-Hosted - Terraform Setup - Azure
 
-This document provides a step-by-step guide for setting up the infrastructure required to self-host the DevZero Control Plane and Data Plane using Terraform. The infrastructure can be deployed on cloud platforms like GCP.
+This document provides a step-by-step guide for setting up the infrastructure required to self-host the DevZero Control Plane and Data Plane using Terraform. The infrastructure can be deployed on cloud platforms like Azure.
 
 ## Pre-reading
 
@@ -9,17 +9,17 @@ If you have your own terraform environment and want to reuse our modules, you ca
 
 ## Overview
 
-The `terraform/` directory contains Infrastructure as Code (IaC) configurations that automate the provisioning of essential cloud resources such as VPCs, GKE clusters, load balancers, and VPNs.
+The `terraform/` directory contains Infrastructure as Code (IaC) configurations that automate the provisioning of essential cloud resources such as VNet, AKS clusters, load balancers, and VPNs.
 
 ## Prerequisites
 
 ### Tools Required
 - [Terraform](https://www.terraform.io/) (for managing infrastructure as code)
-- [GCloud CLI](https://cloud.google.com/sdk/docs/install) (for interacting with GCP resources)
-- Access credentials for your GCP Account
+- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) (for interacting with Azure resources)
+- Access credentials for your Azure Account
 
 ### Permissions Required
-Ensure your IAM user or service account has sufficient permissions to create resources like VPCs, subnets, GKE clusters, VMs, and KMS.
+Ensure your IAM user or service account has sufficient permissions to create resources like VNet, subnets, AKS clusters, VMs, and Key Vault.
 
 ## Infrastructure Setup Guide
 
@@ -32,7 +32,7 @@ git clone https://github.com/devzero-inc/self-hosted.git
 ### 2. Navigate to the Base Cluster Directory
 
 ```bash
-cd self-hosted/terraform/examples/gcp/base-cluster
+cd self-hosted/terraform/examples/azure/base-cluster
 ```
 
 ### 3. Configure Terraform Variables
@@ -50,8 +50,8 @@ terraform init
 terraform apply
 ```
 
-- This will create GCP resources such as VPC, GKE, VM, KMS, etc.
-- Copy the output values like project_id, location, and cluster_name for the next steps.
+- This will create Azure resources such as VNet, AKS, VM, Key Vault, etc.
+- Copy the output values like subscription_id, resource_group_name, location, and cluster_name for the next steps.
 
 ## Extending the Cluster
 
@@ -63,7 +63,7 @@ cd ../cluster-extensions
 
 ### 6. Update `terraform.tfvars`
 
-- Add the project_id, location, and cluster_name from the previous step.
+- Add the subscription_id, resource_group_name, location, and cluster_name from the previous step.
 
 ### 7. Apply Terraform for Storage
 
@@ -72,17 +72,17 @@ terraform init
 terraform apply
 ```
 
-- This will create StorageClasses, and Filestore.
+- This will create StorageClasses, and Azure Files.
 
 ## Post-Deployment Steps
 
 ### 8. Update kubeconfig
 
 ```bash
-gcloud container clusters get-credentials <cluster-name> --zone <zone> --project <project-id>
+az aks get-credentials --resource-group <resource-group-name> --name <cluster-name>
 ```
 
-### 9. Install Kata in GKE Node
+### 9. Install Kata in AKS Node
 
 ```bash
 kubectl apply -f kata-sa.yaml
@@ -115,5 +115,3 @@ Refer to the [Charts README](../charts/README.md) for further steps to deploy th
 - Verify cloud credentials and permissions.
 - Check Terraform state files for resource management.
 - Use `terraform plan` to preview changes before applying.
-
-

@@ -19,6 +19,21 @@ server:
   dataStorage:
     enabled: true
 
+  # The following is an example of how to configure the Vault server to use Azure Key Vault for auto-unsealing.
+  # Before using this configuration, you need to create a secret in the Kubernetes cluster that contains the Azure Key Vault credentials:
+  # kubectl create secret generic vault-azure-creds --from-literal=AZURE_TENANT_ID=<TENANT_ID> --from-literal=AZURE_CLIENT_ID=<CLIENT_ID> --from-literal=AZURE_CLIENT_SECRET=<CLIENT_SECRET> -n devzero
+
+  # extraSecretEnvironmentVars:
+  #   - envName: AZURE_CLIENT_ID
+  #     secretName: vault-azure-creds
+  #     secretKey: AZURE_CLIENT_ID
+  #   - envName: AZURE_CLIENT_SECRET
+  #     secretName: vault-azure-creds
+  #     secretKey: AZURE_CLIENT_SECRET
+  #   - envName: AZURE_TENANT_ID
+  #     secretName: vault-azure-creds
+  #     secretKey: AZURE_TENANT_ID
+
   # Disable vault anti-affinity that requires one pod on each node. This allows vault to run on a single node cluster.
   affinity: ""
 
@@ -70,6 +85,15 @@ server:
       #   region      = "global"
       #   key_ring    = "GCP_KEY_RING"
       #   crypto_key  = "GCP_CRYPTO_KEY"
+      # }
+      
+      # This is used to configure the Vault server to use Azure Key Vault for auto-unsealing.
+      # seal "azurekeyvault" {
+      #   tenant_id      = "<vault_tenant_id>"
+      #   client_id      = "<vault_sp_client_id>"
+      #   client_secret  = "<vault_sp_client_secret>"
+      #   vault_name     = "<vault_keyvault_name>"
+      #   key_name       = "<vault_key_name>"
       # }
 
   ingress:

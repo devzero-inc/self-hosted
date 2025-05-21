@@ -1,0 +1,185 @@
+name: "[Azure] DevZero self-hosted deployment"
+
+on:
+  push:
+    branches:
+      - garvit/azure-tf
+  workflow_dispatch:
+
+jobs:
+  setup-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 'Az CLI login'
+        uses: azure/login@v1.6.1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set Azure env for Terraform providers
+        run: |
+          echo "ARM_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.11.3"
+      
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.35.2/yq_linux_amd64 -O /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+      
+      - name : Add SHORT_SHA Environment Variable
+        id   : short-sha
+        shell: bash      
+        run  : echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+      
+      - name : Generate unique job identifier
+        id   : job-identifier
+        shell: bash      
+        run  : |
+          SAFE_ID=$(echo "gha${SHORT_SHA}" | tr -cd 'a-z0-9' | cut -c1-20)
+          echo "JOB_IDENTIFIER=$SAFE_ID" >> $GITHUB_ENV
+
+      - name: Add Backend Override (Base Cluster)
+        run: |
+          cd terraform/examples/azure/base-cluster
+          cat <<EOF > backend_override.tf
+          terraform {
+            backend "azurerm" {
+              resource_group_name  = "dev-test"
+              storage_account_name = "dshterraformstate"
+              container_name       = "tfstate"
+              key                  = "${JOB_IDENTIFIER}/base-cluster/terraform.tfstate"
+            }
+          }
+          EOF
+
+      - name: Initialize and Apply Terraform (Base Cluster)
+        run: |
+          cd terraform/examples/azure/base-cluster
+          terraform init
+          terraform apply -auto-approve -var="cluster_name=$JOB_IDENTIFIER" 
+
+      - name: Configure Kubernetes Access
+        run: |
+          az aks get-credentials --resource-group dev-test --name $JOB_IDENTIFIER
+
+      - name: Set up Kata
+        run: |
+          cd terraform/examples/azure/base-cluster
+          kubectl apply -f kata-sa.yaml
+          kubectl apply -f daemonset.yaml
+          for NODE in $(kubectl get nodes -o name); do
+            kubectl label "$NODE" kata-runtime=running --overwrite
+            kubectl label "$NODE" node-role.kubernetes.io/kata-devpod-node=1 --overwrite
+          done
+          
+      - name: Deploy Control Plane Dependencies (and modify domains)
+        run: |
+          DEFAULT_SC=$(kubectl get sc -o jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].metadata.name}')
+          kubectl get sc "$DEFAULT_SC" -o yaml | \
+            sed "s/name: $DEFAULT_SC/name: gp2/" | \
+            sed "/^  uid:/d; /^  resourceVersion:/d; /^  creationTimestamp:/d" | \
+            kubectl apply -f -
+            
+          cd charts/dz-control-plane-deps
+
+          find . -name "values.yaml" -print0 | while IFS= read -r -d '' file; do
+            yq e -i '.. |= select(tag == "!!str" and test("example\\.com")) |= sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net")' "$file"
+          done
+
+          make install
+
+      - name: Update values.yaml for dz-control-plane
+        env:
+          BACKEND_LICENSE_KEY: ${{ secrets.BACKEND_LICENSE_KEY }}
+        run: |
+          # setting credentials enable to false since we will explicitly feed the dockerhub creds to kubernetes api
+          # also setting image.pullsecrets to empty to make sure that each of the deployments dont try to pull their relevant OCI images from this registry
+          # backend license key is ... needed
+
+          yq e '.credentials.enable = false | .backend.licenseKey = strenv(BACKEND_LICENSE_KEY) | .image.pullSecrets = []' -i charts/dz-control-plane/values.yaml
+
+      - name: Deploy DevZero Control Plane (after configuring kubernetes to use dockerhub creds, and patching all the deployments to point to the right domain)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          cd charts/dz-control-plane
+          make add-docker-creds
+          
+          find . -name "values.yaml" -print0 | while IFS= read -r -d '' file; do
+            yq e -i '.. |= select(tag == "!!str" and test("example\\.com")) |= sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net")' "$file"
+          done
+
+          make install
+
+      - name: Validate Control Plane
+        run: |
+          .github/scripts/dsh-pod-test.sh          
+      
+      - name: Deploy Data Plane Dependencies
+        run: |
+          cd charts/dz-data-plane-deps
+          
+          find . -name "values.yaml" -print0 | while IFS= read -r -d '' file; do
+            yq e -i '.. |= select(tag == "!!str" and test("example\\.com")) |= sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net")' "$file"
+          done
+
+          make install
+
+      - name: Deploy DevZero Data Plane
+        run: |
+          cd charts/dz-data-plane
+          
+          find . -name "values.yaml" -print0 | while IFS= read -r -d '' file; do
+            yq e -i '.. |= select(tag == "!!str" and test("example\\.com")) |= sub("example\\.com"; env(JOB_IDENTIFIER) + ".ci.selfzero.net")' "$file"
+          done
+
+          make install
+
+      - name: Validate Data Plane
+        run: |
+          kubectl get pods -n devzero-self-hosted
+          kubectl get ingress -n devzero-self-hosted
+      
+      - name: '[helm] Destroy data-plane'
+        if: always()
+        run: |
+          cd charts/dz-data-plane
+          make delete
+      
+      - name: '[helm] Destroy data-plane-deps'
+        if: always()
+        run: |
+          cd charts/dz-data-plane-deps
+          make delete
+
+      - name: '[helm] Destroy control-plane'
+        if: always()
+        run: |
+          cd charts/dz-control-plane
+          make delete
+
+      - name: '[helm] Destroy control-plane-deps'
+        if: always()
+        run: |
+          cd charts/dz-control-plane-deps
+          make delete
+    
+      - name: '[terraform] Destroy base-cluster'
+        if: always()
+        run: |
+          cd terraform/examples/azure/base-cluster
+          terraform destroy -auto-approve -var="cluster_name=$JOB_IDENTIFIER"
