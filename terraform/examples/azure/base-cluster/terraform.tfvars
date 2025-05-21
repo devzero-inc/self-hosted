@@ -17,8 +17,8 @@ node_count   = 2
 min_size       = 1
 max_size       = 3
 
-enable_nat_gateway   = true
-single_nat_gateway   = true
+enable_nat_gateway   = false
+single_nat_gateway   = false
 
 # Optional tagging
 
@@ -33,4 +33,4 @@ public_derp = false
 
 create_vault_auto_unseal_key = false
 
-create_vpn = true
+create_vpn = false
