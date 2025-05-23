@@ -1,0 +1,59 @@
+name: Clean Azure Unused Disks
+
+on:
+  push:
+    branches:
+      - garvit/clean-azure-disks
+  schedule:
+    - cron: '0 7 * * *'  # Daily at 7:00 UTC
+  workflow_dispatch:
+
+jobs:
+  clean-azure-disks:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 'Az CLI login'
+        uses: azure/login@v1.6.1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Azure CLI & jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: List and delete unattached managed disks
+        run: |
+          echo "🔍 Fetching all unmanaged disks..."
+          disks=$(az disk list --query "[?managedBy==null].{name:name, resourceGroup:resourceGroup, location:location}" -o json)
+
+          count=$(echo "$disks" | jq length)
+          if [ "$count" -eq 0 ]; then
+            echo "✅ No unattached Azure disks found."
+            exit 0
+          fi
+
+          echo "🧹 Deleting $count unattached disks..."
+          echo "$disks" | jq -c '.[]' | while read -r disk; do
+            name=$(echo "$disk" | jq -r '.name')
+            rg=$(echo "$disk" | jq -r '.resourceGroup')
+
+            if [[ -n "$name" && -n "$rg" ]]; then
+              echo "→ Deleting disk: $name in resource group: $rg"
+              az disk delete --name "$name" --resource-group "$rg" --yes --no-wait
+            else
+              echo "⚠️ Missing name or resource group, skipping..."
+            fi
+          done
+
+          echo "🎉 Cleanup complete: All unused disks deleted."
