@@ -1,9 +1,6 @@
 name: Clean Azure Unused Disks
 
 on:
-  push:
-    branches:
-      - garvit/clean-azure-disks
   schedule:
     - cron: '0 7 * * *'  # Daily at 7:00 UTC
   workflow_dispatch:

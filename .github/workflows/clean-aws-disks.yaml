@@ -1,9 +1,6 @@
 name: Clean AWS Unused EC2 Volumes
 
 on:
-  push:
-    branches:
-      - garvit/clean-aws-volumes
   schedule:
     - cron: '0 7 * * *'  # Runs daily at 7:00 UTC
   workflow_dispatch:

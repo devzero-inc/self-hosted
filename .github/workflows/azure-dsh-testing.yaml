@@ -1,9 +1,6 @@
 name: "[Azure] DevZero self-hosted deployment"
 
 on:
-  push:
-    branches:
-      - garvit/azure-tf
   workflow_dispatch:
 
 jobs:

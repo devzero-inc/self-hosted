@@ -1,9 +1,6 @@
 name: Clean GCP Unused Disks
 
 on:
-  push:
-    branches:
-      - garvit/clean-gcp-disks
   schedule:
     - cron: '0 7 * * *'  # Runs daily at midnight Pacific Time (7:00 UTC)
   workflow_dispatch: 
